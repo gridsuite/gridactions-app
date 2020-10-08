@@ -35,6 +35,9 @@ import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 
+import { ReactComponent as GridActionsLogoDark } from '../images/GridActions_logo_dark.svg';
+import { ReactComponent as GridActionsLogoLight } from '../images/GridActions_logo_light.svg';
+
 const lightTheme = createMuiTheme({
     palette: {
         type: 'light',
@@ -126,7 +129,9 @@ const App = () => {
             <React.Fragment>
                 <CssBaseline />
                 <TopBar
-                    appName="GridActions"
+                    appName="Actions"
+                    appColor="#DA0063"
+                    appLogo={(theme===LIGHT_THEME)?(<GridActionsLogoLight />):(<GridActionsLogoDark />)}
                     onParametersClick={() => console.log('onParametersClick')}
                     onLogoutClick={() => logout(dispatch, userManager.instance)}
                     onLogoClick={() => onLogoClicked()}
