@@ -131,7 +131,13 @@ const App = () => {
                 <TopBar
                     appName="Actions"
                     appColor="#DA0063"
-                    appLogo={(theme===LIGHT_THEME)?(<GridActionsLogoLight />):(<GridActionsLogoDark />)}
+                    appLogo={
+                        theme === LIGHT_THEME ? (
+                            <GridActionsLogoLight />
+                        ) : (
+                            <GridActionsLogoDark />
+                        )
+                    }
                     onParametersClick={() => console.log('onParametersClick')}
                     onLogoutClick={() => logout(dispatch, userManager.instance)}
                     onLogoClick={() => onLogoClicked()}
