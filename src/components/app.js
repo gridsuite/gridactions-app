@@ -67,6 +67,8 @@ const App = () => {
 
     const user = useSelector((state) => state.user);
 
+    const [appsAndUrls, setAppsAndUrls] = React.useState([]);
+
     const signInCallbackError = useSelector(
         (state) => state.signInCallbackError
     );
@@ -120,6 +122,14 @@ const App = () => {
         // Note: initialize won't change
     }, [initialize]);
 
+    useEffect(() => {
+        if (user !== null) {
+            fetchAppsAndUrls().then((res) => {
+                setAppsAndUrls(res);
+            });
+        }
+    }, [user]);
+
     function onLogoClicked() {
         history.replace('/');
     }
@@ -142,6 +152,7 @@ const App = () => {
                     onLogoutClick={() => logout(dispatch, userManager.instance)}
                     onLogoClick={() => onLogoClicked()}
                     user={user}
+                    appsAndUrls={appsAndUrls}
                 />
                 {user !== null ? (
                     <Switch>
