@@ -37,6 +37,7 @@ import Box from '@material-ui/core/Box';
 
 import { ReactComponent as GridActionsLogoDark } from '../images/GridActions_logo_dark.svg';
 import { ReactComponent as GridActionsLogoLight } from '../images/GridActions_logo_light.svg';
+import { fetchAppsAndUrls } from '../utils/rest-api';
 
 const lightTheme = createMuiTheme({
     palette: {
