@@ -12,3 +12,9 @@ export const LIGHT_THEME = 'Light';
 export function selectTheme(theme) {
     return { type: SELECT_THEME, theme: theme };
 }
+
+export const UPDATE_CONTINGENCY_LIST = 'UPDATE_CONTINGENCY_LIST';
+
+export function updateContingencyList(list) {
+    return { type: UPDATE_CONTINGENCY_LIST, list: list };
+}

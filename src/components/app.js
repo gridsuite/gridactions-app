@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -27,13 +27,14 @@ import {
     logout,
     getPreLoginPath,
     initializeAuthenticationProd,
-    initializeAuthenticationDev,
 } from '@gridsuite/commons-ui';
 
 import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import Typography from '@material-ui/core/Typography';
+import Contingency from './contingency-list';
+
 import Box from '@material-ui/core/Box';
+import Parameters from './parameters';
 
 import { ReactComponent as GridActionsLogoDark } from '../images/GridActions_logo_dark.svg';
 import { ReactComponent as GridActionsLogoLight } from '../images/GridActions_logo_light.svg';
@@ -76,52 +77,50 @@ const App = () => {
 
     const [userManager, setUserManager] = useState(noUserManager);
 
+    const [showParameters, setShowParameters] = useState(false);
+
     const history = useHistory();
 
     const dispatch = useDispatch();
 
     const location = useLocation();
 
-    const matchSilentRenewCallbackUrl = useRouteMatch({
+    let matchSilentRenewCallbackUrl = useRouteMatch({
         path: '/silent-renew-callback',
         exact: true,
     });
 
-    // Get the routeMatch at page load, so we ignore the exhaustive deps check
-    const initialMatchSilentRenewCallbackUrl = useCallback(
-        () => matchSilentRenewCallbackUrl,
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        []
-    )();
-
-    const initialize = useCallback(() => {
-        if (process.env.REACT_APP_USE_AUTHENTICATION === true) {
-            return initializeAuthenticationProd(
-                dispatch,
-                initialMatchSilentRenewCallbackUrl != null,
-                fetch('idpSettings.json')
-            );
-        } else {
-            return initializeAuthenticationDev(
-                dispatch,
-                initialMatchSilentRenewCallbackUrl != null
-            );
-        }
-        // Note: initialMatchSilentRenewCallbackUrl and dispatch don't change
-    }, [initialMatchSilentRenewCallbackUrl, dispatch]);
-
     useEffect(() => {
-        initialize()
+        initializeAuthenticationProd(
+            dispatch,
+            matchSilentRenewCallbackUrl != null,
+            fetch('idpSettings.json')
+        )
             .then((userManager) => {
                 setUserManager({ instance: userManager, error: null });
-                userManager.signinSilent();
+                userManager.getUser().then((user) => {
+                    if (user == null) {
+                        userManager.signinSilent().catch((error) => {
+                            const oidcHackReloaded =
+                                'gridsuite-oidc-hack-reloaded';
+                            if (
+                                !sessionStorage.getItem(oidcHackReloaded) &&
+                                error.message ===
+                                    'authority mismatch on settings vs. signin state'
+                            ) {
+                                sessionStorage.setItem(oidcHackReloaded, true);
+                                window.location.reload();
+                            }
+                        });
+                    }
+                });
             })
             .catch(function (error) {
                 setUserManager({ instance: null, error: error.message });
                 console.debug('error when importing the idp settings');
             });
-        // Note: initialize won't change
-    }, [initialize]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         if (user !== null) {
@@ -133,6 +132,14 @@ const App = () => {
 
     function onLogoClicked() {
         history.replace('/');
+    }
+
+    function showParametersClicked() {
+        setShowParameters(true);
+    }
+
+    function hideParameters() {
+        setShowParameters(false);
     }
 
     return (
@@ -149,23 +156,21 @@ const App = () => {
                             <GridActionsLogoDark />
                         )
                     }
-                    onParametersClick={() => console.log('onParametersClick')}
+                    onParametersClick={() => showParametersClicked()}
                     onLogoutClick={() => logout(dispatch, userManager.instance)}
                     onLogoClick={() => onLogoClicked()}
                     user={user}
                     appsAndUrls={appsAndUrls}
                 />
+                <Parameters
+                    showParameters={showParameters}
+                    hideParameters={hideParameters}
+                />
                 {user !== null ? (
                     <Switch>
                         <Route exact path="/">
                             <Box mt={20}>
-                                <Typography
-                                    variant="h3"
-                                    color="textPrimary"
-                                    align="center"
-                                >
-                                    GRID ACTIONS APP
-                                </Typography>
+                                <Contingency />
                             </Box>
                         </Route>
                         <Route exact path="/sign-in-callback">
