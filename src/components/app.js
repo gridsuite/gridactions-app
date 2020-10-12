@@ -37,6 +37,7 @@ import Box from '@material-ui/core/Box';
 
 import { ReactComponent as GridActionsLogoDark } from '../images/GridActions_logo_dark.svg';
 import { ReactComponent as GridActionsLogoLight } from '../images/GridActions_logo_light.svg';
+import { fetchAppsAndUrls } from '../utils/rest-api';
 
 const lightTheme = createMuiTheme({
     palette: {
@@ -66,6 +67,8 @@ const App = () => {
     const theme = useSelector((state) => state.theme);
 
     const user = useSelector((state) => state.user);
+
+    const [appsAndUrls, setAppsAndUrls] = React.useState([]);
 
     const signInCallbackError = useSelector(
         (state) => state.signInCallbackError
@@ -120,6 +123,14 @@ const App = () => {
         // Note: initialize won't change
     }, [initialize]);
 
+    useEffect(() => {
+        if (user !== null) {
+            fetchAppsAndUrls().then((res) => {
+                setAppsAndUrls(res);
+            });
+        }
+    }, [user]);
+
     function onLogoClicked() {
         history.replace('/');
     }
@@ -142,6 +153,7 @@ const App = () => {
                     onLogoutClick={() => logout(dispatch, userManager.instance)}
                     onLogoClick={() => onLogoClicked()}
                     user={user}
+                    appsAndUrls={appsAndUrls}
                 />
                 {user !== null ? (
                     <Switch>
