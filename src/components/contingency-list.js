@@ -48,7 +48,11 @@ import {
 } from '@material-ui/core/styles';
 
 import { FormattedMessage } from 'react-intl';
-import { getContingencyLists, addContingencyList } from '../utils/api';
+import {
+    getContingencyLists,
+    addContingencyList,
+    deleteListByName,
+} from '../utils/rest-api';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -228,12 +232,14 @@ const Contingency = () => {
     const [newNameFileCreated, setNewNameFileCreated] = useState(false);
     const [disabledBtnSubmitList, setDisabledBtnSubmitList] = useState(false);
     const [alertEmptyList, setAlertEmptyList] = useState(true);
+    const [alertNotSelectedList, setAlertNotSelectedList] = useState(false);
 
     const [firstItemInList, setFirstItemInList] = useState([]);
     const [listsContingency, setListsContingency] = useState([]);
     const [fileContent, setFileContent] = useState('');
     // const [fileNameUploaded, setFileNameUploaded] = useState('');
     const [selectedIndex, setSelectedIndex] = useState('');
+    const [selectedListName, setSelectedListName] = useState('');
 
     const [newFileNameCreated, setNewFileNameCreated] = useState(
         firstItemInList ? firstItemInList.name : ''
@@ -248,6 +254,8 @@ const Contingency = () => {
      * @param index
      */
     const handleListItemClick = (item, index) => {
+        setSelectedListName(item.name);
+        setAlertNotSelectedList(false);
         if (newNameFileCreated) {
             setOpenDialog(true);
             setFileContent('');
@@ -376,6 +384,24 @@ const Contingency = () => {
             : '';
     };
 
+    /**
+     * Delete list by name
+     */
+    const handleDeleteList = () => {
+        if (selectedListName) {
+            deleteListByName(selectedListName).then(() => {
+                getContingencyLists().then((data) => {
+                    if (data) {
+                        setListsContingency(data);
+                        dispatch(updateContingencyList(data));
+                    }
+                });
+            });
+        } else {
+            setAlertNotSelectedList(true);
+        }
+    };
+
     useEffect(() => {
         /**
          * Get all contingency lists on load page
@@ -451,11 +477,8 @@ const Contingency = () => {
                             <label className={classes.iconSvg}>
                                 <DeleteOutlineOutlinedIcon
                                     aria-label="New folder"
-                                    color="disabled"
-                                    style={{
-                                        fontSize: 42,
-                                        cursor: 'not-allowed',
-                                    }}
+                                    style={{ fontSize: 42 }}
+                                    onClick={() => handleDeleteList()}
                                 />
                             </label>
                             <span className={classes.iconLabel}>
@@ -473,29 +496,40 @@ const Contingency = () => {
                         <FormattedMessage id="contingencyTitle" />
                     </h3>
                     {listsContingency.length > 0 ? (
-                        <List className={classes.root}>
-                            {listsContingency.map((item, index) => (
-                                <CustomListItem
-                                    button
-                                    key={item.name}
-                                    selected={selectedIndex === index}
-                                    onClick={() =>
-                                        handleListItemClick(item, index)
-                                    }
-                                >
-                                    <ListItemIcon>
-                                        <ChevronRightIcon />
-                                    </ListItemIcon>
-                                    <ListItemText
-                                        primary={item.name}
+                        <>
+                            <List className={classes.root}>
+                                {listsContingency.map((item, index) => (
+                                    <CustomListItem
+                                        button
                                         key={item.name}
+                                        selected={selectedIndex === index}
                                         onClick={() =>
-                                            setFileContent(item.script)
+                                            handleListItemClick(item, index)
                                         }
-                                    />
-                                </CustomListItem>
-                            ))}
-                        </List>
+                                    >
+                                        <ListItemIcon>
+                                            <ChevronRightIcon />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={item.name}
+                                            key={item.name}
+                                            onClick={() =>
+                                                setFileContent(item.script)
+                                            }
+                                        />
+                                    </CustomListItem>
+                                ))}
+                            </List>
+                            {/* To be replaced by snackbar */}
+                            {alertNotSelectedList && (
+                                <Alert
+                                    severity="error"
+                                    className={classes.alert}
+                                >
+                                    <FormattedMessage id="alertDeleteList" />
+                                </Alert>
+                            )}
+                        </>
                     ) : alertEmptyList ? (
                         <Alert severity="error" className={classes.alert}>
                             <FormattedMessage id="contingencyListIsEmpty" />
