@@ -296,15 +296,18 @@ const Contingency = () => {
     };
 
     /**
-     *
-     * @param newValue
-     * @returns {*}
+     * On change editor, check if data is the same to disabled submit button
+     * @param newScript
+     * @param newScript
      */
-    const onChange = (newValue) => {
-        if ((newFileNameCreated && newValue) || newValue !== fileNameContent) {
+    const onChangeEditor = (newScript) => {
+        if (
+            (newFileNameCreated && newScript) ||
+            newScript !== fileNameContent
+        ) {
             setDisabledBtnSubmitList(true);
+            setFileContent(newScript);
         }
-        return newValue;
     };
 
     /**
@@ -336,9 +339,16 @@ const Contingency = () => {
             addContingencyList(name, script).then((data) => {
                 getContingencyLists().then((data) => {
                     if (data) {
+                        let currentScript = '';
                         setNewNameFileCreated(false);
                         setListsContingency(data);
                         dispatch(updateContingencyList(data));
+                        data.find((list) => {
+                            if (list.name === name) {
+                                currentScript = list.script;
+                            }
+                            return setFileContent(currentScript);
+                        });
                     }
                 });
                 setDisabledBtnSubmitList(false);
@@ -620,7 +630,7 @@ const Contingency = () => {
                         mode="groovy"
                         placeholder="Insert your groovy script here"
                         theme={themeForAceEditor()}
-                        onChange={(val) => onChange(val)}
+                        onChange={(val) => onChangeEditor(val)}
                         value={fileContent}
                         fontSize="18px"
                         editorProps={{ $blockScrolling: true }}
