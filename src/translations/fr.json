@@ -1,1 +1,20 @@
-{}
+{
+    "contingencyTitle": "Listes de contingences",
+    "contingencyListIsEmpty": "La liste de contingence est vide",
+    "addNewContencyFile": "Nom de la nouvelle liste",
+    "parameters": "Paramètres",
+    "General": "Général",
+    "theme": "Thème",
+    "close": "Fermer",
+    "newList": "Nouvelle liste",
+    "uploadList": "Télécharger la liste",
+    "exportList": "Exporter la liste",
+    "deleteList": "Supprimer la liste",
+    "save": "Enregister",
+    "create": "Créer",
+    "cancel": "Annuler",
+    "listName": "Nom de la liste",
+    "placeholderEditor": "Insérez votre script groovy ici",
+    "saveNewListTitle": "Enregistrer la nouvelle liste",
+    "saveNewListMsg": "Ajouter le script et enregistrer la nouvelle liste avant d'aller sur une autre"
+}

@@ -1,1 +1,20 @@
-{}
+{
+    "contingencyTitle": "Contingencies lists",
+    "contingencyListIsEmpty": "Contingency list is empty",
+    "addNewContencyFile": "Name of the new list",
+    "parameters": "Parameters",
+    "General": "General",
+    "theme": "Theme",
+    "close": "Close",
+    "newList": "New list",
+    "uploadList": "Upload list",
+    "exportList": "Export list",
+    "deleteList": "Delete list",
+    "save": "Save",
+    "create": "Create",
+    "cancel": "Cancel",
+    "listName": "List name",
+    "placeholderEditor": "Insert your groovy script here",
+    "saveNewListTitle": "Save new list",
+    "saveNewListMsg": "Add the script and save the new list before going to another"
+}
