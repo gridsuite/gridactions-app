@@ -335,11 +335,11 @@ const Contingency = () => {
      * @param script
      */
     const saveNewList = (name, script) => {
+        let currentScript = '';
         if (script) {
             addContingencyList(name, script).then((data) => {
                 getContingencyLists().then((data) => {
                     if (data) {
-                        let currentScript = '';
                         setNewNameFileCreated(false);
                         setListsContingency(data);
                         dispatch(updateContingencyList(data));
