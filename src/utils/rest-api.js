@@ -8,6 +8,8 @@ import { store } from '../redux/store';
 
 const PREFIX_APPS_URLS_QUERIES = process.env.REACT_APP_APPS_URLS;
 
+const PREFIX_ACTIONS_QUERIES = process.env.REACT_APP_API_GATEWAY + '/actions';
+
 const ENV_VARIABLES = fetch('env.json');
 
 function getToken() {
@@ -41,5 +43,44 @@ export function fetchAppsAndUrls() {
         return backendFetch(url).then((response) => {
             return response.json();
         });
+    });
+}
+
+/**
+ * Get all contingency lists
+ * @returns {Promise<Response>}
+ */
+export function getContingencyLists() {
+    const url = PREFIX_ACTIONS_QUERIES + '/v1/contingency-lists';
+    return backendFetch(url).then((response) => response.json());
+}
+
+/**
+ * Add new contingency list
+ * @returns {Promise<Response>}
+ */
+export function addContingencyList(name, script) {
+    const url =
+        PREFIX_ACTIONS_QUERIES +
+        '/v1/script-contingency-lists/' +
+        encodeURIComponent(name);
+    return backendFetch(url, {
+        method: 'put',
+        body: script,
+    });
+}
+
+/**
+ * Delete contingency list by name
+ * @param name
+ * @returns {Promise<Response>}
+ */
+export function deleteListByName(name) {
+    const url =
+        PREFIX_ACTIONS_QUERIES +
+        '/v1/contingency-lists/' +
+        encodeURIComponent(name);
+    return backendFetch(url, {
+        method: 'delete',
     });
 }

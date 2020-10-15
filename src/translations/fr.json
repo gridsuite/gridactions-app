@@ -16,5 +16,6 @@
     "listName": "Nom de la liste",
     "placeholderEditor": "Insérez votre script groovy ici",
     "saveNewListTitle": "Enregistrer la nouvelle liste",
-    "saveNewListMsg": "Ajouter le script et enregistrer la nouvelle liste avant d'aller sur une autre"
+    "saveNewListMsg": "Ajouter le script et enregistrer la nouvelle liste avant d'aller sur une autre",
+    "alertDeleteList": "Veuillez sélectionner une liste avant la suppression"
 }
