@@ -385,10 +385,32 @@ const Contingency = () => {
     };
 
     /**
+     * Fetch the script by name in contingency lists
+     * @param itemIndex
+     */
+    const fetchScriptByNameList = (itemIndex) => {
+        let script = '';
+        listsContingency.map((item, index) => {
+            if (index + 1 === itemIndex + 1) {
+                script = item.script;
+            }
+            return setFileContent(script);
+        });
+    };
+
+    /**
      * Delete list by name
      */
     const handleDeleteList = () => {
         if (selectedListName) {
+            if (listsContingency.length === selectedIndex + 1) {
+                setSelectedIndex(selectedIndex - 1);
+                fetchScriptByNameList(selectedIndex - 1);
+            } else {
+                setSelectedIndex(selectedIndex);
+                fetchScriptByNameList(selectedIndex + 1);
+            }
+
             deleteListByName(selectedListName).then(() => {
                 getContingencyLists().then((data) => {
                     if (data) {
