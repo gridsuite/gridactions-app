@@ -8,7 +8,8 @@ import { store } from '../redux/store';
 
 const PREFIX_ACTIONS_QUERIES = process.env.REACT_APP_API_GATEWAY + '/actions';
 
-const APPS_METADATA_SERVER = process.env.REACT_APP_APPS_URLS + '/apps-metadata.json';
+const APPS_METADATA_SERVER =
+    process.env.REACT_APP_APPS_URLS + '/apps-metadata.json';
 
 function getToken() {
     const state = store.getState();
