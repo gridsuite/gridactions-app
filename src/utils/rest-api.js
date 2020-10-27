@@ -8,8 +8,7 @@ import { store } from '../redux/store';
 
 const PREFIX_ACTIONS_QUERIES = process.env.REACT_APP_API_GATEWAY + '/actions';
 
-const APPS_METADATA_SERVER =
-    process.env.REACT_APP_APPS_URLS + '/apps-metadata.json';
+const APPS_METADATA_SERVER_URL = fetch('env.json');
 
 function getToken() {
     const state = store.getState();
@@ -31,8 +30,12 @@ function backendFetch(url, init) {
 
 export function fetchAppsAndUrls() {
     console.info(`Fetching apps and urls...`);
-    return backendFetch(APPS_METADATA_SERVER).then((response) => {
-        return response.json();
+    return APPS_METADATA_SERVER_URL.then((res) => res.json()).then((res) => {
+        return backendFetch(
+            res.appsMetadataServerUrl + '/apps-metadata.json'
+        ).then((response) => {
+            return response.json();
+        });
     });
 }
 
