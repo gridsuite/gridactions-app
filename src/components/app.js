@@ -92,7 +92,9 @@ const App = () => {
 
     useEffect(() => {
         document.addEventListener('contextmenu', (event) => {
-            event.preventDefault();
+            if (event.target.className !== 'ace_text-input') {
+                event.preventDefault();
+            }
         });
     });
 
