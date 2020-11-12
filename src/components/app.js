@@ -85,10 +85,13 @@ const App = () => {
 
     const location = useLocation();
 
-    let matchSilentRenewCallbackUrl = useRouteMatch({
-        path: '/silent-renew-callback',
-        exact: true,
-    });
+    // Can't use lazy initializer because useRouteMatch is a hook
+    const [initialMatchSilentRenewCallbackUrl] = useState(
+        useRouteMatch({
+            path: '/silent-renew-callback',
+            exact: true,
+        })
+    );
 
     useEffect(() => {
         document.addEventListener('contextmenu', (event) => {
@@ -101,13 +104,16 @@ const App = () => {
     useEffect(() => {
         initializeAuthenticationProd(
             dispatch,
-            matchSilentRenewCallbackUrl != null,
+            initialMatchSilentRenewCallbackUrl != null,
             fetch('idpSettings.json')
         )
             .then((userManager) => {
                 setUserManager({ instance: userManager, error: null });
                 userManager.getUser().then((user) => {
-                    if (user == null && matchSilentRenewCallbackUrl == null) {
+                    if (
+                        user == null &&
+                        initialMatchSilentRenewCallbackUrl == null
+                    ) {
                         userManager.signinSilent().catch((error) => {
                             const oidcHackReloaded =
                                 'gridsuite-oidc-hack-reloaded';
@@ -127,8 +133,8 @@ const App = () => {
                 setUserManager({ instance: null, error: error.message });
                 console.debug('error when importing the idp settings');
             });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        // Note: initialMatchSilentRenewCallbackUrl and dispatch don't change
+    }, [initialMatchSilentRenewCallbackUrl, dispatch]);
 
     useEffect(() => {
         if (user !== null) {
