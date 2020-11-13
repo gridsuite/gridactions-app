@@ -94,6 +94,14 @@ const App = () => {
     );
 
     useEffect(() => {
+        document.addEventListener('contextmenu', (event) => {
+            if (event.target.className !== 'ace_text-input') {
+                event.preventDefault();
+            }
+        });
+    });
+
+    useEffect(() => {
         initializeAuthenticationProd(
             dispatch,
             initialMatchSilentRenewCallbackUrl != null,
