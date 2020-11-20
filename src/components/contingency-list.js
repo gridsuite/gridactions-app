@@ -312,6 +312,21 @@ const Contingency = () => {
         }
     };
 
+    const onChangeInputName = (name) => {
+        if (listsContingency.length > 0) {
+            listsContingency.map((list) => {
+                if (list.name === name || selectedListName === name) {
+                    setDisabledBtnRenameList(false);
+                } else {
+                    setNewFileNameCreated(name);
+                    setDisabledBtnRenameList(true);
+                }
+            });
+        } else {
+            setDisabledBtnRenameList(true);
+        }
+    };
+
     /**
      * on change input popup check if name already exist
      * @param name
