@@ -1,6 +1,6 @@
 {
     "contingencyTitle": "Contingency lists",
-    "contingencyListIsEmpty": "Contingency lists is empty",
+    "contingencyListIsEmpty": "Contingency lists are empty",
     "addNewContencyFile": "Name of the new list",
     "parameters": "Parameters",
     "General": "General",
@@ -18,5 +18,5 @@
     "rename": "Rename",
     "delete": "Delete",
     "renameList": "Rename list",
-    "newNameList": "New name list"
+    "newNameList": "New list name"
 }

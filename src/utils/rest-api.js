@@ -84,11 +84,11 @@ export function deleteListByName(name) {
  * @param newNameList
  * @returns {Promise<Response>}
  */
-export function renameListByName(oldNameList, newNameList) {
+export function renameListByName(oldName, newName) {
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/contingency-lists/' +
-        encodeURIComponent(oldNameList) +
+        encodeURIComponent(oldName) +
         '/rename';
 
     return backendFetch(url, {
@@ -97,6 +97,6 @@ export function renameListByName(oldNameList, newNameList) {
             Accept: 'application/json',
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ newContingencyListName: newNameList }),
+        body: JSON.stringify({ newContingencyListName: newName }),
     });
 }

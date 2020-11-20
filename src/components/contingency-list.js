@@ -238,6 +238,7 @@ const Contingency = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [newNameFileCreated, setNewNameFileCreated] = useState(false);
     const [disabledBtnSubmitList, setDisabledBtnSubmitList] = useState(false);
+    const [disabledBtnRenameList, setDisabledBtnRenameList] = useState(false);
     const [alertEmptyList, setAlertEmptyList] = useState(true);
     const [alertNotSelectedList, setAlertNotSelectedList] = useState(false);
     const [renameList, setRenameList] = useState(false);
@@ -311,6 +312,21 @@ const Contingency = () => {
         }
     };
 
+    const onChangeInputName = (name) => {
+        if (listsContingency.length > 0) {
+            listsContingency.map((list) => {
+                if (list.name === name || selectedListName === name) {
+                    setDisabledBtnRenameList(false);
+                } else {
+                    setNewFileNameCreated(name);
+                    setDisabledBtnRenameList(true);
+                }
+            });
+        } else {
+            setDisabledBtnRenameList(true);
+        }
+    };
+
     /**
      * Save name of new file added from dialog
      * @param name
@@ -331,7 +347,7 @@ const Contingency = () => {
                 );
                 setOpenDialog(false);
                 setTimeout(function () {
-                    getAllContngencyLists();
+                    getAllContingencyLists();
                 }, 50);
             } else {
                 aceEditorRef.current.editor.setValue('');
@@ -452,9 +468,9 @@ const Contingency = () => {
     /**
      * Get all contingency lists on load page
      **/
-    const getAllContngencyLists = useCallback(() => {
+    const getAllContingencyLists = useCallback(() => {
         getContingencyLists().then((data) => {
-            if (data) {
+            if (data.length > 0) {
                 setFirstItemInList(data[0]);
                 setListsContingency(data);
                 dispatch(updateContingencyList(data));
@@ -463,8 +479,8 @@ const Contingency = () => {
     }, [dispatch]);
 
     useEffect(() => {
-        getAllContngencyLists();
-    }, [getAllContngencyLists]);
+        getAllContingencyLists();
+    }, [getAllContingencyLists]);
 
     return (
         <div className={classes.container}>
@@ -627,9 +643,14 @@ const Contingency = () => {
                                     {!newNameFileCreated ? (
                                         <ThemeProvider theme={theme}>
                                             <TextField
+                                                defaultValue={
+                                                    renameList
+                                                        ? selectedListName
+                                                        : ''
+                                                }
                                                 autoFocus
                                                 onChange={(event) =>
-                                                    setNewFileNameCreated(
+                                                    onChangeInputName(
                                                         event.target.value
                                                     )
                                                 }
@@ -659,7 +680,9 @@ const Contingency = () => {
                                 <Button
                                     variant="outlined"
                                     size="small"
-                                    disabled={newFileNameCreated ? false : true}
+                                    disabled={
+                                        disabledBtnRenameList ? false : true
+                                    }
                                     onClick={() =>
                                         saveNewFileName(
                                             newFileNameCreated,
