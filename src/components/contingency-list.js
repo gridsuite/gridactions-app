@@ -312,18 +312,24 @@ const Contingency = () => {
         }
     };
 
+    /**
+     * on change input popup check if name already exist
+     * @param name
+     */
     const onChangeInputName = (name) => {
-        if (listsContingency.length > 0) {
-            listsContingency.map((list) => {
-                if (list.name === name || selectedListName === name) {
+        if (name.length === 0) {
+            setDisabledBtnRenameList(false);
+        } else {
+            if (listsContingency.length > 0) {
+                if (listsContingency.some((list) => list.name === name)) {
                     setDisabledBtnRenameList(false);
                 } else {
                     setNewFileNameCreated(name);
                     setDisabledBtnRenameList(true);
                 }
-            });
-        } else {
-            setDisabledBtnRenameList(true);
+            } else {
+                setDisabledBtnRenameList(true);
+            }
         }
     };
 
@@ -704,6 +710,7 @@ const Contingency = () => {
                     <div className={classes.containerButtons}>
                         <Button
                             style={{ marginRight: '15px' }}
+                            disabled={disabledBtnSubmitList ? false : true}
                             onClick={() =>
                                 cancelNewList(
                                     aceEditorRef.current.editor.setValue('')
