@@ -17,7 +17,7 @@ const initialState = {
     theme: getLocalStorageTheme(),
     user: null,
     signInCallbackError: null,
-    list: null,
+    list: [],
 };
 
 export const reducer = createReducer(initialState, {

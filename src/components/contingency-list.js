@@ -19,8 +19,6 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import { grey } from '@material-ui/core/colors';
-import TextField from '@material-ui/core/TextField';
 import Alert from '@material-ui/lab/Alert';
 
 import IconButton from '@material-ui/core/IconButton';
@@ -33,20 +31,10 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
-import CloseIcon from '@material-ui/icons/Close';
-import Typography from '@material-ui/core/Typography';
-
 import { updateContingencyList } from '../redux/actions';
+import { PopupWithInput, PopupInfo } from './popup';
 
-import {
-    makeStyles,
-    ThemeProvider,
-    createMuiTheme,
-} from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
 import { FormattedMessage } from 'react-intl';
 import {
@@ -155,71 +143,11 @@ const CustomListItem = withStyles((theme) => ({
     },
 }))(ListItem);
 
-const theme = createMuiTheme({
-    palette: {
-        primary: grey,
-    },
-});
-
-const styles = (theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(2),
-    },
-    closeButton: {
-        position: 'absolute',
-        right: theme.spacing(1),
-        top: theme.spacing(1),
-        color: theme.palette.grey[500],
-    },
-    selected: {
-        background: '#000',
-    },
-});
-
-const DialogContainer = withStyles((theme) => ({
-    paper: {
-        width: '500px',
-        height: '250px',
-    },
-}))(Dialog);
-
 const NewFileCreatedList = withStyles((theme) => ({
     root: {
         padding: '0',
     },
 }))(List);
-
-const DialogTitle = withStyles(styles)((props) => {
-    const { children, classes, onClose, ...other } = props;
-    return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
-            <Typography variant="h6">{children}</Typography>
-            {onClose ? (
-                <IconButton
-                    aria-label="close"
-                    className={classes.closeButton}
-                    onClick={onClose}
-                >
-                    <CloseIcon />
-                </IconButton>
-            ) : null}
-        </MuiDialogTitle>
-    );
-});
-
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(2),
-    },
-}))(MuiDialogContent);
-
-const DialogActions = withStyles((theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
 
 const StyledMenu = withStyles({
     paper: {
@@ -235,13 +163,10 @@ const Contingency = () => {
     const dispatch = useDispatch();
     const selectedTheme = useSelector((state) => state.theme);
 
-    const [openDialog, setOpenDialog] = useState(false);
     const [newNameFileCreated, setNewNameFileCreated] = useState(false);
     const [disabledBtnSubmitList, setDisabledBtnSubmitList] = useState(false);
-    const [disabledBtnRenameList, setDisabledBtnRenameList] = useState(false);
     const [alertEmptyList, setAlertEmptyList] = useState(true);
     const [alertNotSelectedList, setAlertNotSelectedList] = useState(false);
-    const [renameList, setRenameList] = useState(false);
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [firstItemInList, setFirstItemInList] = useState([]);
@@ -249,6 +174,10 @@ const Contingency = () => {
     const [fileContent, setFileContent] = useState('');
     const [selectedIndex, setSelectedIndex] = useState('');
     const [selectedListName, setSelectedListName] = useState([]);
+
+    const [openPopupNewList, setOpenPopupNewList] = useState(false);
+    const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
+    const [openPopupInfo, setOpenPopupInfo] = useState(false);
 
     const [newFileNameCreated, setNewFileNameCreated] = useState(
         firstItemInList ? firstItemInList.name : ''
@@ -266,7 +195,7 @@ const Contingency = () => {
         setSelectedListName(item.name);
         setAlertNotSelectedList(false);
         if (newNameFileCreated) {
-            setOpenDialog(true);
+            setOpenPopupInfo(true);
             setFileContent('');
         } else {
             setSelectedIndex(index);
@@ -280,21 +209,7 @@ const Contingency = () => {
      * Handler open dialog
      */
     const handleOpenDialog = () => {
-        setOpenDialog(true);
-        setRenameList(false);
-    };
-
-    /**
-     * Handler close dialog
-     */
-    const handleCloseDialog = () => {
-        if (newNameFileCreated) {
-            setNewNameFileCreated(false);
-            setFileContent('');
-            setOpenDialog(false);
-        } else {
-            setOpenDialog(false);
-        }
+        setOpenPopupNewList(true);
     };
 
     /**
@@ -313,78 +228,51 @@ const Contingency = () => {
     };
 
     /**
-     * on change input popup check if name already exist
+     * Add new list name
      * @param name
      */
-    const onChangeInputName = (name) => {
-        if (name.length === 0) {
-            setDisabledBtnRenameList(false);
-        } else {
-            if (listsContingency.length > 0) {
-                if (listsContingency.some((list) => list.name === name)) {
-                    setDisabledBtnRenameList(false);
-                } else {
-                    setNewFileNameCreated(name);
-                    setDisabledBtnRenameList(true);
-                }
-            } else {
-                setDisabledBtnRenameList(true);
-            }
-        }
+    const addNewList = (name) => {
+        aceEditorRef.current.editor.setValue('');
+        setAlertEmptyList(false);
+        setSelectedIndex('');
+        setNewNameFileCreated(true);
+        setNewFileNameCreated(name);
+        setFileContent(aceEditorRef.current.editor.setValue(''));
+        setOpenPopupNewList(false);
     };
 
     /**
-     * on change input popup check if name already exist
-     * @param name
+     * Rename exist list
+     * @param oldName
+     * @param newName
      */
-    const onChangeInputName = (name) => {
-        if (name.length === 0) {
-            setDisabledBtnRenameList(false);
-        } else {
-            if (listsContingency.length > 0) {
-                if (listsContingency.some((list) => list.name === name)) {
-                    setDisabledBtnRenameList(false);
-                } else {
-                    setNewFileNameCreated(name);
-                    setDisabledBtnRenameList(true);
-                }
-            } else {
-                setDisabledBtnRenameList(true);
+    const renameExistList = (oldName, newName) => {
+        renameListByName(oldName, newName).then((response) => {
+            if (!response.ok) {
+                console.error(response.statusText);
             }
-        }
+        });
+        setTimeout(function () {
+            getAllContingencyLists();
+        }, 50);
+        setOpenPopupRenameList(false);
     };
 
     /**
-     * Save name of new file added from dialog
-     * @param name
-     * @param script
+     * Alert : Add the script and save the new list
      */
-    const saveNewFileName = (name, script) => {
-        if (newNameFileCreated) {
-            setFileContent('');
-            setOpenDialog(false);
-        } else if (name) {
-            if (renameList) {
-                renameListByName(selectedListName, newFileNameCreated).then(
-                    (response) => {
-                        if (!response.ok) {
-                            console.error(response.statusText);
-                        }
-                    }
-                );
-                setOpenDialog(false);
-                setTimeout(function () {
-                    getAllContingencyLists();
-                }, 50);
-            } else {
-                aceEditorRef.current.editor.setValue('');
-                setAlertEmptyList(false);
-                setSelectedIndex('');
-                setNewNameFileCreated(true);
-                setFileContent(script);
-                setOpenDialog(false);
-            }
-        }
+    const createListBeforeExit = () => {
+        setFileContent('');
+        setOpenPopupInfo(false);
+    };
+
+    /**
+     * Alert : Cancel create new list
+     */
+    const cancelCreateListBeforeExit = () => {
+        setNewNameFileCreated(false);
+        setFileContent('');
+        setOpenPopupInfo(false);
     };
 
     /**
@@ -488,8 +376,7 @@ const Contingency = () => {
 
     const handleRenameList = () => {
         setAnchorEl(null);
-        setOpenDialog(true);
-        setRenameList(true);
+        setOpenPopupRenameList(true);
     };
 
     /**
@@ -613,7 +500,7 @@ const Contingency = () => {
                                     </>
                                 ))}
                             </List>
-                            {/* To be replaced by snackbar */}
+                            {/* To be replaced width snackbar */}
                             {alertNotSelectedList && (
                                 <Alert
                                     severity="error"
@@ -651,82 +538,46 @@ const Contingency = () => {
                     </>
 
                     <div>
-                        <DialogContainer
-                            onClose={handleCloseDialog}
-                            aria-labelledby="customized-dialog-title"
-                            open={openDialog}
-                        >
-                            <DialogTitle id="customized-dialog-title">
-                                {newNameFileCreated ? (
-                                    <FormattedMessage id="saveNewListTitle" />
-                                ) : renameList ? (
-                                    <FormattedMessage id="renameList" />
-                                ) : (
-                                    <FormattedMessage id="addNewContencyFile" />
-                                )}
-                            </DialogTitle>
-                            <DialogContent dividers>
-                                <div style={{ paddingLeft: '12px' }}>
-                                    {!newNameFileCreated ? (
-                                        <ThemeProvider theme={theme}>
-                                            <TextField
-                                                defaultValue={
-                                                    renameList
-                                                        ? selectedListName
-                                                        : ''
-                                                }
-                                                autoFocus
-                                                onChange={(event) =>
-                                                    onChangeInputName(
-                                                        event.target.value
-                                                    )
-                                                }
-                                                className={classes.margin}
-                                                label={
-                                                    renameList ? (
-                                                        <FormattedMessage id="newNameList" />
-                                                    ) : (
-                                                        <FormattedMessage id="listName" />
-                                                    )
-                                                }
-                                            />
-                                        </ThemeProvider>
-                                    ) : (
-                                        <FormattedMessage id="saveNewListMsg" />
-                                    )}
-                                </div>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button
-                                    size="small"
-                                    style={{ marginRight: '15px' }}
-                                    onClick={handleCloseDialog}
-                                >
-                                    <FormattedMessage id="cancel" />
-                                </Button>
-                                <Button
-                                    variant="outlined"
-                                    size="small"
-                                    disabled={
-                                        disabledBtnRenameList ? false : true
-                                    }
-                                    onClick={() =>
-                                        saveNewFileName(
-                                            newFileNameCreated,
-                                            aceEditorRef.current.editor.setValue(
-                                                ''
-                                            )
-                                        )
-                                    }
-                                >
-                                    {renameList ? (
-                                        <FormattedMessage id="rename" />
-                                    ) : (
-                                        <FormattedMessage id="create" />
-                                    )}
-                                </Button>
-                            </DialogActions>
-                        </DialogContainer>
+                        {/* Popup for add new list */}
+                        <PopupWithInput
+                            open={openPopupNewList}
+                            onClose={setOpenPopupNewList}
+                            title={<FormattedMessage id="addNewContencyFile" />}
+                            inputLabelText={<FormattedMessage id="listName" />}
+                            customTextValidationBtn={
+                                <FormattedMessage id="create" />
+                            }
+                            customTextCancelBtn={
+                                <FormattedMessage id="cancel" />
+                            }
+                            handleSaveNewList={addNewList}
+                            newList={true}
+                        />
+                        {/* Popup for rename exist list */}
+                        <PopupWithInput
+                            open={openPopupRenameList}
+                            onClose={setOpenPopupRenameList}
+                            title={<FormattedMessage id="renameList" />}
+                            inputLabelText={
+                                <FormattedMessage id="newNameList" />
+                            }
+                            customTextValidationBtn={
+                                <FormattedMessage id="rename" />
+                            }
+                            customTextCancelBtn={
+                                <FormattedMessage id="cancel" />
+                            }
+                            handleRenameExistList={renameExistList}
+                            selectedListName={selectedListName}
+                            newList={false}
+                        />
+                        {/* Alert to save temporary list before switch to another */}
+                        <PopupInfo
+                            open={openPopupInfo}
+                            onClose={setOpenPopupInfo}
+                            handleSaveNewList={createListBeforeExit}
+                            handleCancelNewList={cancelCreateListBeforeExit}
+                        />
                     </div>
                     <div className={classes.containerButtons}>
                         <Button
