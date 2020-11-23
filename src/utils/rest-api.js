@@ -45,10 +45,10 @@ export function fetchAppsAndUrls() {
  */
 export function getContingencyLists(guiMode) {
     if (guiMode) {
-        const url = PREFIX_ACTIONS_QUERIES + '/v1/contingency-lists';
+        const url = PREFIX_ACTIONS_QUERIES + '/v1/script-contingency-lists';
         return Promise.resolve([{ name: 'Gui script 1' }]);
     } else {
-        const url = PREFIX_ACTIONS_QUERIES + '/v1/contingency-lists';
+        const url = PREFIX_ACTIONS_QUERIES + '/v1/script-contingency-lists';
         return backendFetch(url).then((response) => response.json());
     }
 }
@@ -76,7 +76,7 @@ export function addContingencyList(name, script) {
 export function deleteListByName(name) {
     const url =
         PREFIX_ACTIONS_QUERIES +
-        '/v1/contingency-lists/' +
+        '/v1/script-contingency-lists/' +
         encodeURIComponent(name);
     return backendFetch(url, {
         method: 'delete',
@@ -92,7 +92,7 @@ export function deleteListByName(name) {
 export function renameListByName(oldName, newName) {
     const url =
         PREFIX_ACTIONS_QUERIES +
-        '/v1/contingency-lists/' +
+        '/v1/script-contingency-lists/' +
         encodeURIComponent(oldName) +
         '/rename';
 

@@ -25,3 +25,9 @@ export function updateGuiContingencyList(guiList) {
     return { type: UPDATE_GUI_CONTINGENCY_LIST, guiList: guiList };
 }
 
+export const UPDATE_CONTINGENCY_LIST = 'UPDATE_CONTINGENCY_LIST';
+
+export function updateContingencyList(contingencyLists) {
+    return { type: UPDATE_CONTINGENCY_LIST, contingencyLists: contingencyLists };
+}
+
