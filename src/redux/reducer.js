@@ -9,7 +9,7 @@ import { createReducer } from '@reduxjs/toolkit';
 
 import { getLocalStorageTheme, saveLocalStorageTheme } from './local-storage';
 
-import { SELECT_THEME, UPDATE_CONTINGENCY_LIST } from './actions';
+import { SELECT_THEME, UPDATE_GUI_CONTINGENCY_LIST, UPDATE_SCRIPT_CONTINGENCY_LIST } from './actions';
 
 import { USER, SIGNIN_CALLBACK_ERROR } from '@gridsuite/commons-ui';
 
@@ -17,7 +17,8 @@ const initialState = {
     theme: getLocalStorageTheme(),
     user: null,
     signInCallbackError: null,
-    list: null,
+    scriptList: [],
+    guiList: []
 };
 
 export const reducer = createReducer(initialState, {
@@ -34,7 +35,11 @@ export const reducer = createReducer(initialState, {
         state.signInCallbackError = action.signInCallbackError;
     },
 
-    [UPDATE_CONTINGENCY_LIST]: (state, action) => {
-        state.list = action.list;
+    [UPDATE_SCRIPT_CONTINGENCY_LIST]: (state, action) => {
+        state.scriptList = action.scriptList;
+    },
+
+    [UPDATE_GUI_CONTINGENCY_LIST]: (state, action) => {
+        state.guiList = action.guiList;
     },
 });

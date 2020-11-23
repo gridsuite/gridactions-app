@@ -17,7 +17,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
-        padding: 10
+        padding: 10,
     },
 }));
 
@@ -35,11 +35,11 @@ const BootstrapInput = withStyles((theme) => ({
 const GuiPane = () => {
     const classes = useStyles();
 
-    const [equipmentID, setEquipmentID] = useState("*");
-    const [equipmentName, setEquipmentName] = useState("*");
-    const [equipmentType, setEquipmentType] = useState("*");
-    const [operator, setOperator] = useState("=");
-    const [nominalVoltage, setNominalVoltage] = useState("*");
+    const [equipmentID, setEquipmentID] = useState('*');
+    const [equipmentName, setEquipmentName] = useState('*');
+    const [equipmentType, setEquipmentType] = useState('*');
+    const [operator, setOperator] = useState('=');
+    const [nominalVoltage, setNominalVoltage] = useState('*');
 
     function handleOperator(event) {
         setOperator(event.target.value);
@@ -63,35 +63,37 @@ const GuiPane = () => {
 
     return (
         <div className={classes.root}>
-            <Grid container
-                  direction="row"
-                  spacing={1}>
-                <Grid item xs={12}  sm={4}>
+            <Grid container direction="row" spacing={1}>
+                <Grid item xs={12} sm={4}>
                     <h3>Equipment ID</h3>
                 </Grid>
-                <Grid item xs={12} sm={8} >
-                    <TextField onChange={handleEquipmentID} label="Equipment ID" variant="outlined" />
+                <Grid item xs={12} sm={8}>
+                    <TextField
+                        onChange={handleEquipmentID}
+                        label="Equipment ID"
+                        variant="outlined"
+                    />
                 </Grid>
             </Grid>
 
-            <Grid container
-                  direction="row"
-                  spacing={1}>
-                <Grid item xs={12}  sm={4}>
+            <Grid container direction="row" spacing={1}>
+                <Grid item xs={12} sm={4}>
                     <h3>Equipment name</h3>
                 </Grid>
-                <Grid item xs={12} sm={8} >
-                    <TextField onChange={handleEquipmentName} label="Equipment name" variant="outlined" />
+                <Grid item xs={12} sm={8}>
+                    <TextField
+                        onChange={handleEquipmentName}
+                        label="Equipment name"
+                        variant="outlined"
+                    />
                 </Grid>
             </Grid>
 
-            <Grid container
-                  direction="row"
-                  spacing={1}>
-                <Grid item xs={12}  sm={4}>
+            <Grid container direction="row" spacing={1}>
+                <Grid item xs={12} sm={4}>
                     <h3>Equipment type</h3>
                 </Grid>
-                <Grid item xs={12} sm={8} >
+                <Grid item xs={12} sm={8}>
                     <FormControl className="MuiFormControl-root">
                         <NativeSelect
                             id="demo-customized-select-native"
@@ -99,40 +101,41 @@ const GuiPane = () => {
                             onChange={handleEquipmentType}
                             input={<BootstrapInput />}
                         >
-                            <option value={"*"}>*</option>
-                            <option value={"Lines"}>Lines</option>
-                            <option value={"Substations"}>Substations</option>
+                            <option value={'*'}>*</option>
+                            <option value={'Lines'}>Lines</option>
+                            <option value={'Substations'}>Substations</option>
                         </NativeSelect>
                     </FormControl>
                 </Grid>
             </Grid>
 
-            <Grid container
-                  direction="row"
-                  spacing={1}>
+            <Grid container direction="row" spacing={1}>
                 <Grid item xs={10} sm={3}>
                     <h3>Nominal voltage (KV)</h3>
                 </Grid>
-                <Grid  item xs={2} sm={1}  >
+                <Grid item xs={2} sm={1}>
                     <FormControl className={classes.formControl}>
                         <Select
                             native
                             value={operator}
                             onChange={handleOperator}
                         >
-                            <option value={"="}>=</option>
-                            <option value={">"}> &gt; </option>
-                            <option value={">="}> &ge; </option>
-                            <option value={"<"}> &lt; </option>
-                            <option value={"<="}> &le; </option>
+                            <option value={'='}>=</option>
+                            <option value={'>'}> &gt; </option>
+                            <option value={'>='}> &ge; </option>
+                            <option value={'<'}> &lt; </option>
+                            <option value={'<='}> &le; </option>
                         </Select>
                     </FormControl>
                 </Grid>
-                <Grid item xs={12} sm={8} >
-                    <TextField  onChange={handleNominalVoltage} label="Nominal voltage" variant="outlined" />
+                <Grid item xs={12} sm={8}>
+                    <TextField
+                        onChange={handleNominalVoltage}
+                        label="Nominal voltage"
+                        variant="outlined"
+                    />
                 </Grid>
             </Grid>
-
         </div>
     );
 };

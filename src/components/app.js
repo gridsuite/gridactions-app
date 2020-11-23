@@ -184,7 +184,7 @@ const App = () => {
                     <Switch>
                         <Route exact path="/">
                             <Box mt={20}>
-                                <Contingency theme={getMuiTheme(theme)}/>
+                                <Contingency theme={getMuiTheme(theme)} />
                             </Box>
                         </Route>
                         <Route exact path="/sign-in-callback">

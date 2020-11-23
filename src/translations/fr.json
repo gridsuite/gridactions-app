@@ -18,12 +18,7 @@
     "rename": "Renommer",
     "delete": "Supprimer",
     "renameList": "Renommer la liste",
-<<<<<<< HEAD
-    "newNameList": "Nouveau nom de la liste"
-=======
     "newNameList": "Nouveau nom de la liste",
-
     "guiMode": "Mode GUI",
     "scriptMode": "Mode script"
->>>>>>> first commit
 }

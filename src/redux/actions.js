@@ -13,8 +13,15 @@ export function selectTheme(theme) {
     return { type: SELECT_THEME, theme: theme };
 }
 
-export const UPDATE_CONTINGENCY_LIST = 'UPDATE_CONTINGENCY_LIST';
+export const UPDATE_SCRIPT_CONTINGENCY_LIST = 'UPDATE_SCRIPT_CONTINGENCY_LIST';
 
-export function updateContingencyList(list) {
-    return { type: UPDATE_CONTINGENCY_LIST, list: list };
+export function updateScriptContingencyList(scriptList) {
+    return { type: UPDATE_SCRIPT_CONTINGENCY_LIST, scriptList: scriptList };
 }
+
+export const UPDATE_GUI_CONTINGENCY_LIST = 'UPDATE_GUI_CONTINGENCY_LIST';
+
+export function updateGuiContingencyList(guiList) {
+    return { type: UPDATE_GUI_CONTINGENCY_LIST, guiList: guiList };
+}
+

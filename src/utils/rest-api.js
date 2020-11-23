@@ -44,10 +44,11 @@ export function fetchAppsAndUrls() {
  * @returns {Promise<Response>}
  */
 export function getContingencyLists(guiMode) {
-    const url = PREFIX_ACTIONS_QUERIES + '/v1/contingency-lists';
-    if(guiMode) {
-        return Promise.resolve([{'name' : 'Gui script 1'}]);
+    if (guiMode) {
+        const url = PREFIX_ACTIONS_QUERIES + '/v1/contingency-lists';
+        return Promise.resolve([{ name: 'Gui script 1' }]);
     } else {
+        const url = PREFIX_ACTIONS_QUERIES + '/v1/contingency-lists';
         return backendFetch(url).then((response) => response.json());
     }
 }
