@@ -43,9 +43,13 @@ export function fetchAppsAndUrls() {
  * Get all contingency lists
  * @returns {Promise<Response>}
  */
-export function getContingencyLists() {
+export function getContingencyLists(guiMode) {
     const url = PREFIX_ACTIONS_QUERIES + '/v1/contingency-lists';
-    return backendFetch(url).then((response) => response.json());
+    if(guiMode) {
+        return Promise.resolve([{'name' : 'Gui script 1'}]);
+    } else {
+        return backendFetch(url).then((response) => response.json());
+    }
 }
 
 /**

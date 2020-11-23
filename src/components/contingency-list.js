@@ -19,7 +19,6 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import { grey } from '@material-ui/core/colors';
 import TextField from '@material-ui/core/TextField';
 import Alert from '@material-ui/lab/Alert';
 
@@ -32,19 +31,23 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import { withStyles } from '@material-ui/core/styles';
+import AddIcon from '@material-ui/icons/Add';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
 import CloseIcon from '@material-ui/icons/Close';
+import DescriptionIcon from '@material-ui/icons/Description';
+import PanToolIcon from '@material-ui/icons/PanTool';
 import Typography from '@material-ui/core/Typography';
+
+import GuiPane from './gui-mode';
 
 import { updateContingencyList } from '../redux/actions';
 
 import {
     makeStyles,
-    ThemeProvider,
     createMuiTheme,
 } from '@material-ui/core/styles';
 
@@ -155,12 +158,6 @@ const CustomListItem = withStyles((theme) => ({
     },
 }))(ListItem);
 
-const theme = createMuiTheme({
-    palette: {
-        primary: grey,
-    },
-});
-
 const styles = (theme) => ({
     root: {
         margin: 0,
@@ -229,7 +226,7 @@ const StyledMenu = withStyles({
     },
 })(Menu);
 
-const Contingency = () => {
+const Contingency = ({theme}) => {
     const classes = useStyles();
     const aceEditorRef = useRef();
     const dispatch = useDispatch();
@@ -249,6 +246,8 @@ const Contingency = () => {
     const [fileContent, setFileContent] = useState('');
     const [selectedIndex, setSelectedIndex] = useState('');
     const [selectedListName, setSelectedListName] = useState([]);
+
+    const [guiMode, setGuiMode] = useState(false);
 
     const [newFileNameCreated, setNewFileNameCreated] = useState(
         firstItemInList ? firstItemInList.name : ''
@@ -409,8 +408,8 @@ const Contingency = () => {
         return selectedTheme === 'Light'
             ? 'github'
             : selectedTheme === 'Dark'
-            ? 'clouds_midnight'
-            : '';
+                ? 'clouds_midnight'
+                : '';
     };
 
     /**
@@ -471,12 +470,20 @@ const Contingency = () => {
         setRenameList(true);
     };
 
+    const handleScriptModeChosen = () => {
+       setGuiMode(false);
+    };
+
+    const handleGuiModeChosen = () => {
+        setGuiMode(true);
+    };
+
     /**
      * Get all contingency lists on load page
      **/
-    const getAllContingencyLists = useCallback(() => {
-        getContingencyLists().then((data) => {
-            if (data.length > 0) {
+    const getAllContingencyLists = useCallback((guiMode) => {
+        getContingencyLists(guiMode).then((data) => {
+            if (data) {
                 setFirstItemInList(data[0]);
                 setListsContingency(data);
                 dispatch(updateContingencyList(data));
@@ -485,8 +492,8 @@ const Contingency = () => {
     }, [dispatch]);
 
     useEffect(() => {
-        getAllContingencyLists();
-    }, [getAllContingencyLists]);
+        getAllContingencyLists(guiMode);
+    }, [getAllContingencyLists, guiMode]);
 
     return (
         <div className={classes.container}>
@@ -502,11 +509,10 @@ const Contingency = () => {
                             xs={3}
                             item={true}
                             className={classes.iconButton}
-                            htmlFor="addfile"
-                            style={{ marginTop: '5px' }}
-                        >
+                            htmlFor="addScript"
+                            style={{ marginTop: '5px' }}>
                             <label className={classes.iconSvg}>
-                                <InsertDriveFileOutlinedIcon
+                                <AddIcon
                                     aria-label="New file"
                                     style={{ fontSize: 36 }}
                                     onClick={() => handleOpenDialog()}
@@ -514,6 +520,48 @@ const Contingency = () => {
                             </label>
                             <span className={classes.iconLabel}>
                                 <FormattedMessage id="newList" />
+                            </span>
+                        </Grid>
+                        <Grid
+                            xs={3}
+                            item={true}
+                            className={classes.iconButton}
+                            htmlFor="empty area"
+                            style={{ marginTop: '5px' }}>
+                        </Grid>
+                        <Grid
+                            xs={3}
+                            item={true}
+                            className={classes.iconButton}
+                            htmlFor="GUI Mode"
+                            style={{ marginTop: '5px' }}>
+                            <label className={classes.iconSvg}>
+                                <PanToolIcon
+                                    aria-label="New file"
+                                    style={guiMode ? { fontSize: 36, color : theme.palette.secondary.light } : { fontSize: 36}}
+                                    onClick={() => handleGuiModeChosen()}
+                                />
+                            </label>
+                            <span className={classes.iconLabel}>
+                                <FormattedMessage id="guiMode" />
+                            </span>
+                        </Grid>
+                        <Grid
+                            xs={3}
+                            item={true}
+                            className={classes.iconButton}
+                            htmlFor="Script Mode"
+                            style={{ marginTop: '5px' }}
+                        >
+                            <label className={classes.iconSvg}>
+                                <DescriptionIcon
+                                    aria-label="Script Mode"
+                                    style={guiMode ? { fontSize: 36 } : { fontSize: 36, color : theme.palette.secondary.light}}
+                                    onClick={() => handleScriptModeChosen()}
+                                />
+                            </label>
+                            <span className={classes.iconLabel}>
+                                <FormattedMessage id="scriptMode" />
                             </span>
                         </Grid>
                     </Grid>
@@ -647,13 +695,13 @@ const Contingency = () => {
                             <DialogContent dividers>
                                 <div style={{ paddingLeft: '12px' }}>
                                     {!newNameFileCreated ? (
-                                        <ThemeProvider theme={theme}>
                                             <TextField
                                                 defaultValue={
                                                     renameList
                                                         ? selectedListName
                                                         : ''
                                                 }
+
                                                 autoFocus
                                                 onChange={(event) =>
                                                     onChangeInputName(
@@ -669,7 +717,6 @@ const Contingency = () => {
                                                     )
                                                 }
                                             />
-                                        </ThemeProvider>
                                     ) : (
                                         <FormattedMessage id="saveNewListMsg" />
                                     )}
@@ -733,8 +780,9 @@ const Contingency = () => {
                         </Button>
                     </div>
                 </Grid>
+
                 <Grid xs={9} item={true} className={classes.aceEditor}>
-                    <AceEditor
+                    {guiMode  ? (<GuiPane/>) : (< AceEditor
                         className={classes.editor}
                         ref={aceEditorRef}
                         mode="groovy"
@@ -743,8 +791,9 @@ const Contingency = () => {
                         onChange={(val) => onChangeEditor(val)}
                         value={fileContent}
                         fontSize="18px"
-                        editorProps={{ $blockScrolling: true }}
-                    />
+                        editorProps={{$blockScrolling: true}}
+                        />)
+                    }
                 </Grid>
             </Grid>
         </div>

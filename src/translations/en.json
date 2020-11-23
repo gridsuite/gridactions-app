@@ -19,4 +19,6 @@
     "delete": "Delete",
     "renameList": "Rename list",
     "newNameList": "New list name"
+    "guiMode": "GUI mode",
+    "scriptMode": "Script mode"
 }
