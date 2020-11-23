@@ -7,9 +7,6 @@
     "theme": "Thème",
     "close": "Fermer",
     "newList": "Nouvelle liste",
-    "uploadList": "Télécharger la liste",
-    "exportList": "Exporter la liste",
-    "deleteList": "Supprimer la liste",
     "save": "Enregister",
     "create": "Créer",
     "cancel": "Annuler",
@@ -17,5 +14,9 @@
     "placeholderEditor": "Insérez votre script groovy ici",
     "saveNewListTitle": "Enregistrer la nouvelle liste",
     "saveNewListMsg": "Ajouter le script et enregistrer la nouvelle liste avant d'aller sur une autre",
-    "alertDeleteList": "Veuillez sélectionner une liste avant la suppression"
+    "alertDeleteList": "Veuillez sélectionner une liste avant la suppression",
+    "rename": "Renommer",
+    "delete": "Supprimer",
+    "renameList": "Renommer la liste",
+    "newNameList": "Nouveau nom de la liste"
 }

@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AceEditor from 'react-ace';
@@ -24,11 +24,12 @@ import TextField from '@material-ui/core/TextField';
 import Alert from '@material-ui/lab/Alert';
 
 import IconButton from '@material-ui/core/IconButton';
-import SaveAltOutlinedIcon from '@material-ui/icons/SaveAltOutlined';
 import InsertDriveFileOutlinedIcon from '@material-ui/icons/InsertDriveFileOutlined';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import DeleteOutlineOutlinedIcon from '@material-ui/icons/DeleteOutlineOutlined';
-import ImportExportOutlinedIcon from '@material-ui/icons/ImportExportOutlined';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -52,10 +53,12 @@ import {
     getContingencyLists,
     addContingencyList,
     deleteListByName,
+    renameListByName,
 } from '../utils/rest-api';
 
 const useStyles = makeStyles((theme) => ({
     root: {
+        padding: '0',
         '& > *': {
             margin: theme.spacing(1),
         },
@@ -66,7 +69,7 @@ const useStyles = makeStyles((theme) => ({
         position: 'absolute',
         width: '100%',
         top: '70px',
-        height: '100%',
+        height: 'calc(100vh - 70px)',
     },
     contentList: {
         marginTop: '20px',
@@ -80,7 +83,7 @@ const useStyles = makeStyles((theme) => ({
     },
     contingencyTitle: {
         padding: '15px 10px 10px 15px',
-        margin: '0',
+        margin: '0 0 16px 0',
         textAlign: 'left',
         fontSize: '24px',
         fontWeight: 'bold',
@@ -94,13 +97,6 @@ const useStyles = makeStyles((theme) => ({
         width: '100% !important',
         height: '100% !important',
         margin: 'auto',
-    },
-    uploadFile: {
-        opacity: 0,
-        position: 'absolute',
-        pointerEvents: 'none',
-        width: '1px',
-        height: '1px',
     },
     iconButton: {
         display: 'grid',
@@ -141,11 +137,17 @@ const useStyles = makeStyles((theme) => ({
         padding: 20,
         width: '25%',
     },
+    listItemText: {
+        padding: '15px 25px 15px',
+        margin: '0',
+    },
 }));
 
 const CustomListItem = withStyles((theme) => ({
     root: {
         margin: '0',
+        textTransform: 'capitalize',
+        padding: '0',
     },
     selected: {
         backgroundColor: '#000',
@@ -184,9 +186,7 @@ const DialogContainer = withStyles((theme) => ({
 
 const NewFileCreatedList = withStyles((theme) => ({
     root: {
-        paddingTop: '0',
-        paddingBottom: '0',
-        marginTop: '-10px',
+        padding: '0',
     },
 }))(List);
 
@@ -221,6 +221,14 @@ const DialogActions = withStyles((theme) => ({
     },
 }))(MuiDialogActions);
 
+const StyledMenu = withStyles({
+    paper: {
+        border: '1px solid #d3d4d5',
+        marginTop: '67px',
+        marginLeft: '-88px',
+    },
+})(Menu);
+
 const Contingency = () => {
     const classes = useStyles();
     const aceEditorRef = useRef();
@@ -228,18 +236,19 @@ const Contingency = () => {
     const selectedTheme = useSelector((state) => state.theme);
 
     const [openDialog, setOpenDialog] = useState(false);
-    const [newNameFileUploaded, setNewNameFileUploaded] = useState(false);
     const [newNameFileCreated, setNewNameFileCreated] = useState(false);
     const [disabledBtnSubmitList, setDisabledBtnSubmitList] = useState(false);
+    const [disabledBtnRenameList, setDisabledBtnRenameList] = useState(false);
     const [alertEmptyList, setAlertEmptyList] = useState(true);
     const [alertNotSelectedList, setAlertNotSelectedList] = useState(false);
+    const [renameList, setRenameList] = useState(false);
+    const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [firstItemInList, setFirstItemInList] = useState([]);
     const [listsContingency, setListsContingency] = useState([]);
     const [fileContent, setFileContent] = useState('');
-    // const [fileNameUploaded, setFileNameUploaded] = useState('');
     const [selectedIndex, setSelectedIndex] = useState('');
-    const [selectedListName, setSelectedListName] = useState('');
+    const [selectedListName, setSelectedListName] = useState([]);
 
     const [newFileNameCreated, setNewFileNameCreated] = useState(
         firstItemInList ? firstItemInList.name : ''
@@ -272,6 +281,7 @@ const Contingency = () => {
      */
     const handleOpenDialog = () => {
         setOpenDialog(true);
+        setRenameList(false);
     };
 
     /**
@@ -285,22 +295,6 @@ const Contingency = () => {
         } else {
             setOpenDialog(false);
         }
-    };
-
-    /**
-     * Handler click to upload new external file
-     * @param e
-     * @param val
-     */
-    const handleChangeUploadFile = (e, val) => {
-        const fileReader = new FileReader();
-        setFileContent('');
-        fileReader.readAsText(e.target.files[0], 'UTF-8');
-        // setFileNameUploaded(e.target.files[0].name);
-        setNewNameFileUploaded(e.target.files[0].name);
-        fileReader.onload = (e) => {
-            setFileContent(e.target.result);
-        };
     };
 
     /**
@@ -319,6 +313,27 @@ const Contingency = () => {
     };
 
     /**
+     * on change input popup check if name already exist
+     * @param name
+     */
+    const onChangeInputName = (name) => {
+        if (name.length === 0) {
+            setDisabledBtnRenameList(false);
+        } else {
+            if (listsContingency.length > 0) {
+                if (listsContingency.some((list) => list.name === name)) {
+                    setDisabledBtnRenameList(false);
+                } else {
+                    setNewFileNameCreated(name);
+                    setDisabledBtnRenameList(true);
+                }
+            } else {
+                setDisabledBtnRenameList(true);
+            }
+        }
+    };
+
+    /**
      * Save name of new file added from dialog
      * @param name
      * @param script
@@ -328,12 +343,26 @@ const Contingency = () => {
             setFileContent('');
             setOpenDialog(false);
         } else if (name) {
-            aceEditorRef.current.editor.setValue('');
-            setAlertEmptyList(false);
-            setSelectedIndex('');
-            setNewNameFileCreated(true);
-            setFileContent(script);
-            setOpenDialog(false);
+            if (renameList) {
+                renameListByName(selectedListName, newFileNameCreated).then(
+                    (response) => {
+                        if (!response.ok) {
+                            console.error(response.statusText);
+                        }
+                    }
+                );
+                setOpenDialog(false);
+                setTimeout(function () {
+                    getAllContingencyLists();
+                }, 50);
+            } else {
+                aceEditorRef.current.editor.setValue('');
+                setAlertEmptyList(false);
+                setSelectedIndex('');
+                setNewNameFileCreated(true);
+                setFileContent(script);
+                setOpenDialog(false);
+            }
         }
     };
 
@@ -402,6 +431,7 @@ const Contingency = () => {
      * Delete list by name
      */
     const handleDeleteList = () => {
+        setAnchorEl(null);
         if (selectedListName) {
             if (listsContingency.length === selectedIndex + 1) {
                 setSelectedIndex(selectedIndex - 1);
@@ -413,9 +443,11 @@ const Contingency = () => {
 
             deleteListByName(selectedListName).then(() => {
                 getContingencyLists().then((data) => {
-                    if (data) {
-                        setListsContingency(data);
+                    setListsContingency(data);
+                    if (data.length > 0) {
                         dispatch(updateContingencyList(data));
+                    } else {
+                        setAlertEmptyList(true);
                     }
                 });
             });
@@ -424,18 +456,37 @@ const Contingency = () => {
         }
     };
 
-    useEffect(() => {
-        /**
-         * Get all contingency lists on load page
-         **/
+    const handleOpenMenu = (event, name) => {
+        setAnchorEl(event.currentTarget);
+        setSelectedListName(name);
+    };
+
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+    };
+
+    const handleRenameList = () => {
+        setAnchorEl(null);
+        setOpenDialog(true);
+        setRenameList(true);
+    };
+
+    /**
+     * Get all contingency lists on load page
+     **/
+    const getAllContingencyLists = useCallback(() => {
         getContingencyLists().then((data) => {
-            if (data) {
+            if (data.length > 0) {
                 setFirstItemInList(data[0]);
                 setListsContingency(data);
                 dispatch(updateContingencyList(data));
             }
         });
     }, [dispatch]);
+
+    useEffect(() => {
+        getAllContingencyLists();
+    }, [getAllContingencyLists]);
 
     return (
         <div className={classes.container}>
@@ -465,55 +516,7 @@ const Contingency = () => {
                                 <FormattedMessage id="newList" />
                             </span>
                         </Grid>
-                        <Grid xs={3} item={true} className={classes.iconButton}>
-                            <label className={classes.iconSvg}>
-                                <ImportExportOutlinedIcon
-                                    aria-label="New folder"
-                                    color="disabled"
-                                    style={{
-                                        fontSize: 42,
-                                        cursor: 'not-allowed',
-                                    }}
-                                />
-                            </label>
-                            <span className={classes.iconLabel}>
-                                <FormattedMessage id="exportList" />
-                            </span>
-                        </Grid>
-                        <Grid xs={3} item={true} className={classes.iconButton}>
-                            <label className={classes.iconSvg}>
-                                <SaveAltOutlinedIcon
-                                    aria-label="New folder"
-                                    color="disabled"
-                                    style={{
-                                        fontSize: 42,
-                                        cursor: 'not-allowed',
-                                    }}
-                                />
-                            </label>
-                            <span className={classes.iconLabel}>
-                                <FormattedMessage id="uploadList" />
-                            </span>
-                        </Grid>
-                        <Grid xs={3} item={true} className={classes.iconButton}>
-                            <label className={classes.iconSvg}>
-                                <DeleteOutlineOutlinedIcon
-                                    aria-label="New folder"
-                                    style={{ fontSize: 42 }}
-                                    onClick={() => handleDeleteList()}
-                                />
-                            </label>
-                            <span className={classes.iconLabel}>
-                                <FormattedMessage id="deleteList" />
-                            </span>
-                        </Grid>
                     </Grid>
-                    <input
-                        className={classes.uploadFile}
-                        type="file"
-                        id="uploadfile"
-                        onChange={handleChangeUploadFile}
-                    />
                     <h3 className={classes.contingencyTitle}>
                         <FormattedMessage id="contingencyTitle" />
                     </h3>
@@ -521,25 +524,72 @@ const Contingency = () => {
                         <>
                             <List className={classes.root}>
                                 {listsContingency.map((item, index) => (
-                                    <CustomListItem
-                                        button
-                                        key={item.name}
-                                        selected={selectedIndex === index}
-                                        onClick={() =>
-                                            handleListItemClick(item, index)
-                                        }
-                                    >
-                                        <ListItemIcon>
-                                            <ChevronRightIcon />
-                                        </ListItemIcon>
-                                        <ListItemText
-                                            primary={item.name}
+                                    <>
+                                        <CustomListItem
+                                            button
                                             key={item.name}
+                                            selected={selectedIndex === index}
                                             onClick={() =>
-                                                setFileContent(item.script)
+                                                handleListItemClick(item, index)
                                             }
-                                        />
-                                    </CustomListItem>
+                                        >
+                                            <ListItemText
+                                                className={classes.listItemText}
+                                                primary={item.name}
+                                                key={item.name}
+                                                onClick={() =>
+                                                    setFileContent(item.script)
+                                                }
+                                            />
+                                            <IconButton
+                                                aria-label="settings"
+                                                aria-controls="list-menu"
+                                                aria-haspopup="true"
+                                                variant="contained"
+                                                onClick={(event) =>
+                                                    handleOpenMenu(
+                                                        event,
+                                                        item.name
+                                                    )
+                                                }
+                                            >
+                                                <MoreVertIcon />
+                                            </IconButton>
+                                        </CustomListItem>
+                                        <StyledMenu
+                                            id="list-menu"
+                                            anchorEl={anchorEl}
+                                            open={Boolean(anchorEl)}
+                                            onClose={handleCloseMenu}
+                                        >
+                                            <MenuItem
+                                                onClick={handleDeleteList}
+                                            >
+                                                <ListItemIcon>
+                                                    <DeleteIcon fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText
+                                                    primary={
+                                                        <FormattedMessage id="delete" />
+                                                    }
+                                                />
+                                            </MenuItem>
+                                            <MenuItem
+                                                onClick={() =>
+                                                    handleRenameList()
+                                                }
+                                            >
+                                                <ListItemIcon>
+                                                    <EditIcon fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText
+                                                    primary={
+                                                        <FormattedMessage id="rename" />
+                                                    }
+                                                />
+                                            </MenuItem>
+                                        </StyledMenu>
+                                    </>
                                 ))}
                             </List>
                             {/* To be replaced by snackbar */}
@@ -561,38 +611,23 @@ const Contingency = () => {
                     )}
 
                     {/* Temporary list : new file created */}
-                    {newNameFileCreated && (
-                        <NewFileCreatedList>
-                            <CustomListItem button selected>
-                                <ListItemIcon>
-                                    <ChevronRightIcon />
-                                </ListItemIcon>
-                                <ListItemText
-                                    primary={newFileNameCreated}
-                                    onClick={() =>
-                                        setFileContent(
-                                            aceEditorRef.current.editor.getValue()
-                                        )
-                                    }
-                                />
-                            </CustomListItem>
-                        </NewFileCreatedList>
-                    )}
-
-                    {/* Temporary list : new file uploaded  */}
-                    {newNameFileUploaded && (
-                        <List>
-                            <CustomListItem button>
-                                <ListItemIcon>
-                                    <ChevronRightIcon />
-                                </ListItemIcon>
-                                <ListItemText
-                                    primary={newNameFileUploaded}
-                                    onClick={() => setFileContent(fileContent)}
-                                />
-                            </CustomListItem>
-                        </List>
-                    )}
+                    <>
+                        {newNameFileCreated && (
+                            <NewFileCreatedList>
+                                <CustomListItem button selected>
+                                    <ListItemText
+                                        className={classes.listItemText}
+                                        primary={newFileNameCreated}
+                                        onClick={() =>
+                                            setFileContent(
+                                                aceEditorRef.current.editor.getValue()
+                                            )
+                                        }
+                                    />
+                                </CustomListItem>
+                            </NewFileCreatedList>
+                        )}
+                    </>
 
                     <div>
                         <DialogContainer
@@ -603,6 +638,8 @@ const Contingency = () => {
                             <DialogTitle id="customized-dialog-title">
                                 {newNameFileCreated ? (
                                     <FormattedMessage id="saveNewListTitle" />
+                                ) : renameList ? (
+                                    <FormattedMessage id="renameList" />
                                 ) : (
                                     <FormattedMessage id="addNewContencyFile" />
                                 )}
@@ -612,14 +649,24 @@ const Contingency = () => {
                                     {!newNameFileCreated ? (
                                         <ThemeProvider theme={theme}>
                                             <TextField
+                                                defaultValue={
+                                                    renameList
+                                                        ? selectedListName
+                                                        : ''
+                                                }
+                                                autoFocus
                                                 onChange={(event) =>
-                                                    setNewFileNameCreated(
+                                                    onChangeInputName(
                                                         event.target.value
                                                     )
                                                 }
                                                 className={classes.margin}
                                                 label={
-                                                    <FormattedMessage id="listName" />
+                                                    renameList ? (
+                                                        <FormattedMessage id="newNameList" />
+                                                    ) : (
+                                                        <FormattedMessage id="listName" />
+                                                    )
                                                 }
                                             />
                                         </ThemeProvider>
@@ -639,7 +686,9 @@ const Contingency = () => {
                                 <Button
                                     variant="outlined"
                                     size="small"
-                                    disabled={newFileNameCreated ? false : true}
+                                    disabled={
+                                        disabledBtnRenameList ? false : true
+                                    }
                                     onClick={() =>
                                         saveNewFileName(
                                             newFileNameCreated,
@@ -649,7 +698,11 @@ const Contingency = () => {
                                         )
                                     }
                                 >
-                                    <FormattedMessage id="create" />
+                                    {renameList ? (
+                                        <FormattedMessage id="rename" />
+                                    ) : (
+                                        <FormattedMessage id="create" />
+                                    )}
                                 </Button>
                             </DialogActions>
                         </DialogContainer>
@@ -657,6 +710,7 @@ const Contingency = () => {
                     <div className={classes.containerButtons}>
                         <Button
                             style={{ marginRight: '15px' }}
+                            disabled={disabledBtnSubmitList ? false : true}
                             onClick={() =>
                                 cancelNewList(
                                     aceEditorRef.current.editor.setValue('')

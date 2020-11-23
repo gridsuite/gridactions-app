@@ -77,3 +77,26 @@ export function deleteListByName(name) {
         method: 'delete',
     });
 }
+
+/**
+ * Rename list by name
+ * @param oldNameList
+ * @param newNameList
+ * @returns {Promise<Response>}
+ */
+export function renameListByName(oldName, newName) {
+    const url =
+        PREFIX_ACTIONS_QUERIES +
+        '/v1/contingency-lists/' +
+        encodeURIComponent(oldName) +
+        '/rename';
+
+    return backendFetch(url, {
+        method: 'post',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newContingencyListName: newName }),
+    });
+}
