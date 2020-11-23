@@ -172,8 +172,8 @@ const Contingency = () => {
     const [firstItemInList, setFirstItemInList] = useState([]);
     const [listsContingency, setListsContingency] = useState([]);
     const [fileContent, setFileContent] = useState('');
-    const [selectedIndex, setSelectedIndex] = useState('');
-    const [selectedListName, setSelectedListName] = useState([]);
+    const [selectedIndex, setSelectedIndex] = useState(null);
+    const [selectedListName, setSelectedListName] = useState(null);
 
     const [openPopupNewList, setOpenPopupNewList] = useState(false);
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
@@ -234,7 +234,7 @@ const Contingency = () => {
     const addNewList = (name) => {
         aceEditorRef.current.editor.setValue('');
         setAlertEmptyList(false);
-        setSelectedIndex('');
+        setSelectedIndex(null);
         setNewNameFileCreated(true);
         setNewFileNameCreated(name);
         setFileContent(aceEditorRef.current.editor.setValue(''));
@@ -341,7 +341,7 @@ const Contingency = () => {
      */
     const handleDeleteList = () => {
         setAnchorEl(null);
-        if (selectedListName) {
+        if (selectedListName) {debugger;
             if (listsContingency.length === selectedIndex + 1) {
                 setSelectedIndex(selectedIndex - 1);
                 fetchScriptByNameList(selectedIndex - 1);
@@ -500,7 +500,7 @@ const Contingency = () => {
                                     </>
                                 ))}
                             </List>
-                            {/* To be replaced width snackbar */}
+                            {/* To be replaced with snackbar */}
                             {alertNotSelectedList && (
                                 <Alert
                                     severity="error"

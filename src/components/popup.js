@@ -132,7 +132,7 @@ const PopupWithInput = ({
             <CustomDialogTitle onClose={handleClose}>{title}</CustomDialogTitle>
             <CustomDialogContent dividers>
                 <TextField
-                    defaultValue={!newList ? selectedListName : ''}
+                    defaultValue={newList ? '' : selectedListName}
                     onChange={(event) => onChangeInputName(event.target.value)}
                     label={inputLabelText}
                 />
@@ -157,13 +157,13 @@ const PopupWithInput = ({
 PopupWithInput.propTypes = {
     open: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
-    inputLabelText: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    customTextValidationBtn: PropTypes.string.isRequired,
-    customTextCancelBtn: PropTypes.string.isRequired,
-    handleSaveNewList: PropTypes.func.isRequired,
-    handleRenameExistList: PropTypes.func.isRequired,
-    selectedListName: PropTypes.string.isRequired,
+    inputLabelText: PropTypes.object.isRequired,
+    title: PropTypes.object.isRequired,
+    customTextValidationBtn: PropTypes.object.isRequired,
+    customTextCancelBtn: PropTypes.object.isRequired,
+    handleSaveNewList: PropTypes.func,
+    handleRenameExistList: PropTypes.func,
+    selectedListName: PropTypes.string,
     newList: PropTypes.bool.isRequired,
 };
 
