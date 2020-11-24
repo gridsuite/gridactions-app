@@ -551,7 +551,6 @@ const Contingency = () => {
 
                     <div>
                         {/* Popup for add new list */}
-                        <span>openPopupNewList: {openPopupNewList}</span>
                         <PopupWithInput
                             open={openPopupNewList}
                             title={<FormattedMessage id="addNewContencyFile" />}
