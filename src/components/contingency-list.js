@@ -353,7 +353,6 @@ const Contingency = () => {
     const handleDeleteList = () => {
         setAnchorEl(null);
         if (selectedListName) {
-            debugger;
             if (listsContingency.length === selectedIndex + 1) {
                 setSelectedIndex(selectedIndex - 1);
                 fetchScriptByNameList(selectedIndex - 1);
