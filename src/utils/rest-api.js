@@ -45,8 +45,17 @@ export function fetchAppsAndUrls() {
  */
 export function getContingencyLists(guiMode) {
     if (guiMode) {
-        const url = PREFIX_ACTIONS_QUERIES + '/v1/script-contingency-lists';
-        return Promise.resolve([{ name: 'Gui script 1' }]);
+        const url = PREFIX_ACTIONS_QUERIES + '/v1/filter-contingency-lists';
+        return Promise.resolve([
+            {
+                name: 'eqp1',
+                equipmentID: 'eq1',
+                equipmentName: 'equipment1',
+                equipmentType: ['Lines'],
+                nominalVoltage: '100',
+                nominalVoltageOperator: '>=',
+            },
+        ]);
     } else {
         const url = PREFIX_ACTIONS_QUERIES + '/v1/script-contingency-lists';
         return backendFetch(url).then((response) => response.json());
@@ -57,7 +66,7 @@ export function getContingencyLists(guiMode) {
  * Add new contingency list
  * @returns {Promise<Response>}
  */
-export function addContingencyList(name, script) {
+export function addScriptContingencyList(name, script) {
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/script-contingency-lists/' +
@@ -103,5 +112,26 @@ export function renameListByName(oldName, newName) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({ newContingencyListName: newName }),
+    });
+}
+
+/**
+ * Add new Filter contingency list
+ * @returns {Promise<Response>}
+ */
+export function addFilterContingencyList(name, equipmentID, equipmentName, equipmentType, nominalVoltage, nominalVoltageOperator) {
+    const url =
+        PREFIX_ACTIONS_QUERIES +
+        '/v1/filter-contingency-lists/' +
+        encodeURIComponent(name);
+    return backendFetch(url, {
+        method: 'put',
+        body: {
+            equipmentID : equipmentID,
+            equipmentName: equipmentName,
+            equipmentType: equipmentType,
+            nominalVoltage: nominalVoltage,
+            nominalVoltageOperator: nominalVoltageOperator
+        },
     });
 }

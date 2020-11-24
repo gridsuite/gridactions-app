@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
@@ -13,6 +13,14 @@ import Select from '@material-ui/core/Select';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import InputBase from '@material-ui/core/InputBase';
 import withStyles from '@material-ui/core/styles/withStyles';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    updateEquipmentID,
+    updateEquipmentType,
+    updateNominalVoltageOperator,
+    updateEquipmentName,
+    updateNominalVoltage,
+} from '../redux/actions';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -32,34 +40,46 @@ const BootstrapInput = withStyles((theme) => ({
     },
 }))(InputBase);
 
-const GuiPane = () => {
+const FiltersEditor = ({ item }) => {
     const classes = useStyles();
 
-    const [equipmentID, setEquipmentID] = useState('*');
-    const [equipmentName, setEquipmentName] = useState('*');
-    const [equipmentType, setEquipmentType] = useState('*');
-    const [operator, setOperator] = useState('=');
-    const [nominalVoltage, setNominalVoltage] = useState('*');
+    const dispatch = useDispatch();
+
+    const equipmentID = useSelector((state) => state.equipmentID);
+    const equipmentName = useSelector((state) => state.equipmentName);
+    const equipmentType = useSelector((state) => state.equipmentType);
+    const operator = useSelector((state) => state.operator);
+    const nominalVoltage = useSelector((state) => state.nominalVoltage);
 
     function handleOperator(event) {
-        setOperator(event.target.value);
+        dispatch(updateNominalVoltageOperator(event.target.value));
     }
 
     function handleEquipmentType(event) {
-        setEquipmentType(event.target.value);
+        dispatch(updateEquipmentType(event.target.value));
     }
 
     function handleEquipmentID(event) {
-        setEquipmentID(event.target.value);
+        dispatch(updateEquipmentID(event.target.value));
     }
 
     function handleEquipmentName(event) {
-        setEquipmentName(event.target.value);
+        dispatch(updateEquipmentName(event.target.value));
     }
 
     function handleNominalVoltage(event) {
-        setNominalVoltage(event.target.value);
+        dispatch(updateNominalVoltage(event.target.value));
     }
+
+    useEffect(() => {
+        if (item !== null) {
+            dispatch(updateEquipmentName(item.equipmentName));
+            dispatch(updateEquipmentID(item.equipmentID));
+            dispatch(updateNominalVoltageOperator(item.nominalVoltageOperator));
+            dispatch(updateNominalVoltage(item.nominalVoltage));
+            dispatch(updateEquipmentType(item.equipmentType));
+        }
+    }, item);
 
     return (
         <div className={classes.root}>
@@ -72,6 +92,7 @@ const GuiPane = () => {
                         onChange={handleEquipmentID}
                         label="Equipment ID"
                         variant="outlined"
+                        value={item !== null ? item.equipmentID : equipmentID}
                     />
                 </Grid>
             </Grid>
@@ -85,6 +106,9 @@ const GuiPane = () => {
                         onChange={handleEquipmentName}
                         label="Equipment name"
                         variant="outlined"
+                        value={
+                            item !== null ? item.equipmentName : equipmentName
+                        }
                     />
                 </Grid>
             </Grid>
@@ -133,6 +157,9 @@ const GuiPane = () => {
                         onChange={handleNominalVoltage}
                         label="Nominal voltage"
                         variant="outlined"
+                        value={
+                            item !== null ? item.nominalVoltage : nominalVoltage
+                        }
                     />
                 </Grid>
             </Grid>
@@ -140,4 +167,4 @@ const GuiPane = () => {
     );
 };
 
-export default GuiPane;
+export default FiltersEditor;

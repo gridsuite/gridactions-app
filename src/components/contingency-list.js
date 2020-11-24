@@ -34,8 +34,12 @@ import Button from '@material-ui/core/Button';
 
 import DescriptionIcon from '@material-ui/icons/Description';
 import PanToolIcon from '@material-ui/icons/PanTool';
-import GuiPane from './gui-mode';
-import { updateContingencyList, updateGuiContingencyList, updateScriptContingencyList } from '../redux/actions';
+import FiltersEditor from './filters-editor';
+import {
+    updateContingencyList,
+    updateGuiContingencyList,
+    updateScriptContingencyList,
+} from '../redux/actions';
 import { PopupWithInput, PopupInfo } from './popup';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -43,7 +47,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import {
     getContingencyLists,
-    addContingencyList,
+    addScriptContingencyList,
     deleteListByName,
     renameListByName,
 } from '../utils/rest-api';
@@ -170,16 +174,18 @@ const Contingency = ({ theme }) => {
     const guiContingencyLists = useSelector((state) => state.guiList);
     const [listsContingency, setListsContingency] = useState(null);
 
-    const [newNameFileCreated, setNewNameFileCreated] = useState(false);
     const [disabledBtnSubmitList, setDisabledBtnSubmitList] = useState(false);
     const [alertEmptyList, setAlertEmptyList] = useState(true);
     const [alertNotSelectedList, setAlertNotSelectedList] = useState(false);
+
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [firstItemInList, setFirstItemInList] = useState([]);
 
     const [fileContent, setFileContent] = useState('');
+
     const [selectedIndex, setSelectedIndex] = useState(null);
+
     const [selectedListName, setSelectedListName] = useState(null);
 
     const [guiMode, setGuiMode] = useState(false);
@@ -187,7 +193,8 @@ const Contingency = ({ theme }) => {
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
     const [openPopupInfo, setOpenPopupInfo] = useState(false);
 
-    const [newFileNameCreated, setNewFileNameCreated] = useState(
+    const [newNameFileCreated, setNewNameFileCreated] = useState(false);
+    const [newListName, setNewFileNameCreated] = useState(
         firstItemInList ? firstItemInList.name : ''
     );
     const [fileNameContent, setFileNameContent] = useState(
@@ -208,7 +215,10 @@ const Contingency = ({ theme }) => {
         } else {
             setSelectedIndex(index);
             setNewFileNameCreated(item.name);
-            setFileNameContent(item.script);
+            if (guiMode) {
+            } else {
+                setFileNameContent(item.script);
+            }
             setDisabledBtnSubmitList(false);
         }
     };
@@ -216,7 +226,7 @@ const Contingency = ({ theme }) => {
     /**
      * Handler open dialog
      */
-    const handleOpenDialog = () => {
+    const handleOpenPopupAddNewList = () => {
         setOpenPopupNewList(true);
     };
 
@@ -227,7 +237,7 @@ const Contingency = ({ theme }) => {
      */
     const onChangeEditor = (newScript) => {
         if (
-            (newFileNameCreated && newScript) ||
+            (newListName && newScript) ||
             newScript !== fileNameContent
         ) {
             setDisabledBtnSubmitList(true);
@@ -240,12 +250,19 @@ const Contingency = ({ theme }) => {
      * @param name
      */
     const addNewList = (name) => {
-        aceEditorRef.current.editor.setValue('');
-        setAlertEmptyList(false);
-        setSelectedIndex(null);
-        setNewNameFileCreated(true);
+        if (guiMode) {
+            console.log('add New List with name: ' + name + 'in the gui mode');
+        } else {
+            console.log(
+                'add New List with name: ' + name + 'in the script mode'
+            );
+            aceEditorRef.current.editor.setValue('');
+            setNewNameFileCreated(true);
+            setFileContent(aceEditorRef.current.editor.setValue(''));
+        }
         setNewFileNameCreated(name);
-        setFileContent(aceEditorRef.current.editor.setValue(''));
+        setSelectedIndex(null);
+        setAlertEmptyList(false);
         setOpenPopupNewList(false);
     };
 
@@ -288,25 +305,30 @@ const Contingency = ({ theme }) => {
      * @param name
      * @param script
      */
-    const saveNewList = (name, script) => {
-        let currentScript = '';
-        if (script) {
-            addContingencyList(name, script).then((data) => {
-                getContingencyLists().then((data) => {
-                    if (data) {
-                        setNewNameFileCreated(false);
-                        setListsContingency(data);
-                        dispatch(updateScriptContingencyList(data));
-                        data.find((list) => {
-                            if (list.name === name) {
-                                currentScript = list.script;
-                            }
-                            return setFileContent(currentScript);
-                        });
-                    }
+    const saveNewList = () => {
+        if (guiMode) {
+            console.log("TO DO")
+        } else {
+            const script = aceEditorRef.current.editor.getValue();
+            let currentScript = '';
+            if (script) {
+                addScriptContingencyList(newListName, script).then((data) => {
+                    getContingencyLists().then((data) => {
+                        if (data) {
+                            setNewNameFileCreated(false);
+                            setListsContingency(data);
+                            dispatch(updateScriptContingencyList(data));
+                            data.find((list) => {
+                                if (list.name === newListName) {
+                                    currentScript = list.script;
+                                }
+                                return setFileContent(currentScript);
+                            });
+                        }
+                    });
+                    setDisabledBtnSubmitList(false);
                 });
-                setDisabledBtnSubmitList(false);
-            });
+            }
         }
     };
 
@@ -314,6 +336,9 @@ const Contingency = ({ theme }) => {
      * Cancel create list, reset editor and hide new name from list
      */
     const cancelNewList = () => {
+        if (!guiMode) {
+            aceEditorRef.current.editor.setValue('')
+        }
         setNewNameFileCreated(false);
         setDisabledBtnSubmitList(false);
     };
@@ -350,7 +375,10 @@ const Contingency = ({ theme }) => {
     const handleDeleteList = () => {
         setAnchorEl(null);
         if (selectedListName) {
-            if (listsContingency!== null && listsContingency.length === selectedIndex + 1) {
+            if (
+                listsContingency !== null &&
+                listsContingency.length === selectedIndex + 1
+            ) {
                 setSelectedIndex(selectedIndex - 1);
                 fetchScriptByNameList(selectedIndex - 1);
             } else {
@@ -389,10 +417,13 @@ const Contingency = ({ theme }) => {
 
     const handleScriptModeChosen = () => {
         setGuiMode(false);
+        setSelectedIndex(null);
     };
 
     const handleGuiModeChosen = () => {
+        aceEditorRef.current.editor.setValue('');
         setGuiMode(true);
+        setSelectedIndex(null);
     };
 
     /**
@@ -412,7 +443,6 @@ const Contingency = ({ theme }) => {
                         dispatch(updateScriptContingencyList(data));
                     }
                     dispatch(updateContingencyList(data));
-
                 }
             });
         },
@@ -422,6 +452,10 @@ const Contingency = ({ theme }) => {
     useEffect(() => {
         getAllContingencyLists(guiMode);
     }, [getAllContingencyLists, guiMode]);
+
+    function setFilters(item) {
+        return undefined;
+    }
 
     return (
         <div className={classes.container}>
@@ -438,13 +472,13 @@ const Contingency = ({ theme }) => {
                             item={true}
                             className={classes.iconButton}
                             htmlFor="addScript"
-                            style={{ marginTop: '5px', paddingLeft:'5px' }}
+                            style={{ marginTop: '5px', paddingLeft: '5px' }}
                         >
                             <label className={classes.iconSvg}>
                                 <AddIcon
                                     aria-label="New file"
                                     style={{ fontSize: 36 }}
-                                    onClick={() => handleOpenDialog()}
+                                    onClick={() => handleOpenPopupAddNewList()}
                                 />
                             </label>
                             <span className={classes.iconLabel}>
@@ -509,7 +543,8 @@ const Contingency = ({ theme }) => {
                     <h3 className={classes.contingencyTitle}>
                         <FormattedMessage id="contingencyTitle" />
                     </h3>
-                    {(listsContingency !== null && listsContingency.length > 0) ? (
+                    {listsContingency !== null &&
+                    listsContingency.length > 0 ? (
                         <>
                             <List className={classes.root}>
                                 {listsContingency.map((item, index) => (
@@ -527,7 +562,11 @@ const Contingency = ({ theme }) => {
                                                 primary={item.name}
                                                 key={item.name}
                                                 onClick={() =>
-                                                    setFileContent(item.script)
+                                                    guiMode
+                                                        ? setFilters(item)
+                                                        : setFileContent(
+                                                              item.script
+                                                          )
                                                 }
                                             />
                                             <IconButton
@@ -606,7 +645,7 @@ const Contingency = ({ theme }) => {
                                 <CustomListItem button selected>
                                     <ListItemText
                                         className={classes.listItemText}
-                                        primary={newFileNameCreated}
+                                        primary={newListName}
                                         onClick={() =>
                                             setFileContent(
                                                 aceEditorRef.current.editor.getValue()
@@ -666,9 +705,7 @@ const Contingency = ({ theme }) => {
                             style={{ marginRight: '15px' }}
                             disabled={disabledBtnSubmitList ? false : true}
                             onClick={() =>
-                                cancelNewList(
-                                    aceEditorRef.current.editor.setValue('')
-                                )
+                                cancelNewList()
                             }
                         >
                             <FormattedMessage id="cancel" />
@@ -677,10 +714,7 @@ const Contingency = ({ theme }) => {
                             variant="outlined"
                             disabled={disabledBtnSubmitList ? false : true}
                             onClick={() =>
-                                saveNewList(
-                                    newFileNameCreated,
-                                    aceEditorRef.current.editor.getValue()
-                                )
+                                saveNewList()
                             }
                         >
                             <FormattedMessage id="save" />
@@ -690,7 +724,13 @@ const Contingency = ({ theme }) => {
 
                 <Grid xs={9} item={true} className={classes.aceEditor}>
                     {guiMode ? (
-                        <GuiPane />
+                        <FiltersEditor
+                            item={
+                                selectedIndex !== null
+                                    ? listsContingency[selectedIndex]
+                                    : null
+                            }
+                        />
                     ) : (
                         <AceEditor
                             className={classes.editor}

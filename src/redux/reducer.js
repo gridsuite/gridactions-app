@@ -12,8 +12,13 @@ import { getLocalStorageTheme, saveLocalStorageTheme } from './local-storage';
 import {
     SELECT_THEME,
     UPDATE_CONTINGENCY_LIST,
+    UPDATE_FILTER_EQUIPMENT_ID,
+    UPDATE_FILTER_EQUIPMENT_NAME,
+    UPDATE_FILTER_NOMINAL_VOLTAGE,
+    UPDATE_FILTER_NOMINAL_VOLTAGE_OPERATOR,
+    UPDATE_FILTER_EQUIPMENT_TYPE,
     UPDATE_GUI_CONTINGENCY_LIST,
-    UPDATE_SCRIPT_CONTINGENCY_LIST
+    UPDATE_SCRIPT_CONTINGENCY_LIST,
 } from './actions';
 
 import { USER, SIGNIN_CALLBACK_ERROR } from '@gridsuite/commons-ui';
@@ -24,7 +29,13 @@ const initialState = {
     signInCallbackError: null,
     scriptList: [],
     guiList: [],
-    contingencyLists: []
+    contingencyLists: [],
+
+    equipmentID: '*',
+    equipmentName: '*',
+    equipmentType: '*',
+    nominalVoltageOperator: '=',
+    nominalVoltage: '*',
 };
 
 export const reducer = createReducer(initialState, {
@@ -51,5 +62,25 @@ export const reducer = createReducer(initialState, {
 
     [UPDATE_CONTINGENCY_LIST]: (state, action) => {
         state.contingencyLists = action.contingencyLists;
+    },
+
+    [UPDATE_FILTER_EQUIPMENT_ID]: (state, action) => {
+        state.equipmentID = action.equipmentID;
+    },
+
+    [UPDATE_FILTER_EQUIPMENT_NAME]: (state, action) => {
+        state.equipmentName = action.equipmentName;
+    },
+
+    [UPDATE_FILTER_NOMINAL_VOLTAGE_OPERATOR]: (state, action) => {
+        state.nominalVoltageOperator = action.nominalVoltageOperator;
+    },
+
+    [UPDATE_FILTER_NOMINAL_VOLTAGE]: (state, action) => {
+        state.nominalVoltage = action.nominalVoltage;
+    },
+
+    [UPDATE_FILTER_EQUIPMENT_TYPE]: (state, action) => {
+        state.equipmentType = action.equipmentType;
     },
 });
