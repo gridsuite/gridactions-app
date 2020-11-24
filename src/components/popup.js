@@ -79,13 +79,13 @@ const DialogContainer = withStyles((theme) => ({
 
 const PopupWithInput = ({
     open,
-    onClose,
     inputLabelText,
     title,
     customTextValidationBtn,
     customTextCancelBtn,
     handleSaveNewList,
     handleRenameExistList,
+    handleCancelList,
     selectedListName,
     newList,
 }) => {
@@ -124,7 +124,7 @@ const PopupWithInput = ({
     };
 
     const handleClose = () => {
-        onClose(false);
+        handleCancelList();
     };
 
     return (
@@ -156,27 +156,18 @@ const PopupWithInput = ({
 
 PopupWithInput.propTypes = {
     open: PropTypes.bool.isRequired,
-    onClose: PropTypes.func.isRequired,
     inputLabelText: PropTypes.object.isRequired,
     title: PropTypes.object.isRequired,
     customTextValidationBtn: PropTypes.object.isRequired,
     customTextCancelBtn: PropTypes.object.isRequired,
     handleSaveNewList: PropTypes.func,
     handleRenameExistList: PropTypes.func,
+    handleCancelList: PropTypes.func,
     selectedListName: PropTypes.string,
     newList: PropTypes.bool.isRequired,
 };
 
-const PopupInfo = ({
-    open,
-    onClose,
-    handleSaveNewList,
-    handleCancelNewList,
-}) => {
-    const handleClose = () => {
-        onClose(false);
-    };
-
+const PopupInfo = ({ open, handleSaveNewList, handleCancelNewList }) => {
     const handleSaveList = () => {
         handleSaveNewList();
     };
@@ -186,8 +177,8 @@ const PopupInfo = ({
     };
 
     return (
-        <DialogContainer open={open} onClose={handleClose}>
-            <CustomDialogTitle onClose={handleClose}>
+        <DialogContainer open={open} onClose={handleCancel}>
+            <CustomDialogTitle onClose={handleCancel}>
                 <FormattedMessage id="saveNewListTitle" />
             </CustomDialogTitle>
             <CustomDialogContent dividers>
@@ -210,8 +201,7 @@ const PopupInfo = ({
 };
 
 PopupInfo.propTypes = {
-    open: PropTypes.bool.isRequired,
-    onClose: PropTypes.func.isRequired,
+    open: PropTypes.bool,
     handleSaveNewList: PropTypes.func.isRequired,
     handleCancelNewList: PropTypes.func.isRequired,
 };

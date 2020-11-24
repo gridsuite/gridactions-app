@@ -163,7 +163,7 @@ const Contingency = () => {
     const dispatch = useDispatch();
     const selectedTheme = useSelector((state) => state.theme);
 
-    const [newNameFileCreated, setNewNameFileCreated] = useState(false);
+    const [newTemporaryList, setNewTemporaryList] = useState(false);
     const [disabledBtnSubmitList, setDisabledBtnSubmitList] = useState(false);
     const [alertEmptyList, setAlertEmptyList] = useState(true);
     const [alertNotSelectedList, setAlertNotSelectedList] = useState(false);
@@ -179,7 +179,7 @@ const Contingency = () => {
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
     const [openPopupInfo, setOpenPopupInfo] = useState(false);
 
-    const [newFileNameCreated, setNewFileNameCreated] = useState(
+    const [newListName, setNewListName] = useState(
         firstItemInList ? firstItemInList.name : ''
     );
     const [fileNameContent, setFileNameContent] = useState(
@@ -194,21 +194,21 @@ const Contingency = () => {
     const handleListItemClick = (item, index) => {
         setSelectedListName(item.name);
         setAlertNotSelectedList(false);
-        if (newNameFileCreated) {
+        if (newTemporaryList) {
             setOpenPopupInfo(true);
             setFileContent('');
         } else {
             setSelectedIndex(index);
-            setNewFileNameCreated(item.name);
+            setNewListName(item.name);
             setFileNameContent(item.script);
             setDisabledBtnSubmitList(false);
         }
     };
 
     /**
-     * Handler open dialog
+     * Handler open popup new list
      */
-    const handleOpenDialog = () => {
+    const handleOpenPopupNewList = () => {
         setOpenPopupNewList(true);
     };
 
@@ -218,10 +218,7 @@ const Contingency = () => {
      * @param newScript
      */
     const onChangeEditor = (newScript) => {
-        if (
-            (newFileNameCreated && newScript) ||
-            newScript !== fileNameContent
-        ) {
+        if ((newListName && newScript) || newScript !== fileNameContent) {
             setDisabledBtnSubmitList(true);
             setFileContent(newScript);
         }
@@ -235,10 +232,24 @@ const Contingency = () => {
         aceEditorRef.current.editor.setValue('');
         setAlertEmptyList(false);
         setSelectedIndex(null);
-        setNewNameFileCreated(true);
-        setNewFileNameCreated(name);
-        setFileContent(aceEditorRef.current.editor.setValue(''));
+        setNewTemporaryList(true);
+        setNewListName(name);
+        setFileContent('');
         setOpenPopupNewList(false);
+    };
+
+    /**
+     * Handler cancel popup new list
+     */
+    const cancelPopupNewList = () => {
+        setOpenPopupNewList(false);
+    };
+
+    /**
+     * Handler cancel popup rename list
+     */
+    const cancelRenameList = () => {
+        setOpenPopupRenameList(false);
     };
 
     /**
@@ -270,7 +281,7 @@ const Contingency = () => {
      * Alert : Cancel create new list
      */
     const cancelCreateListBeforeExit = () => {
-        setNewNameFileCreated(false);
+        setNewTemporaryList(false);
         setFileContent('');
         setOpenPopupInfo(false);
     };
@@ -286,7 +297,7 @@ const Contingency = () => {
             addContingencyList(name, script).then((data) => {
                 getContingencyLists().then((data) => {
                     if (data) {
-                        setNewNameFileCreated(false);
+                        setNewTemporaryList(false);
                         setListsContingency(data);
                         dispatch(updateContingencyList(data));
                         data.find((list) => {
@@ -305,8 +316,8 @@ const Contingency = () => {
     /**
      * Cancel create list, reset editor and hide new name from list
      */
-    const cancelNewList = () => {
-        setNewNameFileCreated(false);
+    const cancelAddingNewList = () => {
+        setNewTemporaryList(false);
         setDisabledBtnSubmitList(false);
     };
 
@@ -418,7 +429,7 @@ const Contingency = () => {
                                 <InsertDriveFileOutlinedIcon
                                     aria-label="New file"
                                     style={{ fontSize: 36 }}
-                                    onClick={() => handleOpenDialog()}
+                                    onClick={() => handleOpenPopupNewList()}
                                 />
                             </label>
                             <span className={classes.iconLabel}>
@@ -519,14 +530,14 @@ const Contingency = () => {
                         ''
                     )}
 
-                    {/* Temporary list : new file created */}
+                    {/* Temporary list : new list created */}
                     <>
-                        {newNameFileCreated && (
+                        {newTemporaryList && (
                             <NewFileCreatedList>
                                 <CustomListItem button selected>
                                     <ListItemText
                                         className={classes.listItemText}
-                                        primary={newFileNameCreated}
+                                        primary={newListName}
                                         onClick={() =>
                                             setFileContent(
                                                 aceEditorRef.current.editor.getValue()
@@ -540,9 +551,9 @@ const Contingency = () => {
 
                     <div>
                         {/* Popup for add new list */}
+                        <span>openPopupNewList: {openPopupNewList}</span>
                         <PopupWithInput
                             open={openPopupNewList}
-                            onClose={setOpenPopupNewList}
                             title={<FormattedMessage id="addNewContencyFile" />}
                             inputLabelText={<FormattedMessage id="listName" />}
                             customTextValidationBtn={
@@ -552,6 +563,7 @@ const Contingency = () => {
                                 <FormattedMessage id="cancel" />
                             }
                             handleSaveNewList={addNewList}
+                            handleCancelList={cancelPopupNewList}
                             newList={true}
                         />
                         {/* Popup for rename exist list */}
@@ -569,13 +581,13 @@ const Contingency = () => {
                                 <FormattedMessage id="cancel" />
                             }
                             handleRenameExistList={renameExistList}
+                            handleCancelList={cancelRenameList}
                             selectedListName={selectedListName}
                             newList={false}
                         />
                         {/* Alert to save temporary list before switch to another */}
                         <PopupInfo
                             open={openPopupInfo}
-                            onClose={setOpenPopupInfo}
                             handleSaveNewList={createListBeforeExit}
                             handleCancelNewList={cancelCreateListBeforeExit}
                         />
@@ -585,7 +597,7 @@ const Contingency = () => {
                             style={{ marginRight: '15px' }}
                             disabled={disabledBtnSubmitList ? false : true}
                             onClick={() =>
-                                cancelNewList(
+                                cancelAddingNewList(
                                     aceEditorRef.current.editor.setValue('')
                                 )
                             }
@@ -597,7 +609,7 @@ const Contingency = () => {
                             disabled={disabledBtnSubmitList ? false : true}
                             onClick={() =>
                                 saveNewList(
-                                    newFileNameCreated,
+                                    newListName,
                                     aceEditorRef.current.editor.getValue()
                                 )
                             }
