@@ -46,16 +46,7 @@ export function fetchAppsAndUrls() {
 export function getContingencyLists(guiMode) {
     if (guiMode) {
         const url = PREFIX_ACTIONS_QUERIES + '/v1/filter-contingency-lists';
-        return Promise.resolve([
-            {
-                name: 'eqp1',
-                equipmentID: 'eq1',
-                equipmentName: 'equipment1',
-                equipmentType: ['Lines'],
-                nominalVoltage: '100',
-                nominalVoltageOperator: '>=',
-            },
-        ]);
+        return backendFetch(url).then((response) => response.json());
     } else {
         const url = PREFIX_ACTIONS_QUERIES + '/v1/script-contingency-lists';
         return backendFetch(url).then((response) => response.json());
@@ -126,12 +117,13 @@ export function addFilterContingencyList(name, equipmentID, equipmentName, equip
         encodeURIComponent(name);
     return backendFetch(url, {
         method: 'put',
-        body: {
+        headers: { 'Content-Type': 'application/json' },
+        body:  JSON.stringify({
             equipmentID : equipmentID,
             equipmentName: equipmentName,
-            equipmentType: equipmentType,
+            equipmentType: [equipmentType],
             nominalVoltage: nominalVoltage,
             nominalVoltageOperator: nominalVoltageOperator
-        },
+        }),
     });
 }

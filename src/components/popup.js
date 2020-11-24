@@ -90,7 +90,7 @@ const PopupWithInput = ({
     newList,
 }) => {
     const contingencyLists = useSelector((state) => state.contingencyLists);
-    const [disabledBtnRenameList, setDisabledBtnRenameList] = useState(false);
+    const [disableBtnRenameList, setDisableBtnRenameList] = useState(true);
     const [newNameList, setNewNameList] = useState(false);
 
     /**
@@ -99,17 +99,17 @@ const PopupWithInput = ({
      */
     const onChangeInputName = (name) => {
         if (name.length === 0) {
-            setDisabledBtnRenameList(false);
+            setDisableBtnRenameList(true);
         } else {
             if (contingencyLists.length > 0) {
                 if (contingencyLists.some((list) => list.name === name)) {
-                    setDisabledBtnRenameList(false);
+                    setDisableBtnRenameList(true);
                 } else {
                     setNewNameList(name);
-                    setDisabledBtnRenameList(true);
+                    setDisableBtnRenameList(false);
                 }
             } else {
-                setDisabledBtnRenameList(true);
+                setDisableBtnRenameList(false);
                 setNewNameList(name);
             }
         }
@@ -124,7 +124,7 @@ const PopupWithInput = ({
     };
 
     const handleClose = () => {
-        onClose(false);
+        onClose();
     };
 
     return (
@@ -145,7 +145,7 @@ const PopupWithInput = ({
                     variant="outlined"
                     size="small"
                     onClick={handleSave}
-                    disabled={disabledBtnRenameList ? false : true}
+                    disabled={disableBtnRenameList}
                 >
                     {customTextValidationBtn}
                 </Button>
@@ -174,7 +174,7 @@ const PopupInfo = ({
     handleCancelNewList,
 }) => {
     const handleClose = () => {
-        onClose(false);
+        onClose();
     };
 
     const handleSaveList = () => {

@@ -48,7 +48,7 @@ const FiltersEditor = ({ item }) => {
     const equipmentID = useSelector((state) => state.equipmentID);
     const equipmentName = useSelector((state) => state.equipmentName);
     const equipmentType = useSelector((state) => state.equipmentType);
-    const operator = useSelector((state) => state.operator);
+    const nominalVoltageOperator = useSelector((state) => state.nominalVoltageOperator);
     const nominalVoltage = useSelector((state) => state.nominalVoltage);
 
     function handleOperator(event) {
@@ -141,7 +141,7 @@ const FiltersEditor = ({ item }) => {
                     <FormControl className={classes.formControl}>
                         <Select
                             native
-                            value={operator}
+                            value={nominalVoltageOperator}
                             onChange={handleOperator}
                         >
                             <option value={'='}>=</option>

@@ -22,6 +22,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Alert from '@material-ui/lab/Alert';
 
 import IconButton from '@material-ui/core/IconButton';
+import AddIcon from '@material-ui/icons/Add';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
@@ -29,16 +30,14 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import { withStyles } from '@material-ui/core/styles';
-import AddIcon from '@material-ui/icons/Add';
 import Button from '@material-ui/core/Button';
-
 import DescriptionIcon from '@material-ui/icons/Description';
 import PanToolIcon from '@material-ui/icons/PanTool';
 import FiltersEditor from './filters-editor';
 import {
-    updateContingencyList,
-    updateGuiContingencyList,
-    updateScriptContingencyList,
+    updateContingencyList, updateEquipmentID, updateEquipmentName, updateEquipmentType,
+    updateGuiContingencyList, updateNominalVoltage, updateNominalVoltageOperator,
+    updateScriptContingencyList
 } from '../redux/actions';
 import { PopupWithInput, PopupInfo } from './popup';
 
@@ -49,7 +48,7 @@ import {
     getContingencyLists,
     addScriptContingencyList,
     deleteListByName,
-    renameListByName,
+    renameListByName, addFilterContingencyList
 } from '../utils/rest-api';
 
 const useStyles = makeStyles((theme) => ({
@@ -139,7 +138,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const CustomListItem = withStyles(() => ({
+const CustomListItem = withStyles((theme) => ({
     root: {
         margin: '0',
         textTransform: 'capitalize',
@@ -151,7 +150,7 @@ const CustomListItem = withStyles(() => ({
     },
 }))(ListItem);
 
-const NewFileCreatedList = withStyles(() => ({
+const NewFileCreatedList = withStyles((theme) => ({
     root: {
         padding: '0',
     },
@@ -167,39 +166,48 @@ const StyledMenu = withStyles({
 
 const Contingency = ({ theme }) => {
     const classes = useStyles();
-    const aceEditorRef = useRef();
+
     const dispatch = useDispatch();
+
+    const aceEditorRef = useRef();
+
     const selectedTheme = useSelector((state) => state.theme);
     const scriptContingencyLists = useSelector((state) => state.scriptList);
     const guiContingencyLists = useSelector((state) => state.guiList);
-    const [listsContingency, setListsContingency] = useState(null);
+    const listsContingency = useSelector((state) => state.contingencyLists);
 
     const [disableBtnSaveList, setDisableBtnSaveList] = useState(true);
+
+    const [selectedIndex, setSelectedIndex] = useState(null);
+    const [selectedListName, setSelectedListName] = useState(null);
+
+    const [guiMode, setGuiMode] = useState(false);
+
     const [alertEmptyList, setAlertEmptyList] = useState(true);
     const [alertNotSelectedList, setAlertNotSelectedList] = useState(false);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
 
-    const [firstItemInList, setFirstItemInList] = useState([]);
+    const [aceEditorContent, setAceEditorContent] = useState('');
 
-    const [fileContent, setFileContent] = useState('');
-
-    const [selectedIndex, setSelectedIndex] = useState(null);
-
-    const [selectedListName, setSelectedListName] = useState(null);
-
-    const [guiMode, setGuiMode] = useState(false);
     const [openPopupNewList, setOpenPopupNewList] = useState(false);
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
     const [openPopupInfo, setOpenPopupInfo] = useState(false);
 
-    const [newTemporaryList, setNewTemporaryList] = useState(false);
+    const [newListCreated, setNewListCreated] = useState(false);
+
     const [newListName, setNewListName] = useState(
-        firstItemInList ? firstItemInList.name : ''
+        (listsContingency !== null && listsContingency.length > 0) ? listsContingency[0].name : ''
     );
     const [fileNameContent, setFileNameContent] = useState(
-        firstItemInList ? firstItemInList.script : ''
+        (listsContingency !== null && listsContingency.length > 0) ? listsContingency[0].script : ''
     );
+
+    const equipmentID = useSelector((state) => state.equipmentID);
+    const equipmentName = useSelector((state) => state.equipmentName);
+    const equipmentType = useSelector((state) => state.equipmentType);
+    const nominalVoltageOperator = useSelector((state) => state.nominalVoltageOperator);
+    const nominalVoltage = useSelector((state) => state.nominalVoltage);
 
     /**
      * On click in item of list set it actif
@@ -209,9 +217,9 @@ const Contingency = ({ theme }) => {
     const handleListItemClick = (item, index) => {
         setSelectedListName(item.name);
         setAlertNotSelectedList(false);
-        if (newTemporaryList) {
+        if (newListCreated) {
             setOpenPopupInfo(true);
-            setFileContent('');
+            setAceEditorContent('');
         } else {
             setSelectedIndex(index);
             setNewListName(item.name);
@@ -236,12 +244,9 @@ const Contingency = ({ theme }) => {
      * @param newScript
      */
     const onChangeEditor = (newScript) => {
-        if (
-            (newListName && newScript) ||
-            newScript !== fileNameContent
-        ) {
+        if ((newListName && newScript) || newScript !== fileNameContent) {
             setDisableBtnSaveList(false);
-            setFileContent(newScript);
+            setAceEditorContent(newScript);
         }
     };
 
@@ -252,18 +257,22 @@ const Contingency = ({ theme }) => {
     const addNewList = (name) => {
         if (guiMode) {
             console.log('add New List with name: ' + name + 'in the gui mode');
+            dispatch(updateEquipmentName("*"));
+            dispatch(updateEquipmentID("*"));
+            dispatch(updateNominalVoltageOperator("="));
+            dispatch(updateNominalVoltage("*"));
+            dispatch(updateEquipmentType("*"));
         } else {
-            console.log(
-                'add New List with name: ' + name + 'in the script mode'
-            );
-            aceEditorRef.current.editor.setValue('');
-            setNewTemporaryList(true);
-            setFileContent(aceEditorRef.current.editor.setValue(''));
+            console.log('add New List with name: ' + name + 'in the script mode');
+            setAceEditorContent('');
+            //aceEditorRef.current.editor.setValue('');
         }
         setNewListName(name);
+        setNewListCreated(true);
         setSelectedIndex(null);
         setAlertEmptyList(false);
         setOpenPopupNewList(false);
+        setDisableBtnSaveList(false);
     };
 
     /**
@@ -287,7 +296,7 @@ const Contingency = ({ theme }) => {
      * Alert : Add the script and save the new list
      */
     const createListBeforeExit = () => {
-        setFileContent('');
+        setAceEditorContent('');
         setOpenPopupInfo(false);
     };
 
@@ -295,35 +304,46 @@ const Contingency = ({ theme }) => {
      * Alert : Cancel create new list
      */
     const cancelCreateListBeforeExit = () => {
-        setNewTemporaryList(false);
-        setFileContent('');
+        setNewListCreated(false);
+        setAceEditorContent('');
         setOpenPopupInfo(false);
     };
 
     /**
      * Save new list added: submit name and script
-     * @param name
-     * @param script
      */
     const saveNewList = () => {
         if (guiMode) {
-            console.log("TO DO")
+            addFilterContingencyList(newListName, equipmentID, equipmentName, equipmentType, nominalVoltage, nominalVoltageOperator).then(() => {
+                    getContingencyLists(guiMode).then((data) => {
+                        if (data) {
+                            console.log("TO DO" + data);
+
+                            setNewListCreated(false);
+                            dispatch(updateGuiContingencyList(data));
+                            dispatch(updateContingencyList(data));
+                        }
+                    });
+                    setDisableBtnSaveList(true);
+                }
+            )
         } else {
             const script = aceEditorRef.current.editor.getValue();
             let currentScript = '';
             if (script) {
-                addScriptContingencyList(newListName, script).then((data) => {
-                    getContingencyLists().then((data) => {
+                addScriptContingencyList(newListName, script).then(() => {
+                    getContingencyLists(guiMode).then((data) => {
                         if (data) {
-                            setNewTemporaryList(false);
-                            setListsContingency(data);
+                            setNewListCreated(false);
                             dispatch(updateScriptContingencyList(data));
-                            data.find((list) => {
-                                if (list.name === newListName) {
-                                    currentScript = list.script;
-                                }
-                                return setFileContent(currentScript);
-                            });
+                            dispatch(updateContingencyList(data),
+                                listsContingency.find((list) => {
+                                    if (list.name === newListName) {
+                                        currentScript = list.script;
+                                    }
+                                    return setAceEditorContent(currentScript);
+                                })
+                            );
                         }
                     });
                     setDisableBtnSaveList(true);
@@ -337,9 +357,11 @@ const Contingency = ({ theme }) => {
      */
     const cancelNewList = () => {
         if (!guiMode) {
-            aceEditorRef.current.editor.setValue('')
+            setAceEditorContent('');
+            //setAceEditorContent('');
+            //aceEditorRef.current.editor.setValue('')
         }
-        setNewTemporaryList(false);
+        setNewListCreated(false);
         setDisableBtnSaveList(true);
     };
 
@@ -365,7 +387,7 @@ const Contingency = ({ theme }) => {
             if (index + 1 === itemIndex + 1) {
                 script = item.script;
             }
-            return setFileContent(script);
+            return setAceEditorContent(script);
         });
     };
 
@@ -388,7 +410,7 @@ const Contingency = ({ theme }) => {
 
             deleteListByName(selectedListName).then(() => {
                 getContingencyLists().then((data) => {
-                    setListsContingency(data);
+                    dispatch(updateContingencyList(data));
                     if (data.length > 0) {
                         dispatch(updateScriptContingencyList(data));
                     } else {
@@ -421,7 +443,7 @@ const Contingency = ({ theme }) => {
     };
 
     const handleGuiModeChosen = () => {
-        aceEditorRef.current.editor.setValue('');
+        setAceEditorContent('');
         setGuiMode(true);
         setSelectedIndex(null);
     };
@@ -434,12 +456,10 @@ const Contingency = ({ theme }) => {
             getContingencyLists(guiMode).then((data) => {
                 if (data) {
                     if (guiMode) {
-                        setFirstItemInList(data[0]);
-                        setListsContingency(data);
+                        dispatch(updateContingencyList(data));
                         dispatch(updateGuiContingencyList(data));
                     } else {
-                        setFirstItemInList(data[0]);
-                        setListsContingency(data);
+                        dispatch(updateContingencyList(data));
                         dispatch(updateScriptContingencyList(data));
                     }
                     dispatch(updateContingencyList(data));
@@ -564,7 +584,7 @@ const Contingency = ({ theme }) => {
                                                 onClick={() =>
                                                     guiMode
                                                         ? setFilters(item)
-                                                        : setFileContent(
+                                                        : setAceEditorContent(
                                                               item.script
                                                           )
                                                 }
@@ -640,14 +660,14 @@ const Contingency = ({ theme }) => {
 
                     {/* Temporary list : new file created */}
                     <>
-                        {newTemporaryList && (
+                        {newListCreated && (
                             <NewFileCreatedList>
                                 <CustomListItem button selected>
                                     <ListItemText
                                         className={classes.listItemText}
                                         primary={newListName}
                                         onClick={() =>
-                                            setFileContent(
+                                            setAceEditorContent(
                                                 aceEditorRef.current.editor.getValue()
                                             )
                                         }
@@ -662,7 +682,7 @@ const Contingency = ({ theme }) => {
                         {/* Popup for add new list */}
                         <PopupWithInput
                             open={openPopupNewList}
-                            onClose={setOpenPopupNewList}
+                            onClose={() => setOpenPopupNewList(false)}
                             title={<FormattedMessage id="addNewContencyFile" />}
                             inputLabelText={<FormattedMessage id="listName" />}
                             customTextValidationBtn={
@@ -677,7 +697,7 @@ const Contingency = ({ theme }) => {
                         {/* Popup for rename exist list */}
                         <PopupWithInput
                             open={openPopupRenameList}
-                            onClose={setOpenPopupRenameList}
+                            onClose={() => setOpenPopupRenameList(false)}
                             title={<FormattedMessage id="renameList" />}
                             inputLabelText={
                                 <FormattedMessage id="newNameList" />
@@ -695,7 +715,7 @@ const Contingency = ({ theme }) => {
                         {/* Alert to save temporary list before switch to another */}
                         <PopupInfo
                             open={openPopupInfo}
-                            onClose={setOpenPopupInfo}
+                            onClose={() => setOpenPopupInfo(false)}
                             handleSaveNewList={createListBeforeExit}
                             handleCancelNewList={cancelCreateListBeforeExit}
                         />
@@ -739,7 +759,7 @@ const Contingency = ({ theme }) => {
                             placeholder="Insert your groovy script here"
                             theme={themeForAceEditor()}
                             onChange={(val) => onChangeEditor(val)}
-                            value={fileContent}
+                            value={aceEditorContent}
                             fontSize="18px"
                             editorProps={{ $blockScrolling: true }}
                         />
