@@ -174,7 +174,7 @@ const Contingency = ({ theme }) => {
     const guiContingencyLists = useSelector((state) => state.guiList);
     const [listsContingency, setListsContingency] = useState(null);
 
-    const [disabledBtnSubmitList, setDisabledBtnSubmitList] = useState(false);
+    const [disableBtnSaveList, setDisableBtnSaveList] = useState(true);
     const [alertEmptyList, setAlertEmptyList] = useState(true);
     const [alertNotSelectedList, setAlertNotSelectedList] = useState(false);
 
@@ -193,8 +193,8 @@ const Contingency = ({ theme }) => {
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
     const [openPopupInfo, setOpenPopupInfo] = useState(false);
 
-    const [newNameFileCreated, setNewNameFileCreated] = useState(false);
-    const [newListName, setNewFileNameCreated] = useState(
+    const [newTemporaryList, setNewTemporaryList] = useState(false);
+    const [newListName, setNewListName] = useState(
         firstItemInList ? firstItemInList.name : ''
     );
     const [fileNameContent, setFileNameContent] = useState(
@@ -209,17 +209,17 @@ const Contingency = ({ theme }) => {
     const handleListItemClick = (item, index) => {
         setSelectedListName(item.name);
         setAlertNotSelectedList(false);
-        if (newNameFileCreated) {
+        if (newTemporaryList) {
             setOpenPopupInfo(true);
             setFileContent('');
         } else {
             setSelectedIndex(index);
-            setNewFileNameCreated(item.name);
+            setNewListName(item.name);
             if (guiMode) {
             } else {
                 setFileNameContent(item.script);
             }
-            setDisabledBtnSubmitList(false);
+            setDisableBtnSaveList(true);
         }
     };
 
@@ -240,7 +240,7 @@ const Contingency = ({ theme }) => {
             (newListName && newScript) ||
             newScript !== fileNameContent
         ) {
-            setDisabledBtnSubmitList(true);
+            setDisableBtnSaveList(false);
             setFileContent(newScript);
         }
     };
@@ -257,10 +257,10 @@ const Contingency = ({ theme }) => {
                 'add New List with name: ' + name + 'in the script mode'
             );
             aceEditorRef.current.editor.setValue('');
-            setNewNameFileCreated(true);
+            setNewTemporaryList(true);
             setFileContent(aceEditorRef.current.editor.setValue(''));
         }
-        setNewFileNameCreated(name);
+        setNewListName(name);
         setSelectedIndex(null);
         setAlertEmptyList(false);
         setOpenPopupNewList(false);
@@ -295,7 +295,7 @@ const Contingency = ({ theme }) => {
      * Alert : Cancel create new list
      */
     const cancelCreateListBeforeExit = () => {
-        setNewNameFileCreated(false);
+        setNewTemporaryList(false);
         setFileContent('');
         setOpenPopupInfo(false);
     };
@@ -315,7 +315,7 @@ const Contingency = ({ theme }) => {
                 addScriptContingencyList(newListName, script).then((data) => {
                     getContingencyLists().then((data) => {
                         if (data) {
-                            setNewNameFileCreated(false);
+                            setNewTemporaryList(false);
                             setListsContingency(data);
                             dispatch(updateScriptContingencyList(data));
                             data.find((list) => {
@@ -326,7 +326,7 @@ const Contingency = ({ theme }) => {
                             });
                         }
                     });
-                    setDisabledBtnSubmitList(false);
+                    setDisableBtnSaveList(true);
                 });
             }
         }
@@ -339,8 +339,8 @@ const Contingency = ({ theme }) => {
         if (!guiMode) {
             aceEditorRef.current.editor.setValue('')
         }
-        setNewNameFileCreated(false);
-        setDisabledBtnSubmitList(false);
+        setNewTemporaryList(false);
+        setDisableBtnSaveList(true);
     };
 
     /**
@@ -640,7 +640,7 @@ const Contingency = ({ theme }) => {
 
                     {/* Temporary list : new file created */}
                     <>
-                        {newNameFileCreated && (
+                        {newTemporaryList && (
                             <NewFileCreatedList>
                                 <CustomListItem button selected>
                                     <ListItemText
@@ -703,7 +703,7 @@ const Contingency = ({ theme }) => {
                     <div className={classes.containerButtons}>
                         <Button
                             style={{ marginRight: '15px' }}
-                            disabled={disabledBtnSubmitList ? false : true}
+                            disabled={disableBtnSaveList}
                             onClick={() =>
                                 cancelNewList()
                             }
@@ -712,7 +712,7 @@ const Contingency = ({ theme }) => {
                         </Button>
                         <Button
                             variant="outlined"
-                            disabled={disabledBtnSubmitList ? false : true}
+                            disabled={disableBtnSaveList}
                             onClick={() =>
                                 saveNewList()
                             }
