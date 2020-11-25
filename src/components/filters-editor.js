@@ -40,46 +40,49 @@ const BootstrapInput = withStyles((theme) => ({
     },
 }))(InputBase);
 
-const FiltersEditor = ({ item }) => {
+const FiltersEditor = ({ item, onChange }) => {
     const classes = useStyles();
 
-    const dispatch = useDispatch();
+    const [equipmentID, setEquipmentID] = useState("*");
+    const [equipmentName, setEquipmentName] = useState("*");
+    const [equipmentType, setEquipmentType] = useState("*");
+    const [nominalVoltageOperator, setNominalVoltageOperator] = useState("=");
+    const [nominalVoltage, setNominalVoltage] = useState("*");
 
-    const equipmentID = useSelector((state) => state.equipmentID);
-    const equipmentName = useSelector((state) => state.equipmentName);
-    const equipmentType = useSelector((state) => state.equipmentType);
-    const nominalVoltageOperator = useSelector((state) => state.nominalVoltageOperator);
-    const nominalVoltage = useSelector((state) => state.nominalVoltage);
 
     function handleOperator(event) {
-        dispatch(updateNominalVoltageOperator(event.target.value));
+        setNominalVoltageOperator(event.target.value);
     }
 
     function handleEquipmentType(event) {
-        dispatch(updateEquipmentType(event.target.value));
+        setEquipmentType(event.target.value);
     }
 
     function handleEquipmentID(event) {
-        dispatch(updateEquipmentID(event.target.value));
+        setEquipmentID(event.target.value);
     }
 
     function handleEquipmentName(event) {
-        dispatch(updateEquipmentName(event.target.value));
+        setEquipmentName(event.target.value);
     }
 
     function handleNominalVoltage(event) {
-        dispatch(updateNominalVoltage(event.target.value));
+        setNominalVoltage(event.target.value);
     }
 
     useEffect(() => {
+        onChange(equipmentID, equipmentName, equipmentType, nominalVoltageOperator, nominalVoltage);
+    }, [equipmentID, equipmentName, equipmentType, nominalVoltage, nominalVoltageOperator]);
+
+    useEffect(() => {
         if (item !== null) {
-            dispatch(updateEquipmentName(item.equipmentName));
-            dispatch(updateEquipmentID(item.equipmentID));
-            dispatch(updateNominalVoltageOperator(item.nominalVoltageOperator));
-            dispatch(updateNominalVoltage(item.nominalVoltage));
-            dispatch(updateEquipmentType(item.equipmentType));
+            setEquipmentName(item.equipmentName);
+            setEquipmentID(item.equipmentID);
+            setNominalVoltageOperator(item.nominalVoltageOperator);
+            setNominalVoltage(item.nominalVoltage);
+            setEquipmentType(item.equipmentType);
         }
-    }, item);
+    }, [item]);
 
     return (
         <div className={classes.root}>
@@ -92,7 +95,7 @@ const FiltersEditor = ({ item }) => {
                         onChange={handleEquipmentID}
                         label="Equipment ID"
                         variant="outlined"
-                        value={item !== null ? item.equipmentID : equipmentID}
+                        value={equipmentID}
                     />
                 </Grid>
             </Grid>
@@ -106,9 +109,7 @@ const FiltersEditor = ({ item }) => {
                         onChange={handleEquipmentName}
                         label="Equipment name"
                         variant="outlined"
-                        value={
-                            item !== null ? item.equipmentName : equipmentName
-                        }
+                        value={equipmentName}
                     />
                 </Grid>
             </Grid>
@@ -157,9 +158,7 @@ const FiltersEditor = ({ item }) => {
                         onChange={handleNominalVoltage}
                         label="Nominal voltage"
                         variant="outlined"
-                        value={
-                            item !== null ? item.nominalVoltage : nominalVoltage
-                        }
+                        value={nominalVoltage}
                     />
                 </Grid>
             </Grid>

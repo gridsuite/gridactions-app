@@ -20,6 +20,11 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import TextField from '@material-ui/core/TextField';
 import { useSelector } from 'react-redux';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Radio from '@material-ui/core/Radio';
 
 const styles = (theme) => ({
     root: {
@@ -92,6 +97,7 @@ const PopupWithInput = ({
     const contingencyLists = useSelector((state) => state.contingencyLists);
     const [disableBtnRenameList, setDisableBtnRenameList] = useState(true);
     const [newNameList, setNewNameList] = useState(false);
+    const [newListType, setNewListType] = useState('SCRIPT');
 
     /**
      * on change input popup check if name already exist
@@ -117,7 +123,7 @@ const PopupWithInput = ({
 
     const handleSave = () => {
         if (newList) {
-            handleSaveNewList(newNameList);
+            handleSaveNewList(newNameList, newListType);
         } else {
             handleRenameExistList(selectedListName, newNameList);
         }
@@ -136,6 +142,13 @@ const PopupWithInput = ({
                     onChange={(event) => onChangeInputName(event.target.value)}
                     label={inputLabelText}
                 />
+                {newList && (<FormControl component="fieldset">
+                    <FormLabel component="legend">Type</FormLabel>
+                    <RadioGroup aria-label="gender" name="gender1" value={newListType} onChange={(e) => setNewListType(e.target.value)}>
+                        <FormControlLabel value="SCRIPT" control={<Radio />} label="SCRIPT" />
+                        <FormControlLabel value="FILTERS" control={<Radio />} label="FILTERS" />
+                    </RadioGroup>
+                </FormControl>)}
             </CustomDialogContent>
             <CustomDialogActions>
                 <Button autoFocus size="small" onClick={handleClose}>

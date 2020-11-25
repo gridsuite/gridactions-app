@@ -43,14 +43,27 @@ export function fetchAppsAndUrls() {
  * Get all contingency lists
  * @returns {Promise<Response>}
  */
-export function getContingencyLists(guiMode) {
-    if (guiMode) {
-        const url = PREFIX_ACTIONS_QUERIES + '/v1/filter-contingency-lists';
-        return backendFetch(url).then((response) => response.json());
+export function getContingencyLists() {
+    const url = PREFIX_ACTIONS_QUERIES + '/v1/contingency-lists';
+    return backendFetch(url).then((response) => response.json());
+}
+
+/**
+ * Get all contingency lists
+ * @returns {Promise<Response>}
+ */
+export function getContingencyList(type, name) {
+    let url = PREFIX_ACTIONS_QUERIES;
+    if (type === "SCRIPT") {
+        url += '/v1/script-contingency-lists/';
     } else {
-        const url = PREFIX_ACTIONS_QUERIES + '/v1/script-contingency-lists';
-        return backendFetch(url).then((response) => response.json());
+        url += '/v1/filters-contingency-lists/';
     }
+    url += name;
+    console.debug("fetching contingency List of type "+ type +" ...");
+    console.log(url);
+
+    return backendFetch(url).then((response) => response.json());
 }
 
 /**
@@ -76,7 +89,7 @@ export function addScriptContingencyList(name, script) {
 export function deleteListByName(name) {
     const url =
         PREFIX_ACTIONS_QUERIES +
-        '/v1/script-contingency-lists/' +
+        '/v1/contingency-lists/' +
         encodeURIComponent(name);
     return backendFetch(url, {
         method: 'delete',
@@ -92,7 +105,7 @@ export function deleteListByName(name) {
 export function renameListByName(oldName, newName) {
     const url =
         PREFIX_ACTIONS_QUERIES +
-        '/v1/script-contingency-lists/' +
+        '/v1/contingency-lists/' +
         encodeURIComponent(oldName) +
         '/rename';
 
@@ -110,10 +123,11 @@ export function renameListByName(oldName, newName) {
  * Add new Filter contingency list
  * @returns {Promise<Response>}
  */
-export function addFilterContingencyList(name, equipmentID, equipmentName, equipmentType, nominalVoltage, nominalVoltageOperator) {
+export function addFiltersContingencyList(name, equipmentID, equipmentName, equipmentType, nominalVoltage, nominalVoltageOperator) {
+    console.log(name);
     const url =
         PREFIX_ACTIONS_QUERIES +
-        '/v1/filter-contingency-lists/' +
+        '/v1/filters-contingency-lists/' +
         encodeURIComponent(name);
     return backendFetch(url, {
         method: 'put',
@@ -121,7 +135,7 @@ export function addFilterContingencyList(name, equipmentID, equipmentName, equip
         body:  JSON.stringify({
             equipmentID : equipmentID,
             equipmentName: equipmentName,
-            equipmentType: [equipmentType],
+            equipmentType: equipmentType,
             nominalVoltage: nominalVoltage,
             nominalVoltageOperator: nominalVoltageOperator
         }),

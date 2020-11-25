@@ -22,7 +22,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Alert from '@material-ui/lab/Alert';
 
 import IconButton from '@material-ui/core/IconButton';
-import AddIcon from '@material-ui/icons/Add';
+import InsertDriveFileOutlinedIcon from '@material-ui/icons/InsertDriveFileOutlined';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
@@ -31,12 +31,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import DescriptionIcon from '@material-ui/icons/Description';
-import PanToolIcon from '@material-ui/icons/PanTool';
 import FiltersEditor from './filters-editor';
 import {
-    updateContingencyList, updateEquipmentID, updateEquipmentName, updateEquipmentType,
-    updateGuiContingencyList, updateNominalVoltage, updateNominalVoltageOperator,
+    updateContingencyList,
     updateScriptContingencyList
 } from '../redux/actions';
 import { PopupWithInput, PopupInfo } from './popup';
@@ -48,7 +45,7 @@ import {
     getContingencyLists,
     addScriptContingencyList,
     deleteListByName,
-    renameListByName, addFilterContingencyList
+    renameListByName, addFiltersContingencyList, getContingencyList
 } from '../utils/rest-api';
 
 const useStyles = makeStyles((theme) => ({
@@ -164,70 +161,59 @@ const StyledMenu = withStyles({
     },
 })(Menu);
 
-const Contingency = ({ theme }) => {
+const ContingencyLists = () => {
     const classes = useStyles();
-
     const dispatch = useDispatch();
-
+    const selectedTheme = useSelector((state) => state.theme);
     const aceEditorRef = useRef();
 
-    const selectedTheme = useSelector((state) => state.theme);
-    const scriptContingencyLists = useSelector((state) => state.scriptList);
-    const guiContingencyLists = useSelector((state) => state.guiList);
-    const listsContingency = useSelector((state) => state.contingencyLists);
+    const contingencyLists = useSelector((state) => state.contingencyLists);
+    const [currentItemType, setCurrentItemType] = useState(null);
+    const [currentItemName, setCurrentItemName] = useState(null);
 
-    const [disableBtnSaveList, setDisableBtnSaveList] = useState(true);
+    const [currentScriptContingency, setCurrentScriptContingency] = useState(null);
+    const [currentFiltersContingency, setCurrentFiltersContingency] = useState(null);
 
-    const [selectedIndex, setSelectedIndex] = useState(null);
-    const [selectedListName, setSelectedListName] = useState(null);
-
-    const [guiMode, setGuiMode] = useState(false);
+    const [btnSaveListDisabled, setBtnSaveListDisabled] = useState(true);
+    const [aceEditorContent, setAceEditorContent] = useState('');
+    const [newListCreated, setNewListCreated] = useState(false);
+    const [newListType, setNewListType] = useState(null);
 
     const [alertEmptyList, setAlertEmptyList] = useState(true);
     const [alertNotSelectedList, setAlertNotSelectedList] = useState(false);
 
+
+    const [selectedIndex, setSelectedIndex] = useState(null);
     const [anchorEl, setAnchorEl] = React.useState(null);
 
-    const [aceEditorContent, setAceEditorContent] = useState('');
 
     const [openPopupNewList, setOpenPopupNewList] = useState(false);
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
     const [openPopupInfo, setOpenPopupInfo] = useState(false);
 
-    const [newListCreated, setNewListCreated] = useState(false);
+    const [newListName, setNewListName] = useState(null);
 
-    const [newListName, setNewListName] = useState(
-        (listsContingency !== null && listsContingency.length > 0) ? listsContingency[0].name : ''
-    );
-    const [fileNameContent, setFileNameContent] = useState(
-        (listsContingency !== null && listsContingency.length > 0) ? listsContingency[0].script : ''
-    );
-
-    const equipmentID = useSelector((state) => state.equipmentID);
-    const equipmentName = useSelector((state) => state.equipmentName);
-    const equipmentType = useSelector((state) => state.equipmentType);
-    const nominalVoltageOperator = useSelector((state) => state.nominalVoltageOperator);
-    const nominalVoltage = useSelector((state) => state.nominalVoltage);
+    const [equipmentID, setEquipmentID] = useState("*");
+    const [equipmentName, setEquipmentName] = useState("*");
+    const [equipmentType, setEquipmentType] = useState("*");
+    const [nominalVoltageOperator, setNominalVoltageOperator] = useState("=");
+    const [nominalVoltage, setNominalVoltage] = useState("*");
 
     /**
-     * On click in item of list set it actif
-     * @param event
+     * On click in item on the list
+     * @param item
      * @param index
      */
-    const handleListItemClick = (item, index) => {
-        setSelectedListName(item.name);
-        setAlertNotSelectedList(false);
+    const handleListItemClicked = (item, index) => {
         if (newListCreated) {
             setOpenPopupInfo(true);
-            setAceEditorContent('');
         } else {
             setSelectedIndex(index);
-            setNewListName(item.name);
-            if (guiMode) {
-            } else {
-                setFileNameContent(item.script);
-            }
-            setDisableBtnSaveList(true);
+            setCurrentItemName(item.name);
+            setCurrentItemType(item.type);
+
+            setBtnSaveListDisabled(true);
+            setAlertNotSelectedList(false);
         }
     };
 
@@ -239,40 +225,25 @@ const Contingency = ({ theme }) => {
     };
 
     /**
-     * On change editor, check if data is the same to disabled submit button
-     * @param newScript
-     * @param newScript
-     */
-    const onChangeEditor = (newScript) => {
-        if ((newListName && newScript) || newScript !== fileNameContent) {
-            setDisableBtnSaveList(false);
-            setAceEditorContent(newScript);
-        }
-    };
-
-    /**
      * Add new list name
      * @param name
+     * @param type
      */
-    const addNewList = (name) => {
-        if (guiMode) {
-            console.log('add New List with name: ' + name + 'in the gui mode');
-            dispatch(updateEquipmentName("*"));
-            dispatch(updateEquipmentID("*"));
-            dispatch(updateNominalVoltageOperator("="));
-            dispatch(updateNominalVoltage("*"));
-            dispatch(updateEquipmentType("*"));
-        } else {
-            console.log('add New List with name: ' + name + 'in the script mode');
+    const addNewList = (name, type) => {
+        setNewListType(type);
+        if (type === "SCRIPT") {
             setAceEditorContent('');
-            //aceEditorRef.current.editor.setValue('');
+            setCurrentItemType("SCRIPT");
+        } else {
+            setCurrentFiltersContingency(null);
+            setCurrentItemType("FILTERS");
         }
         setNewListName(name);
         setNewListCreated(true);
         setSelectedIndex(null);
         setAlertEmptyList(false);
         setOpenPopupNewList(false);
-        setDisableBtnSaveList(false);
+        setBtnSaveListDisabled(true);
     };
 
     /**
@@ -282,13 +253,12 @@ const Contingency = ({ theme }) => {
      */
     const renameExistList = (oldName, newName) => {
         renameListByName(oldName, newName).then((response) => {
-            if (!response.ok) {
+            if (response.ok) {
+                getAllContingencyLists();
+            } else {
                 console.error(response.statusText);
             }
         });
-        setTimeout(function () {
-            getAllContingencyLists();
-        }, 50);
         setOpenPopupRenameList(false);
     };
 
@@ -296,7 +266,7 @@ const Contingency = ({ theme }) => {
      * Alert : Add the script and save the new list
      */
     const createListBeforeExit = () => {
-        setAceEditorContent('');
+        saveNewList();
         setOpenPopupInfo(false);
     };
 
@@ -305,50 +275,53 @@ const Contingency = ({ theme }) => {
      */
     const cancelCreateListBeforeExit = () => {
         setNewListCreated(false);
-        setAceEditorContent('');
         setOpenPopupInfo(false);
+        setBtnSaveListDisabled(true);
+        setCurrentItemType(null);
     };
 
     /**
      * Save new list added: submit name and script
      */
     const saveNewList = () => {
-        if (guiMode) {
-            addFilterContingencyList(newListName, equipmentID, equipmentName, equipmentType, nominalVoltage, nominalVoltageOperator).then(() => {
-                    getContingencyLists(guiMode).then((data) => {
+        let type = currentItemType;
+        if (newListCreated) {
+            type = newListType;
+        }
+        if (type === "FILTERS") {
+            addFiltersContingencyList(newListCreated ? newListName : currentItemName , equipmentID, equipmentName, equipmentType, nominalVoltage, nominalVoltageOperator).then(() => {
+                    getContingencyLists().then((data) => {
                         if (data) {
-                            console.log("TO DO" + data);
-
+                            console.log(data);
+                            data.find((element, index) => {
+                                if (element.name === newListName) {
+                                    setSelectedIndex(index);
+                                    setCurrentItemType(type);
+                                }});
                             setNewListCreated(false);
-                            dispatch(updateGuiContingencyList(data));
                             dispatch(updateContingencyList(data));
                         }
                     });
-                    setDisableBtnSaveList(true);
+                    setBtnSaveListDisabled(true);
                 }
             )
         } else {
-            const script = aceEditorRef.current.editor.getValue();
-            let currentScript = '';
-            if (script) {
-                addScriptContingencyList(newListName, script).then(() => {
-                    getContingencyLists(guiMode).then((data) => {
-                        if (data) {
-                            setNewListCreated(false);
-                            dispatch(updateScriptContingencyList(data));
-                            dispatch(updateContingencyList(data),
-                                listsContingency.find((list) => {
-                                    if (list.name === newListName) {
-                                        currentScript = list.script;
-                                    }
-                                    return setAceEditorContent(currentScript);
-                                })
-                            );
-                        }
-                    });
-                    setDisableBtnSaveList(true);
+            addScriptContingencyList(newListCreated ? newListName : currentItemName, aceEditorContent).then(() => {
+                getContingencyLists().then((data) => {
+                    if (data) {
+                        data.find((element, index) => {
+                            if (element.name === newListName) {
+                                console.log(index);
+                                setSelectedIndex(index);
+                                setCurrentItemType(type);
+                            }});
+                        setNewListCreated(false);
+                        dispatch(updateContingencyList(data));
+                    }
                 });
-            }
+                setBtnSaveListDisabled(true);
+            });
+
         }
     };
 
@@ -356,13 +329,9 @@ const Contingency = ({ theme }) => {
      * Cancel create list, reset editor and hide new name from list
      */
     const cancelNewList = () => {
-        if (!guiMode) {
-            setAceEditorContent('');
-            //setAceEditorContent('');
-            //aceEditorRef.current.editor.setValue('')
-        }
+        setCurrentItemType(null);
         setNewListCreated(false);
-        setDisableBtnSaveList(true);
+        setBtnSaveListDisabled(true);
     };
 
     /**
@@ -383,7 +352,7 @@ const Contingency = ({ theme }) => {
      */
     const fetchScriptByNameList = (itemIndex) => {
         let script = '';
-        listsContingency.map((item, index) => {
+        contingencyLists.map((item, index) => {
             if (index + 1 === itemIndex + 1) {
                 script = item.script;
             }
@@ -396,10 +365,10 @@ const Contingency = ({ theme }) => {
      */
     const handleDeleteList = () => {
         setAnchorEl(null);
-        if (selectedListName) {
+        if (currentItemName) {
             if (
-                listsContingency !== null &&
-                listsContingency.length === selectedIndex + 1
+                contingencyLists !== null &&
+                contingencyLists.length === selectedIndex + 1
             ) {
                 setSelectedIndex(selectedIndex - 1);
                 fetchScriptByNameList(selectedIndex - 1);
@@ -408,7 +377,7 @@ const Contingency = ({ theme }) => {
                 fetchScriptByNameList(selectedIndex + 1);
             }
 
-            deleteListByName(selectedListName).then(() => {
+            deleteListByName(currentItemName).then(() => {
                 getContingencyLists().then((data) => {
                     dispatch(updateContingencyList(data));
                     if (data.length > 0) {
@@ -425,7 +394,7 @@ const Contingency = ({ theme }) => {
 
     const handleOpenMenu = (event, name) => {
         setAnchorEl(event.currentTarget);
-        setSelectedListName(name);
+        setCurrentItemName(name);
     };
 
     const handleCloseMenu = () => {
@@ -437,31 +406,51 @@ const Contingency = ({ theme }) => {
         setOpenPopupRenameList(true);
     };
 
-    const handleScriptModeChosen = () => {
-        setGuiMode(false);
-        setSelectedIndex(null);
+    /**
+     * On change editor, check if data is the same to disabled submit button
+     * @param newScript
+     * @param newScript
+     */
+    const onChangeAceEditor = (newScript) => {
+        setAceEditorContent(newScript);
+        if ((newListName != null && newScript !== '') || (currentScriptContingency !== null && newScript !== currentScriptContingency.script)) {
+            setBtnSaveListDisabled(false);
+        } else {
+            setBtnSaveListDisabled(true);
+        }
     };
 
-    const handleGuiModeChosen = () => {
-        setAceEditorContent('');
-        setGuiMode(true);
-        setSelectedIndex(null);
-    };
+    function onChangeFiltersContingency(equipmentID, equipmentName, equipmentType, nominalVoltageOperator, nominalVoltage) {
+        if (currentFiltersContingency !== null) {
+            console.log(currentFiltersContingency.equipmentID);
+            console.log(equipmentID);
+            if (equipmentID !== currentFiltersContingency.equipmentID ||
+            equipmentName !== currentFiltersContingency.equipmentName ||
+            equipmentType !== currentFiltersContingency.equipmentType ||
+            nominalVoltageOperator !== currentFiltersContingency.nominalVoltageOperator ||
+            nominalVoltage !== currentFiltersContingency.nominalVoltage
+            ) {
+                setBtnSaveListDisabled(false);
+            } else {
+                setBtnSaveListDisabled(true);
+            }
+        } else {
+            setBtnSaveListDisabled(false);
+        }
+        setEquipmentID(equipmentID);
+        setEquipmentName(equipmentName);
+        setEquipmentType(equipmentType);
+        setNominalVoltageOperator(nominalVoltageOperator);
+        setNominalVoltage(nominalVoltage);
+    }
 
     /**
      * Get all contingency lists on load page
      **/
     const getAllContingencyLists = useCallback(
-        (guiMode) => {
-            getContingencyLists(guiMode).then((data) => {
+        () => {
+            getContingencyLists().then((data) => {
                 if (data) {
-                    if (guiMode) {
-                        dispatch(updateContingencyList(data));
-                        dispatch(updateGuiContingencyList(data));
-                    } else {
-                        dispatch(updateContingencyList(data));
-                        dispatch(updateScriptContingencyList(data));
-                    }
                     dispatch(updateContingencyList(data));
                 }
             });
@@ -469,13 +458,36 @@ const Contingency = ({ theme }) => {
         [dispatch]
     );
 
-    useEffect(() => {
-        getAllContingencyLists(guiMode);
-    }, [getAllContingencyLists, guiMode]);
+    const getCurrentContingencyList = useCallback(
+        (currentItemType, currentItemName) => {
+            getContingencyList(currentItemType, currentItemName).then((data) => {
+                if (data) {
+                    console.log(data);
+                    if (currentItemType === "SCRIPT") {
+                        setCurrentScriptContingency(data);
+                    } else {
+                        setCurrentFiltersContingency(data);
+                    }
+                }
+            });
+        },
+        [dispatch]
+    );
 
-    function setFilters(item) {
-        return undefined;
-    }
+    useEffect(() => {
+        getAllContingencyLists();
+    }, [getAllContingencyLists]);
+
+
+    useEffect(() => {
+       if (currentScriptContingency !== null) {
+           setAceEditorContent(currentScriptContingency.script);
+       }
+    }, [currentScriptContingency]);
+
+    useEffect(() => {
+        getCurrentContingencyList(currentItemType, currentItemName);
+    }, [currentItemType, currentItemName]);
 
     return (
         <div className={classes.container}>
@@ -488,14 +500,14 @@ const Contingency = ({ theme }) => {
                         id="contingencyTitle"
                     >
                         <Grid
-                            xs={6}
+                            xs={3}
                             item={true}
                             className={classes.iconButton}
-                            htmlFor="addScript"
-                            style={{ marginTop: '5px', paddingLeft: '5px' }}
+                            htmlFor="addContingencyList"
+                            style={{ marginTop: '5px' }}
                         >
                             <label className={classes.iconSvg}>
-                                <AddIcon
+                                <InsertDriveFileOutlinedIcon
                                     aria-label="New file"
                                     style={{ fontSize: 36 }}
                                     onClick={() => handleOpenPopupAddNewList()}
@@ -505,88 +517,29 @@ const Contingency = ({ theme }) => {
                                 <FormattedMessage id="newList" />
                             </span>
                         </Grid>
-                        <Grid
-                            xs={3}
-                            item={true}
-                            className={classes.iconButton}
-                            htmlFor="GUI Mode"
-                            style={{ marginTop: '5px' }}
-                        >
-                            <label className={classes.iconSvg}>
-                                <PanToolIcon
-                                    aria-label="New file"
-                                    style={
-                                        guiMode
-                                            ? {
-                                                  fontSize: 36,
-                                                  color:
-                                                      theme.palette.secondary
-                                                          .light,
-                                              }
-                                            : { fontSize: 36 }
-                                    }
-                                    onClick={() => handleGuiModeChosen()}
-                                />
-                            </label>
-                            <span className={classes.iconLabel}>
-                                <FormattedMessage id="guiMode" />
-                            </span>
-                        </Grid>
-                        <Grid
-                            xs={3}
-                            item={true}
-                            className={classes.iconButton}
-                            htmlFor="Script Mode"
-                            style={{ marginTop: '5px' }}
-                        >
-                            <label className={classes.iconSvg}>
-                                <DescriptionIcon
-                                    aria-label="Script Mode"
-                                    style={
-                                        guiMode
-                                            ? { fontSize: 36 }
-                                            : {
-                                                  fontSize: 36,
-                                                  color:
-                                                      theme.palette.secondary
-                                                          .light,
-                                              }
-                                    }
-                                    onClick={() => handleScriptModeChosen()}
-                                />
-                            </label>
-                            <span className={classes.iconLabel}>
-                                <FormattedMessage id="scriptMode" />
-                            </span>
-                        </Grid>
                     </Grid>
                     <h3 className={classes.contingencyTitle}>
                         <FormattedMessage id="contingencyTitle" />
                     </h3>
-                    {listsContingency !== null &&
-                    listsContingency.length > 0 ? (
+                    {contingencyLists.length > 0 ? (
                         <>
                             <List className={classes.root}>
-                                {listsContingency.map((item, index) => (
+                                {contingencyLists.map((item, index) => (
                                     <>
                                         <CustomListItem
                                             button
                                             key={item.name}
                                             selected={selectedIndex === index}
                                             onClick={() =>
-                                                handleListItemClick(item, index)
+                                                handleListItemClicked(item, index)
                                             }
                                         >
                                             <ListItemText
                                                 className={classes.listItemText}
                                                 primary={item.name}
-                                                key={item.name}
+                                                key={item.name + index}
                                                 onClick={() =>
-                                                    guiMode
-                                                        ? setFilters(item)
-                                                        : setAceEditorContent(
-                                                              item.script
-                                                          )
+                                                   console.log("item text clicked!")
                                                 }
                                             />
                                             <IconButton
@@ -709,7 +662,7 @@ const Contingency = ({ theme }) => {
                                 <FormattedMessage id="cancel" />
                             }
                             handleRenameExistList={renameExistList}
-                            selectedListName={selectedListName}
+                            selectedListName={currentItemName}
                             newList={false}
                         />
                         {/* Alert to save temporary list before switch to another */}
@@ -723,7 +676,7 @@ const Contingency = ({ theme }) => {
                     <div className={classes.containerButtons}>
                         <Button
                             style={{ marginRight: '15px' }}
-                            disabled={disableBtnSaveList}
+                            disabled={btnSaveListDisabled}
                             onClick={() =>
                                 cancelNewList()
                             }
@@ -732,7 +685,7 @@ const Contingency = ({ theme }) => {
                         </Button>
                         <Button
                             variant="outlined"
-                            disabled={disableBtnSaveList}
+                            disabled={btnSaveListDisabled}
                             onClick={() =>
                                 saveNewList()
                             }
@@ -743,22 +696,21 @@ const Contingency = ({ theme }) => {
                 </Grid>
 
                 <Grid xs={9} item={true} className={classes.aceEditor}>
-                    {guiMode ? (
+                    {currentItemType === "FILTERS" && (
                         <FiltersEditor
-                            item={
-                                selectedIndex !== null
-                                    ? listsContingency[selectedIndex]
-                                    : null
-                            }
+                            item = {currentFiltersContingency}
+                            onChange={onChangeFiltersContingency}
                         />
-                    ) : (
+                    ) }
+
+                    {currentItemType === "SCRIPT" && (
                         <AceEditor
                             className={classes.editor}
                             ref={aceEditorRef}
                             mode="groovy"
                             placeholder="Insert your groovy script here"
                             theme={themeForAceEditor()}
-                            onChange={(val) => onChangeEditor(val)}
+                            onChange={(val) => onChangeAceEditor(val)}
                             value={aceEditorContent}
                             fontSize="18px"
                             editorProps={{ $blockScrolling: true }}
@@ -770,4 +722,4 @@ const Contingency = ({ theme }) => {
     );
 };
 
-export default Contingency;
+export default ContingencyLists;
