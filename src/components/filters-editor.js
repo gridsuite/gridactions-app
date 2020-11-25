@@ -43,12 +43,11 @@ const BootstrapInput = withStyles((theme) => ({
 const FiltersEditor = ({ item, onChange }) => {
     const classes = useStyles();
 
-    const [equipmentID, setEquipmentID] = useState("*");
-    const [equipmentName, setEquipmentName] = useState("*");
-    const [equipmentType, setEquipmentType] = useState("*");
-    const [nominalVoltageOperator, setNominalVoltageOperator] = useState("=");
-    const [nominalVoltage, setNominalVoltage] = useState("*");
-
+    const [equipmentID, setEquipmentID] = useState('*');
+    const [equipmentName, setEquipmentName] = useState('*');
+    const [equipmentType, setEquipmentType] = useState('*');
+    const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
+    const [nominalVoltage, setNominalVoltage] = useState('*');
 
     function handleOperator(event) {
         setNominalVoltageOperator(event.target.value);
@@ -71,8 +70,20 @@ const FiltersEditor = ({ item, onChange }) => {
     }
 
     useEffect(() => {
-        onChange(equipmentID, equipmentName, equipmentType, nominalVoltageOperator, nominalVoltage);
-    }, [equipmentID, equipmentName, equipmentType, nominalVoltage, nominalVoltageOperator]);
+        onChange(
+            equipmentID,
+            equipmentName,
+            equipmentType,
+            nominalVoltageOperator,
+            nominalVoltage
+        );
+    }, [
+        equipmentID,
+        equipmentName,
+        equipmentType,
+        nominalVoltage,
+        nominalVoltageOperator,
+    ]);
 
     useEffect(() => {
         if (item !== null) {

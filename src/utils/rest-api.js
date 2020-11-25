@@ -54,13 +54,13 @@ export function getContingencyLists() {
  */
 export function getContingencyList(type, name) {
     let url = PREFIX_ACTIONS_QUERIES;
-    if (type === "SCRIPT") {
+    if (type === 'SCRIPT') {
         url += '/v1/script-contingency-lists/';
     } else {
         url += '/v1/filters-contingency-lists/';
     }
     url += name;
-    console.debug("fetching contingency List of type "+ type +" ...");
+    console.debug('fetching contingency List of type ' + type + ' ...');
     console.log(url);
 
     return backendFetch(url).then((response) => response.json());
@@ -123,7 +123,14 @@ export function renameListByName(oldName, newName) {
  * Add new Filter contingency list
  * @returns {Promise<Response>}
  */
-export function addFiltersContingencyList(name, equipmentID, equipmentName, equipmentType, nominalVoltage, nominalVoltageOperator) {
+export function addFiltersContingencyList(
+    name,
+    equipmentID,
+    equipmentName,
+    equipmentType,
+    nominalVoltage,
+    nominalVoltageOperator
+) {
     console.log(name);
     const url =
         PREFIX_ACTIONS_QUERIES +
@@ -132,12 +139,12 @@ export function addFiltersContingencyList(name, equipmentID, equipmentName, equi
     return backendFetch(url, {
         method: 'put',
         headers: { 'Content-Type': 'application/json' },
-        body:  JSON.stringify({
-            equipmentID : equipmentID,
+        body: JSON.stringify({
+            equipmentID: equipmentID,
             equipmentName: equipmentName,
             equipmentType: equipmentType,
             nominalVoltage: nominalVoltage,
-            nominalVoltageOperator: nominalVoltageOperator
+            nominalVoltageOperator: nominalVoltageOperator,
         }),
     });
 }

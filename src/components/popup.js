@@ -142,13 +142,28 @@ const PopupWithInput = ({
                     onChange={(event) => onChangeInputName(event.target.value)}
                     label={inputLabelText}
                 />
-                {newList && (<FormControl component="fieldset">
-                    <FormLabel component="legend">Type</FormLabel>
-                    <RadioGroup aria-label="gender" name="gender1" value={newListType} onChange={(e) => setNewListType(e.target.value)}>
-                        <FormControlLabel value="SCRIPT" control={<Radio />} label="SCRIPT" />
-                        <FormControlLabel value="FILTERS" control={<Radio />} label="FILTERS" />
-                    </RadioGroup>
-                </FormControl>)}
+                {newList && (
+                    <FormControl component="fieldset">
+                        <FormLabel component="legend">Type</FormLabel>
+                        <RadioGroup
+                            aria-label="gender"
+                            name="gender1"
+                            value={newListType}
+                            onChange={(e) => setNewListType(e.target.value)}
+                        >
+                            <FormControlLabel
+                                value="SCRIPT"
+                                control={<Radio />}
+                                label="SCRIPT"
+                            />
+                            <FormControlLabel
+                                value="FILTERS"
+                                control={<Radio />}
+                                label="FILTERS"
+                            />
+                        </RadioGroup>
+                    </FormControl>
+                )}
             </CustomDialogContent>
             <CustomDialogActions>
                 <Button autoFocus size="small" onClick={handleClose}>
