@@ -34,7 +34,6 @@ import Button from '@material-ui/core/Button';
 import FiltersEditor from './filters-editor';
 import {
     updateContingencyList,
-    updateScriptContingencyList,
 } from '../redux/actions';
 import { PopupWithInput, PopupInfo } from './popup';
 
@@ -171,16 +170,12 @@ const ContingencyLists = () => {
     const contingencyLists = useSelector((state) => state.contingencyLists);
     const [currentItemType, setCurrentItemType] = useState(null);
     const [currentItemName, setCurrentItemName] = useState(null);
-    const [currentScriptContingency, setCurrentScriptContingency] = useState(
-        null
-    );
-    const [currentFiltersContingency, setCurrentFiltersContingency] = useState(
-        null
-    );
+    const [currentScriptContingency, setCurrentScriptContingency] = useState(null);
+    const [currentFiltersContingency, setCurrentFiltersContingency] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
 
     const [btnSaveListDisabled, setBtnSaveListDisabled] = useState(true);
-    const aceEditorRef = useRef();
+
     const [aceEditorContent, setAceEditorContent] = useState('');
 
     const [newListCreated, setNewListCreated] = useState(false);
@@ -300,7 +295,6 @@ const ContingencyLists = () => {
                         data.find((element, index) => {
                             if (element.name === newListName) {
                                 setSelectedIndex(index);
-                                setCurrentItemType(type);
                             }
                         });
                         setNewListCreated(false);
@@ -320,7 +314,6 @@ const ContingencyLists = () => {
                             if (element.name === newListName) {
                                 console.log(index);
                                 setSelectedIndex(index);
-                                setCurrentItemType(type);
                             }
                         });
                         setNewListCreated(false);
@@ -388,7 +381,7 @@ const ContingencyLists = () => {
                 getContingencyLists().then((data) => {
                     dispatch(updateContingencyList(data));
                     if (data.length > 0) {
-                        dispatch(updateScriptContingencyList(data));
+                        dispatch(updateContingencyList(data));
                     } else {
                         setAlertEmptyList(true);
                     }
@@ -641,11 +634,6 @@ const ContingencyLists = () => {
                                     <ListItemText
                                         className={classes.listItemText}
                                         primary={newListName}
-                                        onClick={() =>
-                                            setAceEditorContent(
-                                                aceEditorRef.current.editor.getValue()
-                                            )
-                                        }
                                     />
                                 </CustomListItem>
                             </NewFileCreatedList>
@@ -724,7 +712,6 @@ const ContingencyLists = () => {
                     {currentItemType === 'SCRIPT' && (
                         <AceEditor
                             className={classes.editor}
-                            ref={aceEditorRef}
                             mode="groovy"
                             placeholder="Insert your groovy script here"
                             theme={themeForAceEditor()}

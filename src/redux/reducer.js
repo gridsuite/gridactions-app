@@ -12,13 +12,6 @@ import { getLocalStorageTheme, saveLocalStorageTheme } from './local-storage';
 import {
     SELECT_THEME,
     UPDATE_CONTINGENCY_LIST,
-    UPDATE_FILTER_EQUIPMENT_ID,
-    UPDATE_FILTER_EQUIPMENT_NAME,
-    UPDATE_FILTER_NOMINAL_VOLTAGE,
-    UPDATE_FILTER_NOMINAL_VOLTAGE_OPERATOR,
-    UPDATE_FILTER_EQUIPMENT_TYPE,
-    UPDATE_GUI_CONTINGENCY_LIST,
-    UPDATE_SCRIPT_CONTINGENCY_LIST,
 } from './actions';
 
 import { USER, SIGNIN_CALLBACK_ERROR } from '@gridsuite/commons-ui';
