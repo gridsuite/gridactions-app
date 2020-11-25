@@ -383,6 +383,7 @@ const ContingencyLists = () => {
                     if (data.length > 0) {
                         dispatch(updateContingencyList(data));
                     } else {
+                        setCurrentItemType(null);
                         setAlertEmptyList(true);
                     }
                 });
