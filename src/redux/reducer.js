@@ -27,15 +27,7 @@ const initialState = {
     theme: getLocalStorageTheme(),
     user: null,
     signInCallbackError: null,
-    scriptList: [],
-    guiList: [],
     contingencyLists: [],
-
-    equipmentID: '*',
-    equipmentName: '*',
-    equipmentType: '*',
-    nominalVoltageOperator: '=',
-    nominalVoltage: '*',
 };
 
 export const reducer = createReducer(initialState, {
@@ -52,35 +44,7 @@ export const reducer = createReducer(initialState, {
         state.signInCallbackError = action.signInCallbackError;
     },
 
-    [UPDATE_SCRIPT_CONTINGENCY_LIST]: (state, action) => {
-        state.scriptList = action.scriptList;
-    },
-
-    [UPDATE_GUI_CONTINGENCY_LIST]: (state, action) => {
-        state.guiList = action.guiList;
-    },
-
     [UPDATE_CONTINGENCY_LIST]: (state, action) => {
         state.contingencyLists = action.contingencyLists;
-    },
-
-    [UPDATE_FILTER_EQUIPMENT_ID]: (state, action) => {
-        state.equipmentID = action.equipmentID;
-    },
-
-    [UPDATE_FILTER_EQUIPMENT_NAME]: (state, action) => {
-        state.equipmentName = action.equipmentName;
-    },
-
-    [UPDATE_FILTER_NOMINAL_VOLTAGE_OPERATOR]: (state, action) => {
-        state.nominalVoltageOperator = action.nominalVoltageOperator;
-    },
-
-    [UPDATE_FILTER_NOMINAL_VOLTAGE]: (state, action) => {
-        state.nominalVoltage = action.nominalVoltage;
-    },
-
-    [UPDATE_FILTER_EQUIPMENT_TYPE]: (state, action) => {
-        state.equipmentType = action.equipmentType;
     },
 });
