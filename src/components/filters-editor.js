@@ -13,23 +13,15 @@ import Select from '@material-ui/core/Select';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import InputBase from '@material-ui/core/InputBase';
 import withStyles from '@material-ui/core/styles/withStyles';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-    updateEquipmentID,
-    updateEquipmentType,
-    updateNominalVoltageOperator,
-    updateEquipmentName,
-    updateNominalVoltage,
-} from '../redux/actions';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     root: {
         flexGrow: 1,
         padding: 10,
     },
 }));
 
-const BootstrapInput = withStyles((theme) => ({
+const BootstrapInput = withStyles(() => ({
     input: {
         borderRadius: 4,
         position: 'relative',
@@ -78,6 +70,7 @@ const FiltersEditor = ({ item, onChange }) => {
             nominalVoltage
         );
     }, [
+        onChange,
         equipmentID,
         equipmentName,
         equipmentType,

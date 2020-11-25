@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AceEditor from 'react-ace';
@@ -32,9 +32,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import FiltersEditor from './filters-editor';
-import {
-    updateContingencyList,
-} from '../redux/actions';
+import { updateContingencyList } from '../redux/actions';
 import { PopupWithInput, PopupInfo } from './popup';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -170,8 +168,12 @@ const ContingencyLists = () => {
     const contingencyLists = useSelector((state) => state.contingencyLists);
     const [currentItemType, setCurrentItemType] = useState(null);
     const [currentItemName, setCurrentItemName] = useState(null);
-    const [currentScriptContingency, setCurrentScriptContingency] = useState(null);
-    const [currentFiltersContingency, setCurrentFiltersContingency] = useState(null);
+    const [currentScriptContingency, setCurrentScriptContingency] = useState(
+        null
+    );
+    const [currentFiltersContingency, setCurrentFiltersContingency] = useState(
+        null
+    );
     const [selectedIndex, setSelectedIndex] = useState(null);
 
     const [btnSaveListDisabled, setBtnSaveListDisabled] = useState(true);
@@ -279,50 +281,41 @@ const ContingencyLists = () => {
     /**
      * Save new list added: submit name and script
      */
-    const saveNewList = () => {
+    const saveNewListResponse = () => {
         if (currentItemType === 'FILTERS') {
-            addFiltersContingencyList(
+            return addFiltersContingencyList(
                 newListCreated ? newListName : currentItemName,
                 equipmentID,
                 equipmentName,
                 equipmentType,
                 nominalVoltage,
                 nominalVoltageOperator
-            ).then(() => {
-                getContingencyLists().then((data) => {
-                    if (data) {
-                        console.log(data);
-                        data.find((element, index) => {
-                            if (element.name === newListName) {
-                                setSelectedIndex(index);
-                            }
-                        });
-                        setNewListCreated(false);
-                        dispatch(updateContingencyList(data));
-                    }
-                });
-                setBtnSaveListDisabled(true);
-            });
+            );
         } else {
-            addScriptContingencyList(
+            return addScriptContingencyList(
                 newListCreated ? newListName : currentItemName,
                 aceEditorContent
-            ).then(() => {
-                getContingencyLists().then((data) => {
-                    if (data) {
-                        data.find((element, index) => {
-                            if (element.name === newListName) {
-                                console.log(index);
-                                setSelectedIndex(index);
-                            }
-                        });
-                        setNewListCreated(false);
-                        dispatch(updateContingencyList(data));
-                    }
-                });
-                setBtnSaveListDisabled(true);
-            });
+            );
         }
+    };
+
+    const saveNewList = () => {
+        saveNewListResponse().then(() => {
+            getContingencyLists().then((data) => {
+                if (data) {
+                    data.json().find((element, index) => {
+                        if (element.name === newListName) {
+                            setSelectedIndex(index);
+                            return 'true';
+                        }
+                        return 'false';
+                    });
+                    setNewListCreated(false);
+                    dispatch(updateContingencyList(data));
+                }
+            });
+            setBtnSaveListDisabled(true);
+        });
     };
 
     /**
@@ -380,7 +373,7 @@ const ContingencyLists = () => {
             deleteListByName(currentItemName).then(() => {
                 getContingencyLists().then((data) => {
                     dispatch(updateContingencyList(data));
-                    if (data.length > 0) {
+                    if (data.json().length > 0) {
                         dispatch(updateContingencyList(data));
                     } else {
                         setCurrentItemType(null);
@@ -433,8 +426,6 @@ const ContingencyLists = () => {
         nominalVoltage
     ) {
         if (currentFiltersContingency !== null) {
-            console.log(currentFiltersContingency.equipmentID);
-            console.log(equipmentID);
             if (
                 equipmentID !== currentFiltersContingency.equipmentID ||
                 equipmentName !== currentFiltersContingency.equipmentName ||
@@ -473,7 +464,6 @@ const ContingencyLists = () => {
             getContingencyList(currentItemType, currentItemName).then(
                 (data) => {
                     if (data) {
-                        console.log(data);
                         if (currentItemType === 'SCRIPT') {
                             setCurrentScriptContingency(data);
                         } else {
@@ -483,7 +473,7 @@ const ContingencyLists = () => {
                 }
             );
         },
-        [dispatch]
+        []
     );
 
     useEffect(() => {
@@ -497,8 +487,10 @@ const ContingencyLists = () => {
     }, [currentScriptContingency]);
 
     useEffect(() => {
-        getCurrentContingencyList(currentItemType, currentItemName);
-    }, [currentItemType, currentItemName]);
+        if (currentItemName !== null) {
+            getCurrentContingencyList(currentItemType, currentItemName);
+        }
+    }, [getCurrentContingencyList, currentItemType, currentItemName]);
 
     return (
         <div className={classes.container}>
@@ -552,11 +544,6 @@ const ContingencyLists = () => {
                                                 className={classes.listItemText}
                                                 primary={item.name}
                                                 key={item.name + index}
-                                                onClick={() =>
-                                                    console.log(
-                                                        'item text clicked!'
-                                                    )
-                                                }
                                             />
                                             <IconButton
                                                 aria-label="settings"

@@ -21,4 +21,3 @@ export function updateContingencyList(contingencyLists) {
         contingencyLists: contingencyLists,
     };
 }
-

@@ -9,10 +9,7 @@ import { createReducer } from '@reduxjs/toolkit';
 
 import { getLocalStorageTheme, saveLocalStorageTheme } from './local-storage';
 
-import {
-    SELECT_THEME,
-    UPDATE_CONTINGENCY_LIST,
-} from './actions';
+import { SELECT_THEME, UPDATE_CONTINGENCY_LIST } from './actions';
 
 import { USER, SIGNIN_CALLBACK_ERROR } from '@gridsuite/commons-ui';
 
