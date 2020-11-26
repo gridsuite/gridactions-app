@@ -47,12 +47,9 @@ import {
     getContingencyList,
 } from '../utils/rest-api';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     root: {
         padding: '0',
-        '& > *': {
-            margin: theme.spacing(1),
-        },
     },
     container: {
         display: 'flex',
@@ -303,7 +300,7 @@ const ContingencyLists = () => {
         saveNewListResponse().then(() => {
             getContingencyLists().then((data) => {
                 if (data) {
-                    data.json().find((element, index) => {
+                    data.find((element, index) => {
                         if (element.name === newListName) {
                             setSelectedIndex(index);
                             return 'true';
@@ -373,7 +370,7 @@ const ContingencyLists = () => {
             deleteListByName(currentItemName).then(() => {
                 getContingencyLists().then((data) => {
                     dispatch(updateContingencyList(data));
-                    if (data.json().length > 0) {
+                    if (data.length > 0) {
                         dispatch(updateContingencyList(data));
                     } else {
                         setCurrentItemType(null);
@@ -528,7 +525,7 @@ const ContingencyLists = () => {
                         <>
                             <List className={classes.root}>
                                 {contingencyLists.map((item, index) => (
-                                    <>
+                                    <div key={item.name + 'div'}>
                                         <CustomListItem
                                             button
                                             key={item.name}
@@ -543,7 +540,6 @@ const ContingencyLists = () => {
                                             <ListItemText
                                                 className={classes.listItemText}
                                                 primary={item.name}
-                                                key={item.name + index}
                                             />
                                             <IconButton
                                                 aria-label="settings"
@@ -593,7 +589,7 @@ const ContingencyLists = () => {
                                                 />
                                             </MenuItem>
                                         </StyledMenu>
-                                    </>
+                                    </div>
                                 ))}
                             </List>
                             {/* To be replaced with snackbar */}
@@ -620,6 +616,7 @@ const ContingencyLists = () => {
                             <NewFileCreatedList>
                                 <CustomListItem button selected>
                                     <ListItemText
+                                        key={'temporary'}
                                         className={classes.listItemText}
                                         primary={newListName}
                                     />

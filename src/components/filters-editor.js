@@ -13,24 +13,42 @@ import Select from '@material-ui/core/Select';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import InputBase from '@material-ui/core/InputBase';
 import withStyles from '@material-ui/core/styles/withStyles';
+import { equipmentTypes } from '../utils/equipment-types';
+import { FormattedMessage } from 'react-intl';
 
 const useStyles = makeStyles(() => ({
     root: {
         flexGrow: 1,
         padding: 10,
     },
+    textField: {
+        color: 'red',
+        width: '2033px',
+    },
 }));
 
 const BootstrapInput = withStyles(() => ({
     input: {
+        minWidth: '223px',
+        minHeight: '19px',
+        color: 'white',
+        borderColor: 'grey',
         borderRadius: 4,
         position: 'relative',
-        minWidth: '185px',
         border: '1px solid',
         fontSize: 16,
-        padding: 10,
+        paddingLeft: 14,
+        paddingRight: 14,
+        paddingTop: 18.5,
+        paddingBottom: 18.5,
     },
 }))(InputBase);
+
+const CustomTextField = withStyles(() => ({
+    root: {
+        width: '263px',
+    },
+}))(TextField);
 
 const FiltersEditor = ({ item, onChange }) => {
     const classes = useStyles();
@@ -92,12 +110,13 @@ const FiltersEditor = ({ item, onChange }) => {
         <div className={classes.root}>
             <Grid container direction="row" spacing={1}>
                 <Grid item xs={12} sm={4}>
-                    <h3>Equipment ID</h3>
+                    <h3>
+                        <FormattedMessage id="equipmentID" />
+                    </h3>
                 </Grid>
                 <Grid item xs={12} sm={8}>
-                    <TextField
+                    <CustomTextField
                         onChange={handleEquipmentID}
-                        label="Equipment ID"
                         variant="outlined"
                         value={equipmentID}
                     />
@@ -106,12 +125,13 @@ const FiltersEditor = ({ item, onChange }) => {
 
             <Grid container direction="row" spacing={1}>
                 <Grid item xs={12} sm={4}>
-                    <h3>Equipment name</h3>
+                    <h3>
+                        <FormattedMessage id="equipmentName" />
+                    </h3>
                 </Grid>
                 <Grid item xs={12} sm={8}>
-                    <TextField
+                    <CustomTextField
                         onChange={handleEquipmentName}
-                        label="Equipment name"
                         variant="outlined"
                         value={equipmentName}
                     />
@@ -119,30 +139,12 @@ const FiltersEditor = ({ item, onChange }) => {
             </Grid>
 
             <Grid container direction="row" spacing={1}>
-                <Grid item xs={12} sm={4}>
-                    <h3>Equipment type</h3>
-                </Grid>
-                <Grid item xs={12} sm={8}>
-                    <FormControl className="MuiFormControl-root">
-                        <NativeSelect
-                            id="demo-customized-select-native"
-                            value={equipmentType}
-                            onChange={handleEquipmentType}
-                            input={<BootstrapInput />}
-                        >
-                            <option value={'*'}>*</option>
-                            <option value={'Lines'}>Lines</option>
-                            <option value={'Substations'}>Substations</option>
-                        </NativeSelect>
-                    </FormControl>
-                </Grid>
-            </Grid>
-
-            <Grid container direction="row" spacing={1}>
                 <Grid item xs={10} sm={3}>
-                    <h3>Nominal voltage (KV)</h3>
+                    <h3>
+                        <FormattedMessage id="nominalVoltage" />
+                    </h3>
                 </Grid>
-                <Grid item xs={2} sm={1}>
+                <Grid item xs={1} sm={1}>
                     <FormControl className={classes.formControl}>
                         <Select
                             native
@@ -158,12 +160,37 @@ const FiltersEditor = ({ item, onChange }) => {
                     </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={8}>
-                    <TextField
+                    <CustomTextField
                         onChange={handleNominalVoltage}
-                        label="Nominal voltage"
                         variant="outlined"
                         value={nominalVoltage}
                     />
+                </Grid>
+            </Grid>
+
+            <Grid container direction="row" spacing={1}>
+                <Grid item xs={12} sm={4}>
+                    <h3>
+                        {' '}
+                        <FormattedMessage id="equipmentType" />
+                    </h3>
+                </Grid>
+                <Grid item xs={12} sm={8}>
+                    <FormControl>
+                        <NativeSelect
+                            id="demo-customized-select-native"
+                            value={equipmentType}
+                            onChange={handleEquipmentType}
+                            input={<BootstrapInput />}
+                        >
+                            <option value={'*'}>*</option>
+                            {Object.values(equipmentTypes).map((val) => (
+                                <option value={val} key={val}>
+                                    {val}
+                                </option>
+                            ))}
+                        </NativeSelect>
+                    </FormControl>
                 </Grid>
             </Grid>
         </div>

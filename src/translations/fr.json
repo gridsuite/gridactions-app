@@ -19,6 +19,8 @@
     "delete": "Supprimer",
     "renameList": "Renommer la liste",
     "newNameList": "Nouveau nom de la liste",
-    "guiMode": "Mode GUI",
-    "scriptMode": "Mode script"
+    "equipmentType": "Type d'équipement",
+    "equipmentName": "Nom d'équipement",
+    "equipmentID": "ID d'équipement",
+    "nominalVoltage": "Tension nominale"
 }

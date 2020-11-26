@@ -60,8 +60,6 @@ export function getContingencyList(type, name) {
         url += '/v1/filters-contingency-lists/';
     }
     url += name;
-    console.debug('fetching contingency List of type ' + type + ' ...');
-    console.log(url);
 
     return backendFetch(url).then((response) => response.json());
 }
