@@ -22,12 +22,12 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Alert from '@material-ui/lab/Alert';
 
 import IconButton from '@material-ui/core/IconButton';
-import InsertDriveFileOutlinedIcon from '@material-ui/icons/InsertDriveFileOutlined';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import AddIcon from '@material-ui/icons/Add';
 
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -507,7 +507,7 @@ const ContingencyLists = () => {
                             style={{ marginTop: '5px' }}
                         >
                             <label className={classes.iconSvg}>
-                                <InsertDriveFileOutlinedIcon
+                                <AddIcon
                                     aria-label="New file"
                                     style={{ fontSize: 36 }}
                                     onClick={() => handleOpenPopupAddNewList()}

@@ -19,7 +19,7 @@ import { FormattedMessage } from 'react-intl';
 const useStyles = makeStyles(() => ({
     root: {
         flexGrow: 1,
-        padding: 10,
+        paddingLeft: '40px',
     },
     textField: {
         color: 'red',
@@ -109,12 +109,12 @@ const FiltersEditor = ({ item, onChange }) => {
     return (
         <div className={classes.root}>
             <Grid container direction="row" spacing={1}>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={3}>
                     <h3>
                         <FormattedMessage id="equipmentID" />
                     </h3>
                 </Grid>
-                <Grid item xs={12} sm={8}>
+                <Grid item xs={12} sm={9}>
                     <CustomTextField
                         onChange={handleEquipmentID}
                         variant="outlined"
@@ -124,12 +124,12 @@ const FiltersEditor = ({ item, onChange }) => {
             </Grid>
 
             <Grid container direction="row" spacing={1}>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={3}>
                     <h3>
                         <FormattedMessage id="equipmentName" />
                     </h3>
                 </Grid>
-                <Grid item xs={12} sm={8}>
+                <Grid item xs={12} sm={9}>
                     <CustomTextField
                         onChange={handleEquipmentName}
                         variant="outlined"
@@ -139,12 +139,12 @@ const FiltersEditor = ({ item, onChange }) => {
             </Grid>
 
             <Grid container direction="row" spacing={1}>
-                <Grid item xs={10} sm={3}>
+                <Grid item xs={9} sm={2}>
                     <h3>
                         <FormattedMessage id="nominalVoltage" />
                     </h3>
                 </Grid>
-                <Grid item xs={1} sm={1}>
+                <Grid item xs={3} sm={1}>
                     <FormControl className={classes.formControl}>
                         <Select
                             native
@@ -159,7 +159,7 @@ const FiltersEditor = ({ item, onChange }) => {
                         </Select>
                     </FormControl>
                 </Grid>
-                <Grid item xs={12} sm={8}>
+                <Grid item xs={12} sm={9}>
                     <CustomTextField
                         onChange={handleNominalVoltage}
                         variant="outlined"
@@ -169,13 +169,13 @@ const FiltersEditor = ({ item, onChange }) => {
             </Grid>
 
             <Grid container direction="row" spacing={1}>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={3}>
                     <h3>
                         {' '}
                         <FormattedMessage id="equipmentType" />
                     </h3>
                 </Grid>
-                <Grid item xs={12} sm={8}>
+                <Grid item xs={12} sm={9}>
                     <FormControl>
                         <NativeSelect
                             id="demo-customized-select-native"

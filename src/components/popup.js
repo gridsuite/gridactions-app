@@ -144,12 +144,12 @@ const PopupWithInput = ({
                 />
                 {newList && (
                     <FormControl component="fieldset">
-                        <FormLabel component="legend">Type</FormLabel>
                         <RadioGroup
                             aria-label="gender"
                             name="gender1"
                             value={newListType}
                             onChange={(e) => setNewListType(e.target.value)}
+                            style={{paddingLeft : '10px'}}
                         >
                             <FormControlLabel
                                 value="SCRIPT"
