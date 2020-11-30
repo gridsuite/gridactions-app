@@ -129,7 +129,6 @@ export function addFiltersContingencyList(
     nominalVoltage,
     nominalVoltageOperator
 ) {
-    console.log(name);
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/filters-contingency-lists/' +

@@ -282,6 +282,11 @@ const ContingencyLists = () => {
      */
     const saveNewListResponse = () => {
         if (currentItemType === 'FILTERS') {
+            currentFiltersContingency.equipmentID = equipmentID;
+            currentFiltersContingency.equipmentName = equipmentName;
+            currentFiltersContingency.nominalVoltage = nominalVoltage;
+            currentFiltersContingency.nominalVoltageOperator = nominalVoltageOperator;
+            currentFiltersContingency.equipmentType = equipmentType;
             return addFiltersContingencyList(
                 newListCreated ? newListName : currentItemName,
                 equipmentID,
@@ -309,11 +314,11 @@ const ContingencyLists = () => {
                         }
                         return 'false';
                     });
+                    setBtnSaveListDisabled(true);
                     setNewListCreated(false);
                     dispatch(updateContingencyList(data));
                 }
             });
-            setBtnSaveListDisabled(true);
         });
     };
 
