@@ -28,6 +28,8 @@ import EditIcon from '@material-ui/icons/Edit';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import AddIcon from '@material-ui/icons/Add';
+import DescriptionIcon from '@material-ui/icons/Description';
+import PanToolIcon from '@material-ui/icons/PanTool';
 
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -541,6 +543,12 @@ const ContingencyLists = () => {
                                                 className={classes.listItemText}
                                                 primary={item.name}
                                             />
+                                            {item.type === 'FILTERS' && (
+                                                <PanToolIcon />
+                                            )}
+                                            {item.type === 'SCRIPT' && (
+                                                <DescriptionIcon />
+                                            )}
                                             <IconButton
                                                 aria-label="settings"
                                                 aria-controls="list-menu"

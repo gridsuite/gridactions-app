@@ -55,7 +55,7 @@ const FiltersEditor = ({ item, onChange }) => {
 
     const [equipmentID, setEquipmentID] = useState('*');
     const [equipmentName, setEquipmentName] = useState('*');
-    const [equipmentType, setEquipmentType] = useState('*');
+    const [equipmentType, setEquipmentType] = useState('GENERATOR');
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
     const [nominalVoltage, setNominalVoltage] = useState('*');
 
@@ -183,7 +183,6 @@ const FiltersEditor = ({ item, onChange }) => {
                             onChange={handleEquipmentType}
                             input={<BootstrapInput />}
                         >
-                            <option value={'*'}>*</option>
                             {Object.values(equipmentTypes).map((val) => (
                                 <option value={val} key={val}>
                                     {val}
