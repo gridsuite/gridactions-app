@@ -21,7 +21,6 @@ import { FormattedMessage } from 'react-intl';
 import TextField from '@material-ui/core/TextField';
 import { useSelector } from 'react-redux';
 import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
@@ -149,7 +148,7 @@ const PopupWithInput = ({
                             name="gender1"
                             value={newListType}
                             onChange={(e) => setNewListType(e.target.value)}
-                            style={{paddingLeft : '10px'}}
+                            style={{ paddingLeft: '10px' }}
                         >
                             <FormControlLabel
                                 value="SCRIPT"
