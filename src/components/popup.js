@@ -140,7 +140,7 @@ const PopupWithInput = ({
                 <Grid container direction="row" spacing={1}>
                     <Grid item xs={12} sm={8}>
                         <TextField
-                            style={{width:'100%'}}
+                            style={{ width: '100%' }}
                             defaultValue={newList ? '' : selectedListName}
                             onChange={(event) =>
                                 onChangeInputName(event.target.value)

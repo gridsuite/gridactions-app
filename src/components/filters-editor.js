@@ -14,7 +14,7 @@ import NativeSelect from '@material-ui/core/NativeSelect';
 import InputBase from '@material-ui/core/InputBase';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { equipmentTypes } from '../utils/equipment-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -58,6 +58,8 @@ const FiltersEditor = ({ item, onChange }) => {
     const [equipmentType, setEquipmentType] = useState(equipmentTypes.BRANCH);
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
     const [nominalVoltage, setNominalVoltage] = useState('*');
+
+    const intl = useIntl();
 
     function handleOperator(event) {
         setNominalVoltageOperator(event.target.value);
@@ -191,7 +193,7 @@ const FiltersEditor = ({ item, onChange }) => {
                         >
                             {Object.values(equipmentTypes).map((val) => (
                                 <option value={val} key={val}>
-                                    {val}
+                                    {intl.formatMessage({ id: val })}
                                 </option>
                             ))}
                         </NativeSelect>

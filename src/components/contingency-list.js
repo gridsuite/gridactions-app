@@ -311,7 +311,7 @@ const ContingencyLists = () => {
             getContingencyLists().then((data) => {
                 if (data) {
                     const index = data.findIndex(
-                        element => element.name === newListName
+                        (element) => element.name === newListName
                     );
                     setSelectedIndex(index);
                     setBtnSaveListDisabled(true);

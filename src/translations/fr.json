@@ -24,5 +24,12 @@
     "equipmentID": "ID d'équipement",
     "nominalVoltage": "Tension nominale",
     "SCRIPT": "Script",
-    "FILTERS": "Filtres"
+    "FILTERS": "Filtres",
+    "LINE": "LIGNE",
+    "TRANSFORMER2W": "TRANSFO 2E",
+    "GENERATOR": "GÉNÉRATEUR",
+    "STATIC_VAR_COMPENSATOR": "SVC",
+    "SHUNT_COMPENSATOR": "MCS",
+    "HVDC_LINE": "HVDC",
+    "BUSBAR_SECTION": "SJB"
 }
