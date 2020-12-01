@@ -55,7 +55,7 @@ const FiltersEditor = ({ item, onChange }) => {
 
     const [equipmentID, setEquipmentID] = useState('*');
     const [equipmentName, setEquipmentName] = useState('*');
-    const [equipmentType, setEquipmentType] = useState(equipmentTypes.BRANCH);
+    const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
     const [nominalVoltage, setNominalVoltage] = useState('*');
 
