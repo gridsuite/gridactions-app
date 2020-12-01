@@ -48,6 +48,7 @@ import {
     addFiltersContingencyList,
     getContingencyList,
 } from '../utils/rest-api';
+import { scriptTypes } from '../utils/script-types';
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -128,7 +129,7 @@ const useStyles = makeStyles(() => ({
         width: '25%',
     },
     listItemText: {
-        padding: '15px 25px 15px',
+        padding: '15px 5px 15px',
         margin: '0',
     },
 }));
@@ -233,14 +234,14 @@ const ContingencyLists = () => {
             setCurrentItemType('SCRIPT');
         } else {
             setCurrentFiltersContingency(null);
-            setCurrentItemType('FILTERS');
+            setCurrentItemType(scriptTypes.FILTERS);
         }
         setNewListName(name);
         setNewListCreated(true);
         setSelectedIndex(null);
         setAlertEmptyList(false);
         setOpenPopupNewList(false);
-        setBtnSaveListDisabled(true);
+        setBtnSaveListDisabled(false);
     };
 
     /**
@@ -281,12 +282,14 @@ const ContingencyLists = () => {
      * Save new list added: submit name and script
      */
     const saveNewListResponse = () => {
-        if (currentItemType === 'FILTERS') {
-            currentFiltersContingency.equipmentID = equipmentID;
-            currentFiltersContingency.equipmentName = equipmentName;
-            currentFiltersContingency.nominalVoltage = nominalVoltage;
-            currentFiltersContingency.nominalVoltageOperator = nominalVoltageOperator;
-            currentFiltersContingency.equipmentType = equipmentType;
+        if (currentItemType === scriptTypes.FILTERS) {
+            if (currentFiltersContingency !== null) {
+                currentFiltersContingency.equipmentID = equipmentID;
+                currentFiltersContingency.equipmentName = equipmentName;
+                currentFiltersContingency.nominalVoltage = nominalVoltage;
+                currentFiltersContingency.nominalVoltageOperator = nominalVoltageOperator;
+                currentFiltersContingency.equipmentType = equipmentType;
+            }
             return addFiltersContingencyList(
                 newListCreated ? newListName : currentItemName,
                 equipmentID,
@@ -307,13 +310,10 @@ const ContingencyLists = () => {
         saveNewListResponse().then(() => {
             getContingencyLists().then((data) => {
                 if (data) {
-                    data.find((element, index) => {
-                        if (element.name === newListName) {
-                            setSelectedIndex(index);
-                            return 'true';
-                        }
-                        return 'false';
-                    });
+                    const index = data.findIndex(
+                        element => element.name === newListName
+                    );
+                    setSelectedIndex(index);
                     setBtnSaveListDisabled(true);
                     setNewListCreated(false);
                     dispatch(updateContingencyList(data));
@@ -468,7 +468,7 @@ const ContingencyLists = () => {
             getContingencyList(currentItemType, currentItemName).then(
                 (data) => {
                     if (data) {
-                        if (currentItemType === 'SCRIPT') {
+                        if (currentItemType === scriptTypes.SCRIPT) {
                             setCurrentScriptContingency(data);
                         } else {
                             setCurrentFiltersContingency(data);
@@ -544,16 +544,20 @@ const ContingencyLists = () => {
                                                 )
                                             }
                                         >
+                                            <div style={{ marginLeft: '5px' }}>
+                                                {item.type ===
+                                                    scriptTypes.FILTERS && (
+                                                    <PanToolIcon />
+                                                )}
+                                                {item.type ===
+                                                    scriptTypes.SCRIPT && (
+                                                    <DescriptionIcon />
+                                                )}
+                                            </div>
                                             <ListItemText
                                                 className={classes.listItemText}
                                                 primary={item.name}
                                             />
-                                            {item.type === 'FILTERS' && (
-                                                <PanToolIcon />
-                                            )}
-                                            {item.type === 'SCRIPT' && (
-                                                <DescriptionIcon />
-                                            )}
                                             <IconButton
                                                 aria-label="settings"
                                                 aria-controls="list-menu"
@@ -700,14 +704,14 @@ const ContingencyLists = () => {
                 </Grid>
 
                 <Grid xs={9} item={true} className={classes.aceEditor}>
-                    {currentItemType === 'FILTERS' && (
+                    {currentItemType === scriptTypes.FILTERS && (
                         <FiltersEditor
                             item={currentFiltersContingency}
                             onChange={onChangeFiltersContingency}
                         />
                     )}
 
-                    {currentItemType === 'SCRIPT' && (
+                    {currentItemType === scriptTypes.SCRIPT && (
                         <AceEditor
                             className={classes.editor}
                             mode="groovy"

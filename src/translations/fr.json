@@ -22,5 +22,7 @@
     "equipmentType": "Type d'équipement",
     "equipmentName": "Nom d'équipement",
     "equipmentID": "ID d'équipement",
-    "nominalVoltage": "Tension nominale"
+    "nominalVoltage": "Tension nominale",
+    "SCRIPT": "Script",
+    "FILTERS": "Filtres"
 }

@@ -24,6 +24,7 @@ import FormControl from '@material-ui/core/FormControl';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
+import Grid from '@material-ui/core/Grid';
 
 const styles = (theme) => ({
     root: {
@@ -61,20 +62,20 @@ const CustomDialogTitle = withStyles(styles)((props) => {
     );
 });
 
-const CustomDialogContent = withStyles((theme) => ({
+const CustomDialogContent = withStyles(() => ({
     root: {
         padding: '15px',
     },
 }))(DialogContent);
 
-const CustomDialogActions = withStyles((theme) => ({
+const CustomDialogActions = withStyles(() => ({
     root: {
         margin: '0',
         padding: '15px',
     },
 }))(DialogActions);
 
-const DialogContainer = withStyles((theme) => ({
+const DialogContainer = withStyles(() => ({
     paper: {
         width: '500px',
         height: '250px',
@@ -136,33 +137,46 @@ const PopupWithInput = ({
         <DialogContainer open={open} onClose={handleClose}>
             <CustomDialogTitle onClose={handleClose}>{title}</CustomDialogTitle>
             <CustomDialogContent dividers>
-                <TextField
-                    defaultValue={newList ? '' : selectedListName}
-                    onChange={(event) => onChangeInputName(event.target.value)}
-                    label={inputLabelText}
-                />
-                {newList && (
-                    <FormControl component="fieldset">
-                        <RadioGroup
-                            aria-label="gender"
-                            name="gender1"
-                            value={newListType}
-                            onChange={(e) => setNewListType(e.target.value)}
-                            style={{ paddingLeft: '10px' }}
-                        >
-                            <FormControlLabel
-                                value="SCRIPT"
-                                control={<Radio />}
-                                label="SCRIPT"
-                            />
-                            <FormControlLabel
-                                value="FILTERS"
-                                control={<Radio />}
-                                label="FILTERS"
-                            />
-                        </RadioGroup>
-                    </FormControl>
-                )}
+                <Grid container direction="row" spacing={1}>
+                    <Grid item xs={12} sm={8}>
+                        <TextField
+                            style={{width:'100%'}}
+                            defaultValue={newList ? '' : selectedListName}
+                            onChange={(event) =>
+                                onChangeInputName(event.target.value)
+                            }
+                            label={inputLabelText}
+                        />
+                    </Grid>
+                    {newList && (
+                        <Grid item xs={12} sm={4}>
+                            <FormControl component="fieldset">
+                                <RadioGroup
+                                    aria-label="gender"
+                                    name="gender1"
+                                    value={newListType}
+                                    onChange={(e) =>
+                                        setNewListType(e.target.value)
+                                    }
+                                    style={{ paddingLeft: '10px' }}
+                                >
+                                    <FormControlLabel
+                                        value="SCRIPT"
+                                        control={<Radio />}
+                                        label={<FormattedMessage id="SCRIPT" />}
+                                    />
+                                    <FormControlLabel
+                                        value="FILTERS"
+                                        control={<Radio />}
+                                        label={
+                                            <FormattedMessage id="FILTERS" />
+                                        }
+                                    />
+                                </RadioGroup>
+                            </FormControl>
+                        </Grid>
+                    )}
+                </Grid>
             </CustomDialogContent>
             <CustomDialogActions>
                 <Button autoFocus size="small" onClick={handleClose}>

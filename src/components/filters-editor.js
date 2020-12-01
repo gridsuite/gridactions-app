@@ -55,7 +55,7 @@ const FiltersEditor = ({ item, onChange }) => {
 
     const [equipmentID, setEquipmentID] = useState('*');
     const [equipmentName, setEquipmentName] = useState('*');
-    const [equipmentType, setEquipmentType] = useState('GENERATOR');
+    const [equipmentType, setEquipmentType] = useState(equipmentTypes.BRANCH);
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
     const [nominalVoltage, setNominalVoltage] = useState('*');
 
@@ -103,6 +103,12 @@ const FiltersEditor = ({ item, onChange }) => {
             setNominalVoltageOperator(item.nominalVoltageOperator);
             setNominalVoltage(item.nominalVoltage);
             setEquipmentType(item.equipmentType);
+        } else {
+            setEquipmentName('*');
+            setEquipmentID('*');
+            setNominalVoltageOperator('=');
+            setNominalVoltage('*');
+            setEquipmentType(equipmentTypes.BRANCH);
         }
     }, [item]);
 
