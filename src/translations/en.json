@@ -25,7 +25,7 @@
     "nominalVoltage": "nominal Voltage",
     "SCRIPT": "Script",
     "FILTERS": "Filters",
-    "TRANSFORMER2W": "2W TRANSFORMER",
+    "TWO_WINDINGS_TRANSFORMER": "2W TRANSFORMER",
     "LINE": "LINE",
     "GENERATOR": "GENERATOR",
     "STATIC_VAR_COMPENSATOR": "STATIC_VAR_COMPENSATOR",
