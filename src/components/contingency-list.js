@@ -49,6 +49,7 @@ import {
     getContingencyList,
 } from '../utils/rest-api';
 import { scriptTypes } from '../utils/script-types';
+import { equipmentTypes } from '../utils/equipment-types';
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -192,11 +193,11 @@ const ContingencyLists = () => {
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
     const [openPopupInfo, setOpenPopupInfo] = useState(false);
 
-    const [equipmentID, setEquipmentID] = useState('*');
-    const [equipmentName, setEquipmentName] = useState('*');
-    const [equipmentType, setEquipmentType] = useState('*');
+    const [equipmentID, setEquipmentID] = useState('.*');
+    const [equipmentName, setEquipmentName] = useState('.*');
+    const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
-    const [nominalVoltage, setNominalVoltage] = useState('*');
+    const [nominalVoltage, setNominalVoltage] = useState('');
 
     /**
      * On click in item on the list

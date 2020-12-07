@@ -140,7 +140,7 @@ export function addFiltersContingencyList(
             equipmentID: equipmentID,
             equipmentName: equipmentName,
             equipmentType: equipmentType,
-            nominalVoltage: nominalVoltage,
+            nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage,
             nominalVoltageOperator: nominalVoltageOperator,
         }),
     });
