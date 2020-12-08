@@ -73,17 +73,17 @@ export function fetchConfigParameters() {
     });
 }
 
-export function updateConfigParameter(json) {
-    console.info('updating parameters : ' + json.toString());
+export function updateConfigParameter(configJson) {
+    console.info('updating parameters : ' + configJson.toString());
     const updateParams = PREFIX_CONFIG_QUERIES + '/v1/parameters';
-    return backendFetch(updateParams, {
+    backendFetch(updateParams, {
         method: 'put',
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
         },
-        body: json,
-    }).then((response) => response.json());
+        body: configJson,
+    }).then();
 }
 
 /**
