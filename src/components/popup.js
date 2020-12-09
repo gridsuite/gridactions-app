@@ -211,19 +211,20 @@ PopupWithInput.propTypes = {
 const PopupInfo = ({
     open,
     onClose,
-    handleSaveNewList,
-    handleCancelNewList,
+    customAlertMessage,
+    handleBtnSave,
+    handleBtnCancel,
 }) => {
     const handleClose = () => {
         onClose();
     };
 
     const handleSaveList = () => {
-        handleSaveNewList();
+        handleBtnSave();
     };
 
     const handleCancel = () => {
-        handleCancelNewList();
+        handleBtnCancel();
     };
 
     return (
@@ -232,7 +233,7 @@ const PopupInfo = ({
                 <FormattedMessage id="saveNewListTitle" />
             </CustomDialogTitle>
             <CustomDialogContent dividers>
-                <FormattedMessage id="saveNewListMsg" />
+                {customAlertMessage}
             </CustomDialogContent>
             <CustomDialogActions>
                 <Button autoFocus size="small" onClick={handleCancel}>
@@ -253,8 +254,9 @@ const PopupInfo = ({
 PopupInfo.propTypes = {
     open: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
-    handleSaveNewList: PropTypes.func.isRequired,
-    handleCancelNewList: PropTypes.func.isRequired,
+    customAlertMessage: PropTypes.object.isRequired,
+    handleBtnSave: PropTypes.func.isRequired,
+    handleBtnCancel: PropTypes.func.isRequired,
 };
 
 export { PopupInfo, PopupWithInput };

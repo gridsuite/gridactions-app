@@ -179,13 +179,13 @@ const ContingencyLists = () => {
     const [newListName, setNewListName] = useState(null);
 
     const [alertEmptyList, setAlertEmptyList] = useState(true);
-    const [alertNotSelectedList, setAlertNotSelectedList] = useState(false);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [openPopupNewList, setOpenPopupNewList] = useState(false);
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
     const [openPopupInfo, setOpenPopupInfo] = useState(false);
+    const [openPopupConfirmDelete, setOpenPopupConfirmDelete] = useState(false);
 
     const [equipmentID, setEquipmentID] = useState('*');
     const [equipmentName, setEquipmentName] = useState('*');
@@ -205,9 +205,7 @@ const ContingencyLists = () => {
             setSelectedIndex(index);
             setCurrentItemName(item.name);
             setCurrentItemType(item.type);
-
             setBtnSaveListDisabled(true);
-            setAlertNotSelectedList(false);
         }
     };
 
@@ -353,10 +351,17 @@ const ContingencyLists = () => {
     };
 
     /**
-     * Delete list by name
+     * Show popup confirm delete list
      */
     const handleDeleteList = () => {
         setAnchorEl(null);
+        setOpenPopupConfirmDelete(true);
+    };
+
+    /**
+     * Delete list by name
+     */
+    const confirmDeleteList = () => {
         if (currentItemName) {
             if (
                 contingencyLists !== null &&
@@ -368,7 +373,7 @@ const ContingencyLists = () => {
                 setSelectedIndex(selectedIndex);
                 fetchScriptByNameList(selectedIndex + 1);
             }
-
+            setOpenPopupConfirmDelete(false);
             deleteListByName(currentItemName).then(() => {
                 getContingencyLists().then((data) => {
                     dispatch(updateContingencyList(data));
@@ -380,9 +385,14 @@ const ContingencyLists = () => {
                     }
                 });
             });
-        } else {
-            setAlertNotSelectedList(true);
         }
+    };
+
+    /**
+     * Cancel delete list
+     */
+    const cancelDeleteList = () => {
+        setOpenPopupConfirmDelete(false);
     };
 
     const handleOpenMenu = (event, name) => {
@@ -600,18 +610,10 @@ const ContingencyLists = () => {
                                     </div>
                                 ))}
                             </List>
-                            {/* To be replaced with snackbar */}
-                            {alertNotSelectedList && (
-                                <Alert
-                                    severity="error"
-                                    className={classes.alert}
-                                >
-                                    <FormattedMessage id="alertDeleteList" />
-                                </Alert>
-                            )}
                         </>
                     ) : alertEmptyList ? (
                         <Alert severity="error" className={classes.alert}>
+                            {/* To be replaced with snackbar */}
                             <FormattedMessage id="contingencyListIsEmpty" />
                         </Alert>
                     ) : (
@@ -667,8 +669,27 @@ const ContingencyLists = () => {
                     <PopupInfo
                         open={openPopupInfo}
                         onClose={() => setOpenPopupInfo(false)}
-                        handleSaveNewList={createListBeforeExit}
-                        handleCancelNewList={cancelCreateListBeforeExit}
+                        customAlertMessage={
+                            <FormattedMessage
+                                id={
+                                    currentItemType === scriptTypes.FILTERS
+                                        ? 'saveNewFilterList'
+                                        : 'saveNewScriptList'
+                                }
+                            />
+                        }
+                        handleBtnSave={createListBeforeExit}
+                        handleBtnCancel={cancelCreateListBeforeExit}
+                    />
+                    {/* Alert to confirm delete list */}
+                    <PopupInfo
+                        open={openPopupConfirmDelete}
+                        onClose={() => setOpenPopupConfirmDelete(false)}
+                        customAlertMessage={
+                            <FormattedMessage id="alertBeforeDeleteList" />
+                        }
+                        handleBtnSave={confirmDeleteList}
+                        handleBtnCancel={cancelDeleteList}
                     />
                 </div>
                 <div className={classes.containerButtons}>
