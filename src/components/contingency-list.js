@@ -141,6 +141,7 @@ const StyledMenu = withStyles({
         border: '1px solid #d3d4d5',
         marginTop: '67px',
         marginLeft: '-88px',
+        boxShadow: 'none',
     },
 })(Menu);
 
