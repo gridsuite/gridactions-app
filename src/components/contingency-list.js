@@ -29,6 +29,8 @@ import AddIcon from '@material-ui/icons/Add';
 import DescriptionIcon from '@material-ui/icons/Description';
 import PanToolIcon from '@material-ui/icons/PanTool';
 import Drawer from '@material-ui/core/Drawer';
+import { DoubleArrow } from '@material-ui/icons';
+import { MenuOpen } from '@material-ui/icons';
 
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -73,9 +75,10 @@ const useStyles = makeStyles(() => ({
     },
     addNewList: {
         textAlign: 'center',
-        display: 'flex',
+        display: 'inline-block',
         padding: '10px 15px',
         borderBottom: '1px solid #ccc',
+        width: '100%',
     },
     editor: {
         width: '100% !important',
@@ -85,6 +88,7 @@ const useStyles = makeStyles(() => ({
     containerAddNewList: {
         display: 'grid',
         cursor: 'pointer',
+        float: 'left',
     },
     svgIcon: {
         cursor: 'pointer',
@@ -115,6 +119,16 @@ const useStyles = makeStyles(() => ({
     listItemText: {
         padding: '15px 25px 15px',
         margin: '0',
+    },
+    smallContainer: {
+        minWidth: '70px',
+        textAlign: 'center',
+        marginTop: '14px',
+    },
+    doubleArrowIcon: {
+        padding: '5px',
+        margin: '4px 2px 0',
+        float: 'right',
     },
 }));
 
@@ -192,6 +206,7 @@ const ContingencyLists = () => {
     const [equipmentType, setEquipmentType] = useState('*');
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
     const [nominalVoltage, setNominalVoltage] = useState('*');
+    const [showContainerList, setShowContainerList] = useState(true);
 
     /**
      * On click in item on the list
@@ -485,6 +500,10 @@ const ContingencyLists = () => {
         []
     );
 
+    const collapseList = () => {
+        setShowContainerList(!showContainerList);
+    };
+
     useEffect(() => {
         getAllContingencyLists();
     }, [getAllContingencyLists]);
@@ -503,138 +522,179 @@ const ContingencyLists = () => {
 
     return (
         <div className={classes.container}>
-            <div className={classes.containerLists}>
-                <div className={classes.addNewList}>
-                    <div
-                        className={classes.containerAddNewList}
-                        htmlFor="addContingencyList"
-                        onClick={() => handleOpenPopupAddNewList()}
-                    >
-                        <label className={classes.svgIcon}>
-                            <AddIcon
-                                aria-label="New file"
-                                style={{ fontSize: 36 }}
+            <div
+                className={
+                    showContainerList
+                        ? classes.containerLists
+                        : classes.smallContainer
+                }
+            >
+                {showContainerList ? (
+                    <div className={classes.addNewList}>
+                        <div
+                            className={classes.containerAddNewList}
+                            htmlFor="addContingencyList"
+                            onClick={() => handleOpenPopupAddNewList()}
+                        >
+                            <label className={classes.svgIcon}>
+                                <AddIcon
+                                    aria-label="New file"
+                                    style={{ fontSize: 36 }}
+                                />
+                            </label>
+                            <span className={classes.svgLabel}>
+                                <FormattedMessage id="newList" />
+                            </span>
+                        </div>
+                        <IconButton
+                            onClick={collapseList}
+                            className={classes.doubleArrowIcon}
+                        >
+                            <DoubleArrow
+                                transform={'rotate(180)'}
+                                style={{ fontSize: '40px' }}
                             />
-                        </label>
-                        <span className={classes.svgLabel}>
-                            <FormattedMessage id="newList" />
-                        </span>
+                        </IconButton>
                     </div>
-                </div>
-                <h3 className={classes.contingencyTitle}>
-                    <FormattedMessage id="contingencyTitle" />
-                </h3>
-                <CustomDrawer
-                    anchor="left"
-                    variant="permanent"
-                    className={classes.drawer}
-                >
-                    {contingencyLists.length > 0 ? (
-                        <>
-                            <List className={classes.root}>
-                                {contingencyLists.map((item, index) => (
-                                    <div key={item.name + 'div'}>
-                                        <CustomListItem
-                                            button
-                                            key={item.name}
-                                            selected={selectedIndex === index}
-                                            onClick={() =>
-                                                handleListItemClicked(
-                                                    item,
-                                                    index
-                                                )
-                                            }
-                                        >
-                                            <div style={{ marginLeft: '5px' }}>
-                                                {item.type ===
-                                                    scriptTypes.FILTERS && (
-                                                    <PanToolIcon />
-                                                )}
-                                                {item.type ===
-                                                    scriptTypes.SCRIPT && (
-                                                    <DescriptionIcon />
-                                                )}
-                                            </div>
-                                            <ListItemText
-                                                className={classes.listItemText}
-                                                primary={item.name}
-                                            />
-                                            <IconButton
-                                                aria-label="settings"
-                                                aria-controls="list-menu"
-                                                aria-haspopup="true"
-                                                variant="contained"
-                                                onClick={(event) =>
-                                                    handleOpenMenu(
-                                                        event,
-                                                        item.name
-                                                    )
-                                                }
-                                            >
-                                                <MoreVertIcon />
-                                            </IconButton>
-                                        </CustomListItem>
-                                        <StyledMenu
-                                            id="list-menu"
-                                            anchorEl={anchorEl}
-                                            open={Boolean(anchorEl)}
-                                            onClose={handleCloseMenu}
-                                        >
-                                            <MenuItem
-                                                onClick={handleDeleteList}
-                                            >
-                                                <ListItemIcon>
-                                                    <DeleteIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText
-                                                    primary={
-                                                        <FormattedMessage id="delete" />
-                                                    }
-                                                />
-                                            </MenuItem>
-                                            <MenuItem
-                                                onClick={() =>
-                                                    handleRenameList()
-                                                }
-                                            >
-                                                <ListItemIcon>
-                                                    <EditIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText
-                                                    primary={
-                                                        <FormattedMessage id="rename" />
-                                                    }
-                                                />
-                                            </MenuItem>
-                                        </StyledMenu>
-                                    </div>
-                                ))}
-                            </List>
-                        </>
-                    ) : alertEmptyList ? (
-                        <Alert severity="error" className={classes.alert}>
-                            {/* To be replaced with snackbar */}
-                            <FormattedMessage id="contingencyListIsEmpty" />
-                        </Alert>
-                    ) : (
-                        ''
-                    )}
-
-                    {/* Temporary list : new file created */}
+                ) : (
+                    <IconButton
+                        onClick={collapseList}
+                        style={{ padding: '5px' }}
+                    >
+                        <MenuOpen style={{ fontSize: '40px' }} />
+                    </IconButton>
+                )}
+                {showContainerList && (
                     <>
-                        {newListCreated && (
-                            <NewFileCreatedList>
-                                <CustomListItem button selected>
-                                    <ListItemText
-                                        key={'temporary'}
-                                        className={classes.listItemText}
-                                        primary={newListName}
-                                    />
-                                </CustomListItem>
-                            </NewFileCreatedList>
-                        )}
+                        <h3 className={classes.contingencyTitle}>
+                            <FormattedMessage id="contingencyTitle" />
+                        </h3>
+                        <CustomDrawer
+                            anchor="left"
+                            variant="permanent"
+                            className={classes.drawer}
+                        >
+                            {contingencyLists.length > 0 ? (
+                                <>
+                                    <List className={classes.root}>
+                                        {contingencyLists.map((item, index) => (
+                                            <div key={item.name + 'div'}>
+                                                <CustomListItem
+                                                    button
+                                                    key={item.name}
+                                                    selected={
+                                                        selectedIndex === index
+                                                    }
+                                                    onClick={() =>
+                                                        handleListItemClicked(
+                                                            item,
+                                                            index
+                                                        )
+                                                    }
+                                                >
+                                                    <div
+                                                        style={{
+                                                            marginLeft: '5px',
+                                                        }}
+                                                    >
+                                                        {item.type ===
+                                                            scriptTypes.FILTERS && (
+                                                            <PanToolIcon />
+                                                        )}
+                                                        {item.type ===
+                                                            scriptTypes.SCRIPT && (
+                                                            <DescriptionIcon />
+                                                        )}
+                                                    </div>
+                                                    <ListItemText
+                                                        className={
+                                                            classes.listItemText
+                                                        }
+                                                        primary={item.name}
+                                                    />
+                                                    <IconButton
+                                                        aria-label="settings"
+                                                        aria-controls="list-menu"
+                                                        aria-haspopup="true"
+                                                        variant="contained"
+                                                        onClick={(event) =>
+                                                            handleOpenMenu(
+                                                                event,
+                                                                item.name
+                                                            )
+                                                        }
+                                                    >
+                                                        <MoreVertIcon />
+                                                    </IconButton>
+                                                </CustomListItem>
+                                                <StyledMenu
+                                                    id="list-menu"
+                                                    anchorEl={anchorEl}
+                                                    open={Boolean(anchorEl)}
+                                                    onClose={handleCloseMenu}
+                                                >
+                                                    <MenuItem
+                                                        onClick={
+                                                            handleDeleteList
+                                                        }
+                                                    >
+                                                        <ListItemIcon>
+                                                            <DeleteIcon fontSize="small" />
+                                                        </ListItemIcon>
+                                                        <ListItemText
+                                                            primary={
+                                                                <FormattedMessage id="delete" />
+                                                            }
+                                                        />
+                                                    </MenuItem>
+                                                    <MenuItem
+                                                        onClick={() =>
+                                                            handleRenameList()
+                                                        }
+                                                    >
+                                                        <ListItemIcon>
+                                                            <EditIcon fontSize="small" />
+                                                        </ListItemIcon>
+                                                        <ListItemText
+                                                            primary={
+                                                                <FormattedMessage id="rename" />
+                                                            }
+                                                        />
+                                                    </MenuItem>
+                                                </StyledMenu>
+                                            </div>
+                                        ))}
+                                    </List>
+                                </>
+                            ) : alertEmptyList ? (
+                                <Alert
+                                    severity="error"
+                                    className={classes.alert}
+                                >
+                                    {/* To be replaced with snackbar */}
+                                    <FormattedMessage id="contingencyListIsEmpty" />
+                                </Alert>
+                            ) : (
+                                ''
+                            )}
+
+                            {/* Temporary list : new file created */}
+                            <>
+                                {newListCreated && (
+                                    <NewFileCreatedList>
+                                        <CustomListItem button selected>
+                                            <ListItemText
+                                                key={'temporary'}
+                                                className={classes.listItemText}
+                                                primary={newListName}
+                                            />
+                                        </CustomListItem>
+                                    </NewFileCreatedList>
+                                )}
+                            </>
+                        </CustomDrawer>
                     </>
-                </CustomDrawer>
+                )}
 
                 {/* Dialog */}
                 <div>
@@ -692,22 +752,24 @@ const ContingencyLists = () => {
                         handleBtnCancel={cancelDeleteList}
                     />
                 </div>
-                <div className={classes.containerButtons}>
-                    <Button
-                        style={{ marginRight: '15px' }}
-                        disabled={btnSaveListDisabled}
-                        onClick={() => cancelNewList()}
-                    >
-                        <FormattedMessage id="cancel" />
-                    </Button>
-                    <Button
-                        variant="outlined"
-                        disabled={btnSaveListDisabled}
-                        onClick={() => saveNewList()}
-                    >
-                        <FormattedMessage id="save" />
-                    </Button>
-                </div>
+                {showContainerList && (
+                    <div className={classes.containerButtons}>
+                        <Button
+                            style={{ marginRight: '15px' }}
+                            disabled={btnSaveListDisabled}
+                            onClick={() => cancelNewList()}
+                        >
+                            <FormattedMessage id="cancel" />
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            disabled={btnSaveListDisabled}
+                            onClick={() => saveNewList()}
+                        >
+                            <FormattedMessage id="save" />
+                        </Button>
+                    </div>
+                )}
             </div>
 
             <div className={classes.aceEditor}>
