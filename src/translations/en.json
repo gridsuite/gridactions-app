@@ -18,5 +18,19 @@
     "rename": "Rename",
     "delete": "Delete",
     "renameList": "Rename list",
-    "newNameList": "New list name"
+    "newNameList": "New list name",
+    "equipmentType": "Equipment type",
+    "equipmentName": "Equipment Name",
+    "equipmentID": "Equipment ID",
+    "nominalVoltage": "Nominal Voltage",
+    "SCRIPT": "Script",
+    "FILTERS": "Filters",
+    "TWO_WINDINGS_TRANSFORMER": "2W TRANSFORMER",
+    "DANGLING_LINE": "DANGLING_LINE",
+    "LINE": "LINE",
+    "GENERATOR": "GENERATOR",
+    "STATIC_VAR_COMPENSATOR": "STATIC_VAR_COMPENSATOR",
+    "SHUNT_COMPENSATOR": "SHUNT_COMPENSATOR",
+    "HVDC_LINE": "HVDC_LINE",
+    "BUSBAR_SECTION": "BUSBAR_SECTION"
 }

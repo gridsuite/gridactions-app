@@ -31,7 +31,7 @@ import {
 
 import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import Contingency from './contingency-list';
+import ContingencyLists from './contingency-list';
 
 import Box from '@material-ui/core/Box';
 import Parameters from './parameters';
@@ -238,7 +238,7 @@ const App = () => {
                     <Switch>
                         <Route exact path="/">
                             <Box mt={20}>
-                                <Contingency />
+                                <ContingencyLists />
                             </Box>
                         </Route>
                         <Route exact path="/sign-in-callback">
