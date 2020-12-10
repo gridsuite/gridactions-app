@@ -13,6 +13,8 @@ import 'ace-builds/src-noconflict/mode-groovy';
 import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/theme-clouds_midnight';
 
+import Grid from '@material-ui/core/Grid';
+
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -28,9 +30,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import AddIcon from '@material-ui/icons/Add';
 import DescriptionIcon from '@material-ui/icons/Description';
 import PanToolIcon from '@material-ui/icons/PanTool';
-import Drawer from '@material-ui/core/Drawer';
-import { DoubleArrow } from '@material-ui/icons';
-import { MenuOpen } from '@material-ui/icons';
 
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -50,6 +49,7 @@ import {
     getContingencyList,
 } from '../utils/rest-api';
 import { scriptTypes } from '../utils/script-types';
+import { equipmentTypes } from '../utils/equipment-types';
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -63,8 +63,15 @@ const useStyles = makeStyles(() => ({
         top: '70px',
         height: 'calc(100vh - 70px)',
     },
-    containerLists: {
-        minWidth: '325px',
+    contentList: {
+        marginTop: '20px',
+    },
+    treeItem: {
+        textAlign: 'center !important',
+        padding: '5px',
+    },
+    files: {
+        fontSize: '18px',
     },
     contingencyTitle: {
         padding: '15px 10px 10px 15px',
@@ -73,62 +80,58 @@ const useStyles = makeStyles(() => ({
         fontSize: '24px',
         fontWeight: 'bold',
     },
-    addNewList: {
+    contingencyIcons: {
         textAlign: 'center',
-        display: 'inline-block',
-        padding: '10px 15px',
+        padding: '10px 10px 5px 10px',
         borderBottom: '1px solid #ccc',
-        width: '100%',
     },
     editor: {
         width: '100% !important',
         height: '100% !important',
         margin: 'auto',
     },
-    containerAddNewList: {
+    iconButton: {
         display: 'grid',
-        cursor: 'pointer',
-        float: 'left',
     },
-    svgIcon: {
+    iconSvg: {
         cursor: 'pointer',
     },
-    svgLabel: {
-        fontSize: '12px',
+    iconLabel: {
+        fontSize: '11px',
         position: 'relative',
         top: '-3px',
+    },
+    addFile: {
+        float: 'right',
+        cursor: 'pointer',
+        position: 'relative',
+        top: '4px',
+    },
+    filesList: {
+        listStyle: 'none',
+        textAlign: 'left',
+        paddingLeft: '15px',
     },
     alert: {
         color: 'rgb(97, 26, 21)',
         backgroundColor: 'rgb(253, 236, 234)',
-        maxWidth: '300px',
-        margin: '0 auto',
+        margin: '15px',
     },
     aceEditor: {
         marginTop: '4px',
         borderLeft: '1px solid #ccc',
-        flexGrow: 1,
     },
     containerButtons: {
         position: 'fixed',
         bottom: '0',
         textAlign: 'center',
-        padding: '15px 20px',
-        minWidth: '325px',
+        zIndex: '999',
+        padding: 20,
+        width: '25%',
     },
     listItemText: {
-        padding: '15px 25px 15px',
+        padding: '15px 5px 15px',
         margin: '0',
-    },
-    smallContainer: {
-        minWidth: '70px',
-        textAlign: 'center',
-        marginTop: '14px',
-    },
-    doubleArrowIcon: {
-        padding: '5px',
-        margin: '4px 2px 0',
-        float: 'right',
     },
 }));
 
@@ -155,19 +158,8 @@ const StyledMenu = withStyles({
         border: '1px solid #d3d4d5',
         marginTop: '67px',
         marginLeft: '-88px',
-        boxShadow: 'none',
     },
 })(Menu);
-
-const CustomDrawer = withStyles({
-    paperAnchorLeft: {
-        top: '220px',
-        height: 'calc(100vh - 294px)',
-        minWidth: '325px',
-        backgroundColor: 'transparent',
-        border: 'none',
-    },
-})(Drawer);
 
 const ContingencyLists = () => {
     const classes = useStyles();
@@ -193,20 +185,19 @@ const ContingencyLists = () => {
     const [newListName, setNewListName] = useState(null);
 
     const [alertEmptyList, setAlertEmptyList] = useState(true);
+    const [alertNotSelectedList, setAlertNotSelectedList] = useState(false);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [openPopupNewList, setOpenPopupNewList] = useState(false);
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
     const [openPopupInfo, setOpenPopupInfo] = useState(false);
-    const [openPopupConfirmDelete, setOpenPopupConfirmDelete] = useState(false);
 
-    const [equipmentID, setEquipmentID] = useState('*');
-    const [equipmentName, setEquipmentName] = useState('*');
-    const [equipmentType, setEquipmentType] = useState('*');
+    const [equipmentID, setEquipmentID] = useState('.*');
+    const [equipmentName, setEquipmentName] = useState('.*');
+    const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
-    const [nominalVoltage, setNominalVoltage] = useState('*');
-    const [showContainerList, setShowContainerList] = useState(true);
+    const [nominalVoltage, setNominalVoltage] = useState('');
 
     /**
      * On click in item on the list
@@ -220,7 +211,9 @@ const ContingencyLists = () => {
             setSelectedIndex(index);
             setCurrentItemName(item.name);
             setCurrentItemType(item.type);
+
             setBtnSaveListDisabled(true);
+            setAlertNotSelectedList(false);
         }
     };
 
@@ -366,17 +359,10 @@ const ContingencyLists = () => {
     };
 
     /**
-     * Show popup confirm delete list
+     * Delete list by name
      */
     const handleDeleteList = () => {
         setAnchorEl(null);
-        setOpenPopupConfirmDelete(true);
-    };
-
-    /**
-     * Delete list by name
-     */
-    const confirmDeleteList = () => {
         if (currentItemName) {
             if (
                 contingencyLists !== null &&
@@ -388,7 +374,7 @@ const ContingencyLists = () => {
                 setSelectedIndex(selectedIndex);
                 fetchScriptByNameList(selectedIndex + 1);
             }
-            setOpenPopupConfirmDelete(false);
+
             deleteListByName(currentItemName).then(() => {
                 getContingencyLists().then((data) => {
                     dispatch(updateContingencyList(data));
@@ -400,14 +386,9 @@ const ContingencyLists = () => {
                     }
                 });
             });
+        } else {
+            setAlertNotSelectedList(true);
         }
-    };
-
-    /**
-     * Cancel delete list
-     */
-    const cancelDeleteList = () => {
-        setOpenPopupConfirmDelete(false);
     };
 
     const handleOpenMenu = (event, name) => {
@@ -500,10 +481,6 @@ const ContingencyLists = () => {
         []
     );
 
-    const collapseList = () => {
-        setShowContainerList(!showContainerList);
-    };
-
     useEffect(() => {
         getAllContingencyLists();
     }, [getAllContingencyLists]);
@@ -522,237 +499,193 @@ const ContingencyLists = () => {
 
     return (
         <div className={classes.container}>
-            <div
-                className={
-                    showContainerList
-                        ? classes.containerLists
-                        : classes.smallContainer
-                }
-            >
-                {showContainerList ? (
-                    <div className={classes.addNewList}>
-                        <div
-                            className={classes.containerAddNewList}
+            <Grid container direction="row">
+                <Grid xs={3} item={true} className={classes.files}>
+                    <Grid
+                        container
+                        direction="row"
+                        className={classes.contingencyIcons}
+                        id="contingencyTitle"
+                    >
+                        <Grid
+                            xs={3}
+                            item={true}
+                            className={classes.iconButton}
                             htmlFor="addContingencyList"
-                            onClick={() => handleOpenPopupAddNewList()}
+                            style={{ marginTop: '5px' }}
                         >
-                            <label className={classes.svgIcon}>
+                            <label className={classes.iconSvg}>
                                 <AddIcon
                                     aria-label="New file"
                                     style={{ fontSize: 36 }}
+                                    onClick={() => handleOpenPopupAddNewList()}
                                 />
                             </label>
-                            <span className={classes.svgLabel}>
+                            <span className={classes.iconLabel}>
                                 <FormattedMessage id="newList" />
                             </span>
-                        </div>
-                        <IconButton
-                            onClick={collapseList}
-                            className={classes.doubleArrowIcon}
-                        >
-                            <DoubleArrow
-                                transform={'rotate(180)'}
-                                style={{ fontSize: '40px' }}
-                            />
-                        </IconButton>
-                    </div>
-                ) : (
-                    <IconButton
-                        onClick={collapseList}
-                        style={{ padding: '5px' }}
-                    >
-                        <MenuOpen style={{ fontSize: '40px' }} />
-                    </IconButton>
-                )}
-                {showContainerList && (
-                    <>
-                        <h3 className={classes.contingencyTitle}>
-                            <FormattedMessage id="contingencyTitle" />
-                        </h3>
-                        <CustomDrawer
-                            anchor="left"
-                            variant="permanent"
-                            className={classes.drawer}
-                        >
-                            {contingencyLists.length > 0 ? (
-                                <>
-                                    <List className={classes.root}>
-                                        {contingencyLists.map((item, index) => (
-                                            <div key={item.name + 'div'}>
-                                                <CustomListItem
-                                                    button
-                                                    key={item.name}
-                                                    selected={
-                                                        selectedIndex === index
-                                                    }
-                                                    onClick={() =>
-                                                        handleListItemClicked(
-                                                            item,
-                                                            index
-                                                        )
-                                                    }
-                                                >
-                                                    <div
-                                                        style={{
-                                                            marginLeft: '5px',
-                                                        }}
-                                                    >
-                                                        {item.type ===
-                                                            scriptTypes.FILTERS && (
-                                                            <PanToolIcon />
-                                                        )}
-                                                        {item.type ===
-                                                            scriptTypes.SCRIPT && (
-                                                            <DescriptionIcon />
-                                                        )}
-                                                    </div>
-                                                    <ListItemText
-                                                        className={
-                                                            classes.listItemText
-                                                        }
-                                                        primary={item.name}
-                                                    />
-                                                    <IconButton
-                                                        aria-label="settings"
-                                                        aria-controls="list-menu"
-                                                        aria-haspopup="true"
-                                                        variant="contained"
-                                                        onClick={(event) =>
-                                                            handleOpenMenu(
-                                                                event,
-                                                                item.name
-                                                            )
-                                                        }
-                                                    >
-                                                        <MoreVertIcon />
-                                                    </IconButton>
-                                                </CustomListItem>
-                                                <StyledMenu
-                                                    id="list-menu"
-                                                    anchorEl={anchorEl}
-                                                    open={Boolean(anchorEl)}
-                                                    onClose={handleCloseMenu}
-                                                >
-                                                    <MenuItem
-                                                        onClick={
-                                                            handleDeleteList
-                                                        }
-                                                    >
-                                                        <ListItemIcon>
-                                                            <DeleteIcon fontSize="small" />
-                                                        </ListItemIcon>
-                                                        <ListItemText
-                                                            primary={
-                                                                <FormattedMessage id="delete" />
-                                                            }
-                                                        />
-                                                    </MenuItem>
-                                                    <MenuItem
-                                                        onClick={() =>
-                                                            handleRenameList()
-                                                        }
-                                                    >
-                                                        <ListItemIcon>
-                                                            <EditIcon fontSize="small" />
-                                                        </ListItemIcon>
-                                                        <ListItemText
-                                                            primary={
-                                                                <FormattedMessage id="rename" />
-                                                            }
-                                                        />
-                                                    </MenuItem>
-                                                </StyledMenu>
+                        </Grid>
+                    </Grid>
+                    <h3 className={classes.contingencyTitle}>
+                        <FormattedMessage id="contingencyTitle" />
+                    </h3>
+                    {contingencyLists.length > 0 ? (
+                        <>
+                            <List className={classes.root}>
+                                {contingencyLists.map((item, index) => (
+                                    <div key={item.name + 'div'}>
+                                        <CustomListItem
+                                            button
+                                            key={item.name}
+                                            selected={selectedIndex === index}
+                                            onClick={() =>
+                                                handleListItemClicked(
+                                                    item,
+                                                    index
+                                                )
+                                            }
+                                        >
+                                            <div style={{ marginLeft: '5px' }}>
+                                                {item.type ===
+                                                    scriptTypes.FILTERS && (
+                                                    <PanToolIcon />
+                                                )}
+                                                {item.type ===
+                                                    scriptTypes.SCRIPT && (
+                                                    <DescriptionIcon />
+                                                )}
                                             </div>
-                                        ))}
-                                    </List>
-                                </>
-                            ) : alertEmptyList ? (
+                                            <ListItemText
+                                                className={classes.listItemText}
+                                                primary={item.name}
+                                            />
+                                            <IconButton
+                                                aria-label="settings"
+                                                aria-controls="list-menu"
+                                                aria-haspopup="true"
+                                                variant="contained"
+                                                onClick={(event) =>
+                                                    handleOpenMenu(
+                                                        event,
+                                                        item.name
+                                                    )
+                                                }
+                                            >
+                                                <MoreVertIcon />
+                                            </IconButton>
+                                        </CustomListItem>
+                                        <StyledMenu
+                                            id="list-menu"
+                                            anchorEl={anchorEl}
+                                            open={Boolean(anchorEl)}
+                                            onClose={handleCloseMenu}
+                                        >
+                                            <MenuItem
+                                                onClick={handleDeleteList}
+                                            >
+                                                <ListItemIcon>
+                                                    <DeleteIcon fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText
+                                                    primary={
+                                                        <FormattedMessage id="delete" />
+                                                    }
+                                                />
+                                            </MenuItem>
+                                            <MenuItem
+                                                onClick={() =>
+                                                    handleRenameList()
+                                                }
+                                            >
+                                                <ListItemIcon>
+                                                    <EditIcon fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText
+                                                    primary={
+                                                        <FormattedMessage id="rename" />
+                                                    }
+                                                />
+                                            </MenuItem>
+                                        </StyledMenu>
+                                    </div>
+                                ))}
+                            </List>
+                            {/* To be replaced with snackbar */}
+                            {alertNotSelectedList && (
                                 <Alert
                                     severity="error"
                                     className={classes.alert}
                                 >
-                                    {/* To be replaced with snackbar */}
-                                    <FormattedMessage id="contingencyListIsEmpty" />
+                                    <FormattedMessage id="alertDeleteList" />
                                 </Alert>
-                            ) : (
-                                ''
                             )}
+                        </>
+                    ) : alertEmptyList ? (
+                        <Alert severity="error" className={classes.alert}>
+                            <FormattedMessage id="contingencyListIsEmpty" />
+                        </Alert>
+                    ) : (
+                        ''
+                    )}
 
-                            {/* Temporary list : new file created */}
-                            <>
-                                {newListCreated && (
-                                    <NewFileCreatedList>
-                                        <CustomListItem button selected>
-                                            <ListItemText
-                                                key={'temporary'}
-                                                className={classes.listItemText}
-                                                primary={newListName}
-                                            />
-                                        </CustomListItem>
-                                    </NewFileCreatedList>
-                                )}
-                            </>
-                        </CustomDrawer>
+                    {/* Temporary list : new file created */}
+                    <>
+                        {newListCreated && (
+                            <NewFileCreatedList>
+                                <CustomListItem button selected>
+                                    <ListItemText
+                                        key={'temporary'}
+                                        className={classes.listItemText}
+                                        primary={newListName}
+                                    />
+                                </CustomListItem>
+                            </NewFileCreatedList>
+                        )}
                     </>
-                )}
 
-                {/* Dialog */}
-                <div>
-                    {/* Popup for add new list */}
-                    <PopupWithInput
-                        open={openPopupNewList}
-                        onClose={() => setOpenPopupNewList(false)}
-                        title={<FormattedMessage id="addNewContencyFile" />}
-                        inputLabelText={<FormattedMessage id="listName" />}
-                        customTextValidationBtn={
-                            <FormattedMessage id="create" />
-                        }
-                        customTextCancelBtn={<FormattedMessage id="cancel" />}
-                        handleSaveNewList={addNewList}
-                        newList={true}
-                    />
-                    {/* Popup for rename exist list */}
-                    <PopupWithInput
-                        open={openPopupRenameList}
-                        onClose={() => setOpenPopupRenameList(false)}
-                        title={<FormattedMessage id="renameList" />}
-                        inputLabelText={<FormattedMessage id="newNameList" />}
-                        customTextValidationBtn={
-                            <FormattedMessage id="rename" />
-                        }
-                        customTextCancelBtn={<FormattedMessage id="cancel" />}
-                        handleRenameExistList={renameExistList}
-                        selectedListName={currentItemName}
-                        newList={false}
-                    />
-                    {/* Alert to save temporary list before switch to another */}
-                    <PopupInfo
-                        open={openPopupInfo}
-                        onClose={() => setOpenPopupInfo(false)}
-                        customAlertMessage={
-                            <FormattedMessage
-                                id={
-                                    currentItemType === scriptTypes.FILTERS
-                                        ? 'saveNewFilterList'
-                                        : 'saveNewScriptList'
-                                }
-                            />
-                        }
-                        handleBtnSave={createListBeforeExit}
-                        handleBtnCancel={cancelCreateListBeforeExit}
-                    />
-                    {/* Alert to confirm delete list */}
-                    <PopupInfo
-                        open={openPopupConfirmDelete}
-                        onClose={() => setOpenPopupConfirmDelete(false)}
-                        customAlertMessage={
-                            <FormattedMessage id="alertBeforeDeleteList" />
-                        }
-                        handleBtnSave={confirmDeleteList}
-                        handleBtnCancel={cancelDeleteList}
-                    />
-                </div>
-                {showContainerList && (
+                    {/* Dialog */}
+                    <div>
+                        {/* Popup for add new list */}
+                        <PopupWithInput
+                            open={openPopupNewList}
+                            onClose={() => setOpenPopupNewList(false)}
+                            title={<FormattedMessage id="addNewContencyFile" />}
+                            inputLabelText={<FormattedMessage id="listName" />}
+                            customTextValidationBtn={
+                                <FormattedMessage id="create" />
+                            }
+                            customTextCancelBtn={
+                                <FormattedMessage id="cancel" />
+                            }
+                            handleSaveNewList={addNewList}
+                            newList={true}
+                        />
+                        {/* Popup for rename exist list */}
+                        <PopupWithInput
+                            open={openPopupRenameList}
+                            onClose={() => setOpenPopupRenameList(false)}
+                            title={<FormattedMessage id="renameList" />}
+                            inputLabelText={
+                                <FormattedMessage id="newNameList" />
+                            }
+                            customTextValidationBtn={
+                                <FormattedMessage id="rename" />
+                            }
+                            customTextCancelBtn={
+                                <FormattedMessage id="cancel" />
+                            }
+                            handleRenameExistList={renameExistList}
+                            selectedListName={currentItemName}
+                            newList={false}
+                        />
+                        {/* Alert to save temporary list before switch to another */}
+                        <PopupInfo
+                            open={openPopupInfo}
+                            onClose={() => setOpenPopupInfo(false)}
+                            handleSaveNewList={createListBeforeExit}
+                            handleCancelNewList={cancelCreateListBeforeExit}
+                        />
+                    </div>
                     <div className={classes.containerButtons}>
                         <Button
                             style={{ marginRight: '15px' }}
@@ -769,30 +702,30 @@ const ContingencyLists = () => {
                             <FormattedMessage id="save" />
                         </Button>
                     </div>
-                )}
-            </div>
+                </Grid>
 
-            <div className={classes.aceEditor}>
-                {currentItemType === scriptTypes.FILTERS && (
-                    <FiltersEditor
-                        item={currentFiltersContingency}
-                        onChange={onChangeFiltersContingency}
-                    />
-                )}
+                <Grid xs={9} item={true} className={classes.aceEditor}>
+                    {currentItemType === scriptTypes.FILTERS && (
+                        <FiltersEditor
+                            item={currentFiltersContingency}
+                            onChange={onChangeFiltersContingency}
+                        />
+                    )}
 
-                {currentItemType === scriptTypes.SCRIPT && (
-                    <AceEditor
-                        className={classes.editor}
-                        mode="groovy"
-                        placeholder="Insert your groovy script here"
-                        theme={themeForAceEditor()}
-                        onChange={(val) => onChangeAceEditor(val)}
-                        value={aceEditorContent}
-                        fontSize="18px"
-                        editorProps={{ $blockScrolling: true }}
-                    />
-                )}
-            </div>
+                    {currentItemType === scriptTypes.SCRIPT && (
+                        <AceEditor
+                            className={classes.editor}
+                            mode="groovy"
+                            placeholder="Insert your groovy script here"
+                            theme={themeForAceEditor()}
+                            onChange={(val) => onChangeAceEditor(val)}
+                            value={aceEditorContent}
+                            fontSize="18px"
+                            editorProps={{ $blockScrolling: true }}
+                        />
+                    )}
+                </Grid>
+            </Grid>
         </div>
     );
 };
