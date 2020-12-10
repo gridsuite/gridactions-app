@@ -567,9 +567,13 @@ const ContingencyLists = () => {
                         </h3>
                         <div className={classes.contingencyLists}>
                             {contingencyLists.length > 0 ? (
-
-                                    <List className={classes.root}>
-                                        {contingencyLists.map((item, index) => (
+                                <List className={classes.root}>
+                                    {contingencyLists
+                                        .slice()
+                                        .sort((a, b) =>
+                                            a.name.localeCompare(b.name)
+                                        )
+                                        .map((item, index) => (
                                             <div key={item.name + 'div'}>
                                                 <CustomListItem
                                                     button
@@ -656,7 +660,7 @@ const ContingencyLists = () => {
                                                 </StyledMenu>
                                             </div>
                                         ))}
-                                    </List>
+                                </List>
                             ) : alertEmptyList ? (
                                 <Alert
                                     severity="error"
@@ -720,14 +724,12 @@ const ContingencyLists = () => {
                     <PopupInfo
                         open={openPopupInfo}
                         onClose={() => setOpenPopupInfo(false)}
+                        title={<FormattedMessage id="saveNewListTitle" />}
                         customAlertMessage={
-                            <FormattedMessage
-                                id={
-                                    currentItemType === scriptTypes.FILTERS
-                                        ? 'saveNewFilterList'
-                                        : 'saveNewScriptList'
-                                }
-                            />
+                            <FormattedMessage id="saveNewListMsg" />
+                        }
+                        customTextValidationBtn={
+                            <FormattedMessage id="create" />
                         }
                         handleBtnSave={createListBeforeExit}
                         handleBtnCancel={cancelCreateListBeforeExit}
@@ -736,8 +738,12 @@ const ContingencyLists = () => {
                     <PopupInfo
                         open={openPopupConfirmDelete}
                         onClose={() => setOpenPopupConfirmDelete(false)}
+                        title={<FormattedMessage id="deleteList" />}
                         customAlertMessage={
                             <FormattedMessage id="alertBeforeDeleteList" />
+                        }
+                        customTextValidationBtn={
+                            <FormattedMessage id="delete" />
                         }
                         handleBtnSave={confirmDeleteList}
                         handleBtnCancel={cancelDeleteList}
