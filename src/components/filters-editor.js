@@ -21,10 +21,6 @@ const useStyles = makeStyles(() => ({
         flexGrow: 1,
         paddingLeft: '40px',
     },
-    textField: {
-        color: 'red',
-        width: '2033px',
-    },
 }));
 
 const BootstrapInput = withStyles(() => ({
