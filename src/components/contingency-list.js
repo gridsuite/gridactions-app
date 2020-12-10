@@ -547,82 +547,90 @@ const ContingencyLists = () => {
                                     .slice()
                                     .sort((a, b) => (a.name > b.name ? 1 : -1))
                                     .map((item, index) => (
-                                    <div key={item.name + 'div'}>
-                                        <CustomListItem
-                                            button
-                                            key={item.name}
-                                            selected={selectedIndex === index}
-                                            onClick={() =>
-                                                handleListItemClicked(
-                                                    item,
-                                                    index
-                                                )
-                                            }
-                                        >
-                                            <div style={{ marginLeft: '5px' }}>
-                                                {item.type ===
-                                                    scriptTypes.FILTERS && (
-                                                    <PanToolIcon />
-                                                )}
-                                                {item.type ===
-                                                    scriptTypes.SCRIPT && (
-                                                    <DescriptionIcon />
-                                                )}
-                                            </div>
-                                            <ListItemText
-                                                className={classes.listItemText}
-                                                primary={item.name}
-                                            />
-                                            <IconButton
-                                                aria-label="settings"
-                                                aria-controls="list-menu"
-                                                aria-haspopup="true"
-                                                variant="contained"
-                                                onClick={(event) =>
-                                                    handleOpenMenu(
-                                                        event,
-                                                        item.name
+                                        <div key={item.name + 'div'}>
+                                            <CustomListItem
+                                                button
+                                                key={item.name}
+                                                selected={
+                                                    selectedIndex === index
+                                                }
+                                                onClick={() =>
+                                                    handleListItemClicked(
+                                                        item,
+                                                        index
                                                     )
                                                 }
                                             >
-                                                <MoreVertIcon />
-                                            </IconButton>
-                                        </CustomListItem>
-                                        <StyledMenu
-                                            id="list-menu"
-                                            anchorEl={anchorEl}
-                                            open={Boolean(anchorEl)}
-                                            onClose={handleCloseMenu}
-                                        >
-                                            <MenuItem
-                                                onClick={handleDeleteList}
-                                            >
-                                                <ListItemIcon>
-                                                    <DeleteIcon fontSize="small" />
-                                                </ListItemIcon>
+                                                <div
+                                                    style={{
+                                                        marginLeft: '5px',
+                                                    }}
+                                                >
+                                                    {item.type ===
+                                                        scriptTypes.FILTERS && (
+                                                        <PanToolIcon />
+                                                    )}
+                                                    {item.type ===
+                                                        scriptTypes.SCRIPT && (
+                                                        <DescriptionIcon />
+                                                    )}
+                                                </div>
                                                 <ListItemText
-                                                    primary={
-                                                        <FormattedMessage id="delete" />
+                                                    className={
+                                                        classes.listItemText
                                                     }
+                                                    primary={item.name}
                                                 />
-                                            </MenuItem>
-                                            <MenuItem
-                                                onClick={() =>
-                                                    handleRenameList()
-                                                }
+                                                <IconButton
+                                                    aria-label="settings"
+                                                    aria-controls="list-menu"
+                                                    aria-haspopup="true"
+                                                    variant="contained"
+                                                    onClick={(event) =>
+                                                        handleOpenMenu(
+                                                            event,
+                                                            item.name
+                                                        )
+                                                    }
+                                                >
+                                                    <MoreVertIcon />
+                                                </IconButton>
+                                            </CustomListItem>
+                                            <StyledMenu
+                                                id="list-menu"
+                                                anchorEl={anchorEl}
+                                                open={Boolean(anchorEl)}
+                                                onClose={handleCloseMenu}
                                             >
-                                                <ListItemIcon>
-                                                    <EditIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText
-                                                    primary={
-                                                        <FormattedMessage id="rename" />
+                                                <MenuItem
+                                                    onClick={handleDeleteList}
+                                                >
+                                                    <ListItemIcon>
+                                                        <DeleteIcon fontSize="small" />
+                                                    </ListItemIcon>
+                                                    <ListItemText
+                                                        primary={
+                                                            <FormattedMessage id="delete" />
+                                                        }
+                                                    />
+                                                </MenuItem>
+                                                <MenuItem
+                                                    onClick={() =>
+                                                        handleRenameList()
                                                     }
-                                                />
-                                            </MenuItem>
-                                        </StyledMenu>
-                                    </div>
-                                ))}
+                                                >
+                                                    <ListItemIcon>
+                                                        <EditIcon fontSize="small" />
+                                                    </ListItemIcon>
+                                                    <ListItemText
+                                                        primary={
+                                                            <FormattedMessage id="rename" />
+                                                        }
+                                                    />
+                                                </MenuItem>
+                                            </StyledMenu>
+                                        </div>
+                                    ))}
                             </List>
                         </>
                     ) : alertEmptyList ? (
