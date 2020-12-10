@@ -543,7 +543,10 @@ const ContingencyLists = () => {
                     {contingencyLists.length > 0 ? (
                         <>
                             <List className={classes.root}>
-                                {contingencyLists.map((item, index) => (
+                                {contingencyLists
+                                    .slice()
+                                    .sort((a, b) => (a.name > b.name ? 1 : -1))
+                                    .map((item, index) => (
                                     <div key={item.name + 'div'}>
                                         <CustomListItem
                                             button
