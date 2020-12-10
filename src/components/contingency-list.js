@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import AceEditor from 'react-ace';
@@ -19,49 +19,41 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import { grey } from '@material-ui/core/colors';
-import TextField from '@material-ui/core/TextField';
 import Alert from '@material-ui/lab/Alert';
 
 import IconButton from '@material-ui/core/IconButton';
-import InsertDriveFileOutlinedIcon from '@material-ui/icons/InsertDriveFileOutlined';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import AddIcon from '@material-ui/icons/Add';
+import DescriptionIcon from '@material-ui/icons/Description';
+import PanToolIcon from '@material-ui/icons/PanTool';
 
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
-import CloseIcon from '@material-ui/icons/Close';
-import Typography from '@material-ui/core/Typography';
-
+import FiltersEditor from './filters-editor';
 import { updateContingencyList } from '../redux/actions';
+import { PopupWithInput, PopupInfo } from './popup';
 
-import {
-    makeStyles,
-    ThemeProvider,
-    createMuiTheme,
-} from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
 import { FormattedMessage } from 'react-intl';
 import {
     getContingencyLists,
-    addContingencyList,
+    addScriptContingencyList,
     deleteListByName,
     renameListByName,
+    addFiltersContingencyList,
+    getContingencyList,
 } from '../utils/rest-api';
+import { scriptTypes } from '../utils/script-types';
+import { equipmentTypes } from '../utils/equipment-types';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     root: {
         padding: '0',
-        '& > *': {
-            margin: theme.spacing(1),
-        },
     },
     container: {
         display: 'flex',
@@ -138,12 +130,12 @@ const useStyles = makeStyles((theme) => ({
         width: '25%',
     },
     listItemText: {
-        padding: '15px 25px 15px',
+        padding: '15px 5px 15px',
         margin: '0',
     },
 }));
 
-const CustomListItem = withStyles((theme) => ({
+const CustomListItem = withStyles(() => ({
     root: {
         margin: '0',
         textTransform: 'capitalize',
@@ -155,71 +147,11 @@ const CustomListItem = withStyles((theme) => ({
     },
 }))(ListItem);
 
-const theme = createMuiTheme({
-    palette: {
-        primary: grey,
-    },
-});
-
-const styles = (theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(2),
-    },
-    closeButton: {
-        position: 'absolute',
-        right: theme.spacing(1),
-        top: theme.spacing(1),
-        color: theme.palette.grey[500],
-    },
-    selected: {
-        background: '#000',
-    },
-});
-
-const DialogContainer = withStyles((theme) => ({
-    paper: {
-        width: '500px',
-        height: '250px',
-    },
-}))(Dialog);
-
-const NewFileCreatedList = withStyles((theme) => ({
+const NewFileCreatedList = withStyles(() => ({
     root: {
         padding: '0',
     },
 }))(List);
-
-const DialogTitle = withStyles(styles)((props) => {
-    const { children, classes, onClose, ...other } = props;
-    return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
-            <Typography variant="h6">{children}</Typography>
-            {onClose ? (
-                <IconButton
-                    aria-label="close"
-                    className={classes.closeButton}
-                    onClick={onClose}
-                >
-                    <CloseIcon />
-                </IconButton>
-            ) : null}
-        </MuiDialogTitle>
-    );
-});
-
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(2),
-    },
-}))(MuiDialogContent);
-
-const DialogActions = withStyles((theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
 
 const StyledMenu = withStyles({
     paper: {
@@ -229,176 +161,175 @@ const StyledMenu = withStyles({
     },
 })(Menu);
 
-const Contingency = () => {
+const ContingencyLists = () => {
     const classes = useStyles();
-    const aceEditorRef = useRef();
     const dispatch = useDispatch();
     const selectedTheme = useSelector((state) => state.theme);
 
-    const [openDialog, setOpenDialog] = useState(false);
-    const [newNameFileCreated, setNewNameFileCreated] = useState(false);
-    const [disabledBtnSubmitList, setDisabledBtnSubmitList] = useState(false);
-    const [disabledBtnRenameList, setDisabledBtnRenameList] = useState(false);
+    const contingencyLists = useSelector((state) => state.contingencyLists);
+    const [currentItemType, setCurrentItemType] = useState(null);
+    const [currentItemName, setCurrentItemName] = useState(null);
+    const [currentScriptContingency, setCurrentScriptContingency] = useState(
+        null
+    );
+    const [currentFiltersContingency, setCurrentFiltersContingency] = useState(
+        null
+    );
+    const [selectedIndex, setSelectedIndex] = useState(null);
+
+    const [btnSaveListDisabled, setBtnSaveListDisabled] = useState(true);
+
+    const [aceEditorContent, setAceEditorContent] = useState('');
+
+    const [newListCreated, setNewListCreated] = useState(false);
+    const [newListName, setNewListName] = useState(null);
+
     const [alertEmptyList, setAlertEmptyList] = useState(true);
     const [alertNotSelectedList, setAlertNotSelectedList] = useState(false);
-    const [renameList, setRenameList] = useState(false);
+
     const [anchorEl, setAnchorEl] = React.useState(null);
 
-    const [firstItemInList, setFirstItemInList] = useState([]);
-    const [listsContingency, setListsContingency] = useState([]);
-    const [fileContent, setFileContent] = useState('');
-    const [selectedIndex, setSelectedIndex] = useState('');
-    const [selectedListName, setSelectedListName] = useState([]);
+    const [openPopupNewList, setOpenPopupNewList] = useState(false);
+    const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
+    const [openPopupInfo, setOpenPopupInfo] = useState(false);
 
-    const [newFileNameCreated, setNewFileNameCreated] = useState(
-        firstItemInList ? firstItemInList.name : ''
-    );
-    const [fileNameContent, setFileNameContent] = useState(
-        firstItemInList ? firstItemInList.script : ''
-    );
+    const [equipmentID, setEquipmentID] = useState('.*');
+    const [equipmentName, setEquipmentName] = useState('.*');
+    const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
+    const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
+    const [nominalVoltage, setNominalVoltage] = useState('');
 
     /**
-     * On click in item of list set it actif
-     * @param event
+     * On click in item on the list
+     * @param item
      * @param index
      */
-    const handleListItemClick = (item, index) => {
-        setSelectedListName(item.name);
-        setAlertNotSelectedList(false);
-        if (newNameFileCreated) {
-            setOpenDialog(true);
-            setFileContent('');
+    const handleListItemClicked = (item, index) => {
+        if (newListCreated) {
+            setOpenPopupInfo(true);
         } else {
             setSelectedIndex(index);
-            setNewFileNameCreated(item.name);
-            setFileNameContent(item.script);
-            setDisabledBtnSubmitList(false);
+            setCurrentItemName(item.name);
+            setCurrentItemType(item.type);
+
+            setBtnSaveListDisabled(true);
+            setAlertNotSelectedList(false);
         }
     };
 
     /**
      * Handler open dialog
      */
-    const handleOpenDialog = () => {
-        setOpenDialog(true);
-        setRenameList(false);
+    const handleOpenPopupAddNewList = () => {
+        setOpenPopupNewList(true);
     };
 
     /**
-     * Handler close dialog
-     */
-    const handleCloseDialog = () => {
-        if (newNameFileCreated) {
-            setNewNameFileCreated(false);
-            setFileContent('');
-            setOpenDialog(false);
-        } else {
-            setOpenDialog(false);
-        }
-    };
-
-    /**
-     * On change editor, check if data is the same to disabled submit button
-     * @param newScript
-     * @param newScript
-     */
-    const onChangeEditor = (newScript) => {
-        if (
-            (newFileNameCreated && newScript) ||
-            newScript !== fileNameContent
-        ) {
-            setDisabledBtnSubmitList(true);
-            setFileContent(newScript);
-        }
-    };
-
-    /**
-     * on change input popup check if name already exist
+     * Add new list name
      * @param name
+     * @param type
      */
-    const onChangeInputName = (name) => {
-        if (name.length === 0) {
-            setDisabledBtnRenameList(false);
+    const addNewList = (name, type) => {
+        if (type === 'SCRIPT') {
+            setAceEditorContent('');
+            setCurrentItemType('SCRIPT');
         } else {
-            if (listsContingency.length > 0) {
-                if (listsContingency.some((list) => list.name === name)) {
-                    setDisabledBtnRenameList(false);
-                } else {
-                    setNewFileNameCreated(name);
-                    setDisabledBtnRenameList(true);
-                }
-            } else {
-                setDisabledBtnRenameList(true);
-            }
+            setCurrentFiltersContingency(null);
+            setCurrentItemType(scriptTypes.FILTERS);
         }
+        setNewListName(name);
+        setNewListCreated(true);
+        setSelectedIndex(null);
+        setAlertEmptyList(false);
+        setOpenPopupNewList(false);
+        setBtnSaveListDisabled(false);
     };
 
     /**
-     * Save name of new file added from dialog
-     * @param name
-     * @param script
+     * Rename exist list
+     * @param oldName
+     * @param newName
      */
-    const saveNewFileName = (name, script) => {
-        if (newNameFileCreated) {
-            setFileContent('');
-            setOpenDialog(false);
-        } else if (name) {
-            if (renameList) {
-                renameListByName(selectedListName, newFileNameCreated).then(
-                    (response) => {
-                        if (!response.ok) {
-                            console.error(response.statusText);
-                        }
-                    }
-                );
-                setOpenDialog(false);
-                setTimeout(function () {
-                    getAllContingencyLists();
-                }, 50);
+    const renameExistList = (oldName, newName) => {
+        renameListByName(oldName, newName).then((response) => {
+            if (response.ok) {
+                getAllContingencyLists();
             } else {
-                aceEditorRef.current.editor.setValue('');
-                setAlertEmptyList(false);
-                setSelectedIndex('');
-                setNewNameFileCreated(true);
-                setFileContent(script);
-                setOpenDialog(false);
+                console.error(response.statusText);
             }
-        }
+        });
+        setOpenPopupRenameList(false);
+    };
+
+    /**
+     * Alert : Add the script and save the new list
+     */
+    const createListBeforeExit = () => {
+        saveNewList();
+        setOpenPopupInfo(false);
+    };
+
+    /**
+     * Alert : Cancel create new list
+     */
+    const cancelCreateListBeforeExit = () => {
+        setNewListCreated(false);
+        setOpenPopupInfo(false);
+        setBtnSaveListDisabled(true);
+        setCurrentItemType(null);
     };
 
     /**
      * Save new list added: submit name and script
-     * @param name
-     * @param script
      */
-    const saveNewList = (name, script) => {
-        let currentScript = '';
-        if (script) {
-            addContingencyList(name, script).then((data) => {
-                getContingencyLists().then((data) => {
-                    if (data) {
-                        setNewNameFileCreated(false);
-                        setListsContingency(data);
-                        dispatch(updateContingencyList(data));
-                        data.find((list) => {
-                            if (list.name === name) {
-                                currentScript = list.script;
-                            }
-                            return setFileContent(currentScript);
-                        });
-                    }
-                });
-                setDisabledBtnSubmitList(false);
-            });
+    const saveNewListResponse = () => {
+        if (currentItemType === scriptTypes.FILTERS) {
+            if (currentFiltersContingency !== null) {
+                currentFiltersContingency.equipmentID = equipmentID;
+                currentFiltersContingency.equipmentName = equipmentName;
+                currentFiltersContingency.nominalVoltage = nominalVoltage;
+                currentFiltersContingency.nominalVoltageOperator = nominalVoltageOperator;
+                currentFiltersContingency.equipmentType = equipmentType;
+            }
+            return addFiltersContingencyList(
+                newListCreated ? newListName : currentItemName,
+                equipmentID,
+                equipmentName,
+                equipmentType,
+                nominalVoltage,
+                nominalVoltageOperator
+            );
+        } else {
+            return addScriptContingencyList(
+                newListCreated ? newListName : currentItemName,
+                aceEditorContent
+            );
         }
+    };
+
+    const saveNewList = () => {
+        saveNewListResponse().then(() => {
+            getContingencyLists().then((data) => {
+                if (data) {
+                    const index = data.findIndex(
+                        (element) => element.name === newListName
+                    );
+                    setSelectedIndex(index);
+                    setBtnSaveListDisabled(true);
+                    setNewListCreated(false);
+                    dispatch(updateContingencyList(data));
+                }
+            });
+        });
     };
 
     /**
      * Cancel create list, reset editor and hide new name from list
      */
     const cancelNewList = () => {
-        setNewNameFileCreated(false);
-        setDisabledBtnSubmitList(false);
+        setCurrentItemType(null);
+        setNewListCreated(false);
+        setBtnSaveListDisabled(true);
     };
 
     /**
@@ -419,11 +350,11 @@ const Contingency = () => {
      */
     const fetchScriptByNameList = (itemIndex) => {
         let script = '';
-        listsContingency.map((item, index) => {
+        contingencyLists.map((item, index) => {
             if (index + 1 === itemIndex + 1) {
                 script = item.script;
             }
-            return setFileContent(script);
+            return setAceEditorContent(script);
         });
     };
 
@@ -432,8 +363,11 @@ const Contingency = () => {
      */
     const handleDeleteList = () => {
         setAnchorEl(null);
-        if (selectedListName) {
-            if (listsContingency.length === selectedIndex + 1) {
+        if (currentItemName) {
+            if (
+                contingencyLists !== null &&
+                contingencyLists.length === selectedIndex + 1
+            ) {
                 setSelectedIndex(selectedIndex - 1);
                 fetchScriptByNameList(selectedIndex - 1);
             } else {
@@ -441,12 +375,13 @@ const Contingency = () => {
                 fetchScriptByNameList(selectedIndex + 1);
             }
 
-            deleteListByName(selectedListName).then(() => {
+            deleteListByName(currentItemName).then(() => {
                 getContingencyLists().then((data) => {
-                    setListsContingency(data);
+                    dispatch(updateContingencyList(data));
                     if (data.length > 0) {
                         dispatch(updateContingencyList(data));
                     } else {
+                        setCurrentItemType(null);
                         setAlertEmptyList(true);
                     }
                 });
@@ -458,7 +393,7 @@ const Contingency = () => {
 
     const handleOpenMenu = (event, name) => {
         setAnchorEl(event.currentTarget);
-        setSelectedListName(name);
+        setCurrentItemName(name);
     };
 
     const handleCloseMenu = () => {
@@ -467,26 +402,100 @@ const Contingency = () => {
 
     const handleRenameList = () => {
         setAnchorEl(null);
-        setOpenDialog(true);
-        setRenameList(true);
+        setOpenPopupRenameList(true);
     };
+
+    /**
+     * On change editor, check if data is the same to disabled submit button
+     * @param newScript
+     * @param newScript
+     */
+    const onChangeAceEditor = (newScript) => {
+        setAceEditorContent(newScript);
+        if (
+            (newListName != null && newScript !== '') ||
+            (currentScriptContingency !== null &&
+                newScript !== currentScriptContingency.script)
+        ) {
+            setBtnSaveListDisabled(false);
+        } else {
+            setBtnSaveListDisabled(true);
+        }
+    };
+
+    function onChangeFiltersContingency(
+        equipmentID,
+        equipmentName,
+        equipmentType,
+        nominalVoltageOperator,
+        nominalVoltage
+    ) {
+        if (currentFiltersContingency !== null) {
+            if (
+                equipmentID !== currentFiltersContingency.equipmentID ||
+                equipmentName !== currentFiltersContingency.equipmentName ||
+                equipmentType !== currentFiltersContingency.equipmentType ||
+                nominalVoltageOperator !==
+                    currentFiltersContingency.nominalVoltageOperator ||
+                nominalVoltage !== currentFiltersContingency.nominalVoltage
+            ) {
+                setBtnSaveListDisabled(false);
+            } else {
+                setBtnSaveListDisabled(true);
+            }
+        } else {
+            setBtnSaveListDisabled(false);
+        }
+        setEquipmentID(equipmentID);
+        setEquipmentName(equipmentName);
+        setEquipmentType(equipmentType);
+        setNominalVoltageOperator(nominalVoltageOperator);
+        setNominalVoltage(nominalVoltage);
+    }
 
     /**
      * Get all contingency lists on load page
      **/
     const getAllContingencyLists = useCallback(() => {
         getContingencyLists().then((data) => {
-            if (data.length > 0) {
-                setFirstItemInList(data[0]);
-                setListsContingency(data);
+            if (data) {
                 dispatch(updateContingencyList(data));
             }
         });
     }, [dispatch]);
 
+    const getCurrentContingencyList = useCallback(
+        (currentItemType, currentItemName) => {
+            getContingencyList(currentItemType, currentItemName).then(
+                (data) => {
+                    if (data) {
+                        if (currentItemType === scriptTypes.SCRIPT) {
+                            setCurrentScriptContingency(data);
+                        } else {
+                            setCurrentFiltersContingency(data);
+                        }
+                    }
+                }
+            );
+        },
+        []
+    );
+
     useEffect(() => {
         getAllContingencyLists();
     }, [getAllContingencyLists]);
+
+    useEffect(() => {
+        if (currentScriptContingency !== null) {
+            setAceEditorContent(currentScriptContingency.script);
+        }
+    }, [currentScriptContingency]);
+
+    useEffect(() => {
+        if (currentItemName !== null) {
+            getCurrentContingencyList(currentItemType, currentItemName);
+        }
+    }, [getCurrentContingencyList, currentItemType, currentItemName]);
 
     return (
         <div className={classes.container}>
@@ -502,14 +511,14 @@ const Contingency = () => {
                             xs={3}
                             item={true}
                             className={classes.iconButton}
-                            htmlFor="addfile"
+                            htmlFor="addContingencyList"
                             style={{ marginTop: '5px' }}
                         >
                             <label className={classes.iconSvg}>
-                                <InsertDriveFileOutlinedIcon
+                                <AddIcon
                                     aria-label="New file"
                                     style={{ fontSize: 36 }}
-                                    onClick={() => handleOpenDialog()}
+                                    onClick={() => handleOpenPopupAddNewList()}
                                 />
                             </label>
                             <span className={classes.iconLabel}>
@@ -520,26 +529,35 @@ const Contingency = () => {
                     <h3 className={classes.contingencyTitle}>
                         <FormattedMessage id="contingencyTitle" />
                     </h3>
-                    {listsContingency.length > 0 ? (
+                    {contingencyLists.length > 0 ? (
                         <>
                             <List className={classes.root}>
-                                {listsContingency.map((item, index) => (
-                                    <>
+                                {contingencyLists.map((item, index) => (
+                                    <div key={item.name + 'div'}>
                                         <CustomListItem
                                             button
                                             key={item.name}
                                             selected={selectedIndex === index}
                                             onClick={() =>
-                                                handleListItemClick(item, index)
+                                                handleListItemClicked(
+                                                    item,
+                                                    index
+                                                )
                                             }
                                         >
+                                            <div style={{ marginLeft: '5px' }}>
+                                                {item.type ===
+                                                    scriptTypes.FILTERS && (
+                                                    <PanToolIcon />
+                                                )}
+                                                {item.type ===
+                                                    scriptTypes.SCRIPT && (
+                                                    <DescriptionIcon />
+                                                )}
+                                            </div>
                                             <ListItemText
                                                 className={classes.listItemText}
                                                 primary={item.name}
-                                                key={item.name}
-                                                onClick={() =>
-                                                    setFileContent(item.script)
-                                                }
                                             />
                                             <IconButton
                                                 aria-label="settings"
@@ -589,10 +607,10 @@ const Contingency = () => {
                                                 />
                                             </MenuItem>
                                         </StyledMenu>
-                                    </>
+                                    </div>
                                 ))}
                             </List>
-                            {/* To be replaced by snackbar */}
+                            {/* To be replaced with snackbar */}
                             {alertNotSelectedList && (
                                 <Alert
                                     severity="error"
@@ -612,143 +630,104 @@ const Contingency = () => {
 
                     {/* Temporary list : new file created */}
                     <>
-                        {newNameFileCreated && (
+                        {newListCreated && (
                             <NewFileCreatedList>
                                 <CustomListItem button selected>
                                     <ListItemText
+                                        key={'temporary'}
                                         className={classes.listItemText}
-                                        primary={newFileNameCreated}
-                                        onClick={() =>
-                                            setFileContent(
-                                                aceEditorRef.current.editor.getValue()
-                                            )
-                                        }
+                                        primary={newListName}
                                     />
                                 </CustomListItem>
                             </NewFileCreatedList>
                         )}
                     </>
 
+                    {/* Dialog */}
                     <div>
-                        <DialogContainer
-                            onClose={handleCloseDialog}
-                            aria-labelledby="customized-dialog-title"
-                            open={openDialog}
-                        >
-                            <DialogTitle id="customized-dialog-title">
-                                {newNameFileCreated ? (
-                                    <FormattedMessage id="saveNewListTitle" />
-                                ) : renameList ? (
-                                    <FormattedMessage id="renameList" />
-                                ) : (
-                                    <FormattedMessage id="addNewContencyFile" />
-                                )}
-                            </DialogTitle>
-                            <DialogContent dividers>
-                                <div style={{ paddingLeft: '12px' }}>
-                                    {!newNameFileCreated ? (
-                                        <ThemeProvider theme={theme}>
-                                            <TextField
-                                                defaultValue={
-                                                    renameList
-                                                        ? selectedListName
-                                                        : ''
-                                                }
-                                                autoFocus
-                                                onChange={(event) =>
-                                                    onChangeInputName(
-                                                        event.target.value
-                                                    )
-                                                }
-                                                className={classes.margin}
-                                                label={
-                                                    renameList ? (
-                                                        <FormattedMessage id="newNameList" />
-                                                    ) : (
-                                                        <FormattedMessage id="listName" />
-                                                    )
-                                                }
-                                            />
-                                        </ThemeProvider>
-                                    ) : (
-                                        <FormattedMessage id="saveNewListMsg" />
-                                    )}
-                                </div>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button
-                                    size="small"
-                                    style={{ marginRight: '15px' }}
-                                    onClick={handleCloseDialog}
-                                >
-                                    <FormattedMessage id="cancel" />
-                                </Button>
-                                <Button
-                                    variant="outlined"
-                                    size="small"
-                                    disabled={
-                                        disabledBtnRenameList ? false : true
-                                    }
-                                    onClick={() =>
-                                        saveNewFileName(
-                                            newFileNameCreated,
-                                            aceEditorRef.current.editor.setValue(
-                                                ''
-                                            )
-                                        )
-                                    }
-                                >
-                                    {renameList ? (
-                                        <FormattedMessage id="rename" />
-                                    ) : (
-                                        <FormattedMessage id="create" />
-                                    )}
-                                </Button>
-                            </DialogActions>
-                        </DialogContainer>
+                        {/* Popup for add new list */}
+                        <PopupWithInput
+                            open={openPopupNewList}
+                            onClose={() => setOpenPopupNewList(false)}
+                            title={<FormattedMessage id="addNewContencyFile" />}
+                            inputLabelText={<FormattedMessage id="listName" />}
+                            customTextValidationBtn={
+                                <FormattedMessage id="create" />
+                            }
+                            customTextCancelBtn={
+                                <FormattedMessage id="cancel" />
+                            }
+                            handleSaveNewList={addNewList}
+                            newList={true}
+                        />
+                        {/* Popup for rename exist list */}
+                        <PopupWithInput
+                            open={openPopupRenameList}
+                            onClose={() => setOpenPopupRenameList(false)}
+                            title={<FormattedMessage id="renameList" />}
+                            inputLabelText={
+                                <FormattedMessage id="newNameList" />
+                            }
+                            customTextValidationBtn={
+                                <FormattedMessage id="rename" />
+                            }
+                            customTextCancelBtn={
+                                <FormattedMessage id="cancel" />
+                            }
+                            handleRenameExistList={renameExistList}
+                            selectedListName={currentItemName}
+                            newList={false}
+                        />
+                        {/* Alert to save temporary list before switch to another */}
+                        <PopupInfo
+                            open={openPopupInfo}
+                            onClose={() => setOpenPopupInfo(false)}
+                            handleSaveNewList={createListBeforeExit}
+                            handleCancelNewList={cancelCreateListBeforeExit}
+                        />
                     </div>
                     <div className={classes.containerButtons}>
                         <Button
                             style={{ marginRight: '15px' }}
-                            disabled={disabledBtnSubmitList ? false : true}
-                            onClick={() =>
-                                cancelNewList(
-                                    aceEditorRef.current.editor.setValue('')
-                                )
-                            }
+                            disabled={btnSaveListDisabled}
+                            onClick={() => cancelNewList()}
                         >
                             <FormattedMessage id="cancel" />
                         </Button>
                         <Button
                             variant="outlined"
-                            disabled={disabledBtnSubmitList ? false : true}
-                            onClick={() =>
-                                saveNewList(
-                                    newFileNameCreated,
-                                    aceEditorRef.current.editor.getValue()
-                                )
-                            }
+                            disabled={btnSaveListDisabled}
+                            onClick={() => saveNewList()}
                         >
                             <FormattedMessage id="save" />
                         </Button>
                     </div>
                 </Grid>
+
                 <Grid xs={9} item={true} className={classes.aceEditor}>
-                    <AceEditor
-                        className={classes.editor}
-                        ref={aceEditorRef}
-                        mode="groovy"
-                        placeholder="Insert your groovy script here"
-                        theme={themeForAceEditor()}
-                        onChange={(val) => onChangeEditor(val)}
-                        value={fileContent}
-                        fontSize="18px"
-                        editorProps={{ $blockScrolling: true }}
-                    />
+                    {currentItemType === scriptTypes.FILTERS && (
+                        <FiltersEditor
+                            item={currentFiltersContingency}
+                            onChange={onChangeFiltersContingency}
+                        />
+                    )}
+
+                    {currentItemType === scriptTypes.SCRIPT && (
+                        <AceEditor
+                            className={classes.editor}
+                            mode="groovy"
+                            placeholder="Insert your groovy script here"
+                            theme={themeForAceEditor()}
+                            onChange={(val) => onChangeAceEditor(val)}
+                            value={aceEditorContent}
+                            fontSize="18px"
+                            editorProps={{ $blockScrolling: true }}
+                        />
+                    )}
                 </Grid>
             </Grid>
         </div>
     );
 };
 
-export default Contingency;
+export default ContingencyLists;

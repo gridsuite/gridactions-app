@@ -15,6 +15,9 @@ export function selectTheme(theme) {
 
 export const UPDATE_CONTINGENCY_LIST = 'UPDATE_CONTINGENCY_LIST';
 
-export function updateContingencyList(list) {
-    return { type: UPDATE_CONTINGENCY_LIST, list: list };
+export function updateContingencyList(contingencyLists) {
+    return {
+        type: UPDATE_CONTINGENCY_LIST,
+        contingencyLists: contingencyLists,
+    };
 }

@@ -49,10 +49,26 @@ export function getContingencyLists() {
 }
 
 /**
+ * Get all contingency lists
+ * @returns {Promise<Response>}
+ */
+export function getContingencyList(type, name) {
+    let url = PREFIX_ACTIONS_QUERIES;
+    if (type === 'SCRIPT') {
+        url += '/v1/script-contingency-lists/';
+    } else {
+        url += '/v1/filters-contingency-lists/';
+    }
+    url += name;
+
+    return backendFetch(url).then((response) => response.json());
+}
+
+/**
  * Add new contingency list
  * @returns {Promise<Response>}
  */
-export function addContingencyList(name, script) {
+export function addScriptContingencyList(name, script) {
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/script-contingency-lists/' +
@@ -98,5 +114,34 @@ export function renameListByName(oldName, newName) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({ newContingencyListName: newName }),
+    });
+}
+
+/**
+ * Add new Filter contingency list
+ * @returns {Promise<Response>}
+ */
+export function addFiltersContingencyList(
+    name,
+    equipmentID,
+    equipmentName,
+    equipmentType,
+    nominalVoltage,
+    nominalVoltageOperator
+) {
+    const url =
+        PREFIX_ACTIONS_QUERIES +
+        '/v1/filters-contingency-lists/' +
+        encodeURIComponent(name);
+    return backendFetch(url, {
+        method: 'put',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            equipmentID: equipmentID,
+            equipmentName: equipmentName,
+            equipmentType: equipmentType,
+            nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage,
+            nominalVoltageOperator: nominalVoltageOperator,
+        }),
     });
 }

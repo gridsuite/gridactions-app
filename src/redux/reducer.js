@@ -17,7 +17,7 @@ const initialState = {
     theme: getLocalStorageTheme(),
     user: null,
     signInCallbackError: null,
-    list: null,
+    contingencyLists: [],
 };
 
 export const reducer = createReducer(initialState, {
@@ -35,6 +35,6 @@ export const reducer = createReducer(initialState, {
     },
 
     [UPDATE_CONTINGENCY_LIST]: (state, action) => {
-        state.list = action.list;
+        state.contingencyLists = action.contingencyLists;
     },
 });

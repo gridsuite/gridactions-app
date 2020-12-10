@@ -18,5 +18,19 @@
     "rename": "Renommer",
     "delete": "Supprimer",
     "renameList": "Renommer la liste",
-    "newNameList": "Nouveau nom de la liste"
+    "newNameList": "Nouveau nom de la liste",
+    "equipmentType": "Type d'équipement",
+    "equipmentName": "Nom d'équipement",
+    "equipmentID": "ID d'équipement",
+    "nominalVoltage": "Tension nominale",
+    "SCRIPT": "Script",
+    "FILTERS": "Filtres",
+    "LINE": "LIGNE",
+    "TWO_WINDINGS_TRANSFORMER": "TRANSFO 2E",
+    "DANGLING_LINE": "LIGNE FRONTIÈRE",
+    "GENERATOR": "GÉNÉRATEUR",
+    "STATIC_VAR_COMPENSATOR": "CSPR",
+    "SHUNT_COMPENSATOR": "MCS",
+    "HVDC_LINE": "HVDC",
+    "BUSBAR_SECTION": "SJB"
 }
