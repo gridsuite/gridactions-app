@@ -19,7 +19,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 const useStyles = makeStyles(() => ({
     root: {
         flexGrow: 1,
-        paddingLeft: '40px',
+        padding: '15px 40px',
     },
 }));
 
