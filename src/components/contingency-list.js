@@ -13,6 +13,8 @@ import 'ace-builds/src-noconflict/mode-groovy';
 import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/theme-clouds_midnight';
 
+import Grid from '@material-ui/core/Grid';
+
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -28,7 +30,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import AddIcon from '@material-ui/icons/Add';
 import DescriptionIcon from '@material-ui/icons/Description';
 import PanToolIcon from '@material-ui/icons/PanTool';
-import Drawer from '@material-ui/core/Drawer';
 
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -48,6 +49,7 @@ import {
     getContingencyList,
 } from '../utils/rest-api';
 import { scriptTypes } from '../utils/script-types';
+import { equipmentTypes } from '../utils/equipment-types';
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -61,8 +63,15 @@ const useStyles = makeStyles(() => ({
         top: '70px',
         height: 'calc(100vh - 70px)',
     },
-    containerLists: {
-        minWidth: '325px',
+    contentList: {
+        marginTop: '20px',
+    },
+    treeItem: {
+        textAlign: 'center !important',
+        padding: '5px',
+    },
+    files: {
+        fontSize: '18px',
     },
     contingencyTitle: {
         padding: '15px 10px 10px 15px',
@@ -71,10 +80,9 @@ const useStyles = makeStyles(() => ({
         fontSize: '24px',
         fontWeight: 'bold',
     },
-    addNewList: {
+    contingencyIcons: {
         textAlign: 'center',
-        display: 'flex',
-        padding: '10px 15px',
+        padding: '10px 10px 5px 10px',
         borderBottom: '1px solid #ccc',
     },
     editor: {
@@ -82,38 +90,47 @@ const useStyles = makeStyles(() => ({
         height: '100% !important',
         margin: 'auto',
     },
-    containerAddNewList: {
+    iconButton: {
         display: 'grid',
+    },
+    iconSvg: {
         cursor: 'pointer',
     },
-    svgIcon: {
-        cursor: 'pointer',
-    },
-    svgLabel: {
-        fontSize: '12px',
+    iconLabel: {
+        fontSize: '11px',
         position: 'relative',
         top: '-3px',
+    },
+    addFile: {
+        float: 'right',
+        cursor: 'pointer',
+        position: 'relative',
+        top: '4px',
+    },
+    filesList: {
+        listStyle: 'none',
+        textAlign: 'left',
+        paddingLeft: '15px',
     },
     alert: {
         color: 'rgb(97, 26, 21)',
         backgroundColor: 'rgb(253, 236, 234)',
-        maxWidth: '300px',
-        margin: '0 auto',
+        margin: '15px',
     },
     aceEditor: {
         marginTop: '4px',
         borderLeft: '1px solid #ccc',
-        flexGrow: 1,
     },
     containerButtons: {
         position: 'fixed',
         bottom: '0',
         textAlign: 'center',
-        padding: '15px 20px',
-        minWidth: '325px',
+        zIndex: '999',
+        padding: 20,
+        width: '25%',
     },
     listItemText: {
-        padding: '15px 25px 15px',
+        padding: '15px 5px 15px',
         margin: '0',
     },
 }));
@@ -141,19 +158,8 @@ const StyledMenu = withStyles({
         border: '1px solid #d3d4d5',
         marginTop: '67px',
         marginLeft: '-88px',
-        boxShadow: 'none',
     },
 })(Menu);
-
-const CustomDrawer = withStyles({
-    paperAnchorLeft: {
-        top: '220px',
-        height: 'calc(100vh - 294px)',
-        minWidth: '325px',
-        backgroundColor: 'transparent',
-        border: 'none',
-    },
-})(Drawer);
 
 const ContingencyLists = () => {
     const classes = useStyles();
@@ -179,19 +185,19 @@ const ContingencyLists = () => {
     const [newListName, setNewListName] = useState(null);
 
     const [alertEmptyList, setAlertEmptyList] = useState(true);
+    const [alertNotSelectedList, setAlertNotSelectedList] = useState(false);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [openPopupNewList, setOpenPopupNewList] = useState(false);
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
     const [openPopupInfo, setOpenPopupInfo] = useState(false);
-    const [openPopupConfirmDelete, setOpenPopupConfirmDelete] = useState(false);
 
-    const [equipmentID, setEquipmentID] = useState('*');
-    const [equipmentName, setEquipmentName] = useState('*');
-    const [equipmentType, setEquipmentType] = useState('*');
+    const [equipmentID, setEquipmentID] = useState('.*');
+    const [equipmentName, setEquipmentName] = useState('.*');
+    const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
-    const [nominalVoltage, setNominalVoltage] = useState('*');
+    const [nominalVoltage, setNominalVoltage] = useState('');
 
     /**
      * On click in item on the list
@@ -205,7 +211,9 @@ const ContingencyLists = () => {
             setSelectedIndex(index);
             setCurrentItemName(item.name);
             setCurrentItemType(item.type);
+
             setBtnSaveListDisabled(true);
+            setAlertNotSelectedList(false);
         }
     };
 
@@ -351,17 +359,10 @@ const ContingencyLists = () => {
     };
 
     /**
-     * Show popup confirm delete list
+     * Delete list by name
      */
     const handleDeleteList = () => {
         setAnchorEl(null);
-        setOpenPopupConfirmDelete(true);
-    };
-
-    /**
-     * Delete list by name
-     */
-    const confirmDeleteList = () => {
         if (currentItemName) {
             if (
                 contingencyLists !== null &&
@@ -373,7 +374,7 @@ const ContingencyLists = () => {
                 setSelectedIndex(selectedIndex);
                 fetchScriptByNameList(selectedIndex + 1);
             }
-            setOpenPopupConfirmDelete(false);
+
             deleteListByName(currentItemName).then(() => {
                 getContingencyLists().then((data) => {
                     dispatch(updateContingencyList(data));
@@ -385,14 +386,9 @@ const ContingencyLists = () => {
                     }
                 });
             });
+        } else {
+            setAlertNotSelectedList(true);
         }
-    };
-
-    /**
-     * Cancel delete list
-     */
-    const cancelDeleteList = () => {
-        setOpenPopupConfirmDelete(false);
     };
 
     const handleOpenMenu = (event, name) => {
@@ -503,32 +499,36 @@ const ContingencyLists = () => {
 
     return (
         <div className={classes.container}>
-            <div className={classes.containerLists}>
-                <div className={classes.addNewList}>
-                    <div
-                        className={classes.containerAddNewList}
-                        htmlFor="addContingencyList"
-                        onClick={() => handleOpenPopupAddNewList()}
+            <Grid container direction="row">
+                <Grid xs={3} item={true} className={classes.files}>
+                    <Grid
+                        container
+                        direction="row"
+                        className={classes.contingencyIcons}
+                        id="contingencyTitle"
                     >
-                        <label className={classes.svgIcon}>
-                            <AddIcon
-                                aria-label="New file"
-                                style={{ fontSize: 36 }}
-                            />
-                        </label>
-                        <span className={classes.svgLabel}>
-                            <FormattedMessage id="newList" />
-                        </span>
-                    </div>
-                </div>
-                <h3 className={classes.contingencyTitle}>
-                    <FormattedMessage id="contingencyTitle" />
-                </h3>
-                <CustomDrawer
-                    anchor="left"
-                    variant="permanent"
-                    className={classes.drawer}
-                >
+                        <Grid
+                            xs={3}
+                            item={true}
+                            className={classes.iconButton}
+                            htmlFor="addContingencyList"
+                            style={{ marginTop: '5px' }}
+                        >
+                            <label className={classes.iconSvg}>
+                                <AddIcon
+                                    aria-label="New file"
+                                    style={{ fontSize: 36 }}
+                                    onClick={() => handleOpenPopupAddNewList()}
+                                />
+                            </label>
+                            <span className={classes.iconLabel}>
+                                <FormattedMessage id="newList" />
+                            </span>
+                        </Grid>
+                    </Grid>
+                    <h3 className={classes.contingencyTitle}>
+                        <FormattedMessage id="contingencyTitle" />
+                    </h3>
                     {contingencyLists.length > 0 ? (
                         <>
                             <List className={classes.root}>
@@ -610,10 +610,18 @@ const ContingencyLists = () => {
                                     </div>
                                 ))}
                             </List>
+                            {/* To be replaced with snackbar */}
+                            {alertNotSelectedList && (
+                                <Alert
+                                    severity="error"
+                                    className={classes.alert}
+                                >
+                                    <FormattedMessage id="alertDeleteList" />
+                                </Alert>
+                            )}
                         </>
                     ) : alertEmptyList ? (
                         <Alert severity="error" className={classes.alert}>
-                            {/* To be replaced with snackbar */}
                             <FormattedMessage id="contingencyListIsEmpty" />
                         </Alert>
                     ) : (
@@ -634,103 +642,90 @@ const ContingencyLists = () => {
                             </NewFileCreatedList>
                         )}
                     </>
-                </CustomDrawer>
 
-                {/* Dialog */}
-                <div>
-                    {/* Popup for add new list */}
-                    <PopupWithInput
-                        open={openPopupNewList}
-                        onClose={() => setOpenPopupNewList(false)}
-                        title={<FormattedMessage id="addNewContencyFile" />}
-                        inputLabelText={<FormattedMessage id="listName" />}
-                        customTextValidationBtn={
-                            <FormattedMessage id="create" />
-                        }
-                        customTextCancelBtn={<FormattedMessage id="cancel" />}
-                        handleSaveNewList={addNewList}
-                        newList={true}
-                    />
-                    {/* Popup for rename exist list */}
-                    <PopupWithInput
-                        open={openPopupRenameList}
-                        onClose={() => setOpenPopupRenameList(false)}
-                        title={<FormattedMessage id="renameList" />}
-                        inputLabelText={<FormattedMessage id="newNameList" />}
-                        customTextValidationBtn={
-                            <FormattedMessage id="rename" />
-                        }
-                        customTextCancelBtn={<FormattedMessage id="cancel" />}
-                        handleRenameExistList={renameExistList}
-                        selectedListName={currentItemName}
-                        newList={false}
-                    />
-                    {/* Alert to save temporary list before switch to another */}
-                    <PopupInfo
-                        open={openPopupInfo}
-                        onClose={() => setOpenPopupInfo(false)}
-                        customAlertMessage={
-                            <FormattedMessage
-                                id={
-                                    currentItemType === scriptTypes.FILTERS
-                                        ? 'saveNewFilterList'
-                                        : 'saveNewScriptList'
-                                }
-                            />
-                        }
-                        handleBtnSave={createListBeforeExit}
-                        handleBtnCancel={cancelCreateListBeforeExit}
-                    />
-                    {/* Alert to confirm delete list */}
-                    <PopupInfo
-                        open={openPopupConfirmDelete}
-                        onClose={() => setOpenPopupConfirmDelete(false)}
-                        customAlertMessage={
-                            <FormattedMessage id="alertBeforeDeleteList" />
-                        }
-                        handleBtnSave={confirmDeleteList}
-                        handleBtnCancel={cancelDeleteList}
-                    />
-                </div>
-                <div className={classes.containerButtons}>
-                    <Button
-                        style={{ marginRight: '15px' }}
-                        disabled={btnSaveListDisabled}
-                        onClick={() => cancelNewList()}
-                    >
-                        <FormattedMessage id="cancel" />
-                    </Button>
-                    <Button
-                        variant="outlined"
-                        disabled={btnSaveListDisabled}
-                        onClick={() => saveNewList()}
-                    >
-                        <FormattedMessage id="save" />
-                    </Button>
-                </div>
-            </div>
+                    {/* Dialog */}
+                    <div>
+                        {/* Popup for add new list */}
+                        <PopupWithInput
+                            open={openPopupNewList}
+                            onClose={() => setOpenPopupNewList(false)}
+                            title={<FormattedMessage id="addNewContencyFile" />}
+                            inputLabelText={<FormattedMessage id="listName" />}
+                            customTextValidationBtn={
+                                <FormattedMessage id="create" />
+                            }
+                            customTextCancelBtn={
+                                <FormattedMessage id="cancel" />
+                            }
+                            handleSaveNewList={addNewList}
+                            newList={true}
+                        />
+                        {/* Popup for rename exist list */}
+                        <PopupWithInput
+                            open={openPopupRenameList}
+                            onClose={() => setOpenPopupRenameList(false)}
+                            title={<FormattedMessage id="renameList" />}
+                            inputLabelText={
+                                <FormattedMessage id="newNameList" />
+                            }
+                            customTextValidationBtn={
+                                <FormattedMessage id="rename" />
+                            }
+                            customTextCancelBtn={
+                                <FormattedMessage id="cancel" />
+                            }
+                            handleRenameExistList={renameExistList}
+                            selectedListName={currentItemName}
+                            newList={false}
+                        />
+                        {/* Alert to save temporary list before switch to another */}
+                        <PopupInfo
+                            open={openPopupInfo}
+                            onClose={() => setOpenPopupInfo(false)}
+                            handleSaveNewList={createListBeforeExit}
+                            handleCancelNewList={cancelCreateListBeforeExit}
+                        />
+                    </div>
+                    <div className={classes.containerButtons}>
+                        <Button
+                            style={{ marginRight: '15px' }}
+                            disabled={btnSaveListDisabled}
+                            onClick={() => cancelNewList()}
+                        >
+                            <FormattedMessage id="cancel" />
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            disabled={btnSaveListDisabled}
+                            onClick={() => saveNewList()}
+                        >
+                            <FormattedMessage id="save" />
+                        </Button>
+                    </div>
+                </Grid>
 
-            <div className={classes.aceEditor}>
-                {currentItemType === scriptTypes.FILTERS && (
-                    <FiltersEditor
-                        item={currentFiltersContingency}
-                        onChange={onChangeFiltersContingency}
-                    />
-                )}
+                <Grid xs={9} item={true} className={classes.aceEditor}>
+                    {currentItemType === scriptTypes.FILTERS && (
+                        <FiltersEditor
+                            item={currentFiltersContingency}
+                            onChange={onChangeFiltersContingency}
+                        />
+                    )}
 
-                {currentItemType === scriptTypes.SCRIPT && (
-                    <AceEditor
-                        className={classes.editor}
-                        mode="groovy"
-                        placeholder="Insert your groovy script here"
-                        theme={themeForAceEditor()}
-                        onChange={(val) => onChangeAceEditor(val)}
-                        value={aceEditorContent}
-                        fontSize="18px"
-                        editorProps={{ $blockScrolling: true }}
-                    />
-                )}
-            </div>
+                    {currentItemType === scriptTypes.SCRIPT && (
+                        <AceEditor
+                            className={classes.editor}
+                            mode="groovy"
+                            placeholder="Insert your groovy script here"
+                            theme={themeForAceEditor()}
+                            onChange={(val) => onChangeAceEditor(val)}
+                            value={aceEditorContent}
+                            fontSize="18px"
+                            editorProps={{ $blockScrolling: true }}
+                        />
+                    )}
+                </Grid>
+            </Grid>
         </div>
     );
 };

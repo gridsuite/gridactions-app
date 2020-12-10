@@ -19,11 +19,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 const useStyles = makeStyles(() => ({
     root: {
         flexGrow: 1,
-        padding: '15px 40px',
-    },
-    textField: {
-        color: 'red',
-        width: '2033px',
+        paddingLeft: '40px',
     },
 }));
 
@@ -53,11 +49,11 @@ const CustomTextField = withStyles(() => ({
 const FiltersEditor = ({ item, onChange }) => {
     const classes = useStyles();
 
-    const [equipmentID, setEquipmentID] = useState('*');
-    const [equipmentName, setEquipmentName] = useState('*');
+    const [equipmentID, setEquipmentID] = useState('.*');
+    const [equipmentName, setEquipmentName] = useState('.*');
     const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
-    const [nominalVoltage, setNominalVoltage] = useState('*');
+    const [nominalVoltage, setNominalVoltage] = useState('');
 
     const intl = useIntl();
 
@@ -103,14 +99,18 @@ const FiltersEditor = ({ item, onChange }) => {
             setEquipmentName(item.equipmentName);
             setEquipmentID(item.equipmentID);
             setNominalVoltageOperator(item.nominalVoltageOperator);
-            setNominalVoltage(item.nominalVoltage);
+            if (item.nominalVoltage === -1) {
+                setNominalVoltage('');
+            } else {
+                setNominalVoltage(item.nominalVoltage);
+            }
             setEquipmentType(item.equipmentType);
         } else {
-            setEquipmentName('*');
-            setEquipmentID('*');
+            setEquipmentName('.*');
+            setEquipmentID('.*');
             setNominalVoltageOperator('=');
-            setNominalVoltage('*');
-            setEquipmentType(equipmentTypes.BRANCH);
+            setNominalVoltage('');
+            setEquipmentType(equipmentTypes.LINE);
         }
     }, [item]);
 
