@@ -231,9 +231,7 @@ const PopupInfo = ({
 
     return (
         <DialogContainer open={open} onClose={handleClose}>
-            <CustomDialogTitle onClose={handleClose}>
-                {title}
-            </CustomDialogTitle>
+            <CustomDialogTitle onClose={handleClose}>{title}</CustomDialogTitle>
             <CustomDialogContent dividers>
                 {customAlertMessage}
             </CustomDialogContent>
