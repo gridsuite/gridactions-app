@@ -13,8 +13,6 @@ import 'ace-builds/src-noconflict/mode-groovy';
 import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/theme-clouds_midnight';
 
-import Grid from '@material-ui/core/Grid';
-
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -63,15 +61,8 @@ const useStyles = makeStyles(() => ({
         top: '70px',
         height: 'calc(100vh - 70px)',
     },
-    contentList: {
-        marginTop: '20px',
-    },
-    treeItem: {
-        textAlign: 'center !important',
-        padding: '5px',
-    },
-    files: {
-        fontSize: '18px',
+    containerLists: {
+        minWidth: '350px',
     },
     contingencyTitle: {
         padding: '15px 10px 10px 15px',
@@ -80,9 +71,10 @@ const useStyles = makeStyles(() => ({
         fontSize: '24px',
         fontWeight: 'bold',
     },
-    contingencyIcons: {
+    addNewList: {
         textAlign: 'center',
-        padding: '10px 10px 5px 10px',
+        display: 'flex',
+        padding: '10px 15px',
         borderBottom: '1px solid #ccc',
     },
     editor: {
@@ -90,49 +82,46 @@ const useStyles = makeStyles(() => ({
         height: '100% !important',
         margin: 'auto',
     },
-    iconButton: {
+    containerAddNewList: {
         display: 'grid',
-    },
-    iconSvg: {
         cursor: 'pointer',
     },
-    iconLabel: {
-        fontSize: '11px',
+    svgIcon: {
+        cursor: 'pointer',
+    },
+    svgLabel: {
+        fontSize: '12px',
         position: 'relative',
         top: '-3px',
-    },
-    addFile: {
-        float: 'right',
-        cursor: 'pointer',
-        position: 'relative',
-        top: '4px',
-    },
-    filesList: {
-        listStyle: 'none',
-        textAlign: 'left',
-        paddingLeft: '15px',
     },
     alert: {
         color: 'rgb(97, 26, 21)',
         backgroundColor: 'rgb(253, 236, 234)',
-        margin: '15px',
+        maxWidth: '325px',
+        margin: '0 auto',
     },
     aceEditor: {
         marginTop: '4px',
         borderLeft: '1px solid #ccc',
+        flexGrow: 1,
     },
     containerButtons: {
         position: 'fixed',
         bottom: '0',
         textAlign: 'center',
-        zIndex: '999',
-        padding: 20,
-        width: '25%',
+        padding: '15px 20px',
+        minWidth: '350px',
     },
     listItemText: {
-        padding: '15px 5px 15px',
+        padding: '15px 25px 15px',
         margin: '0',
     },
+    contingencyLists:{
+        overflowY: 'auto',
+        top: '220px',
+        height: 'calc(100vh - 294px)',
+        minWidth: '350px',
+    }
 }));
 
 const CustomListItem = withStyles(() => ({
@@ -158,6 +147,7 @@ const StyledMenu = withStyles({
         border: '1px solid #d3d4d5',
         marginTop: '67px',
         marginLeft: '-88px',
+        boxShadow: 'none',
     },
 })(Menu);
 
@@ -510,36 +500,27 @@ const ContingencyLists = () => {
 
     return (
         <div className={classes.container}>
-            <Grid container direction="row">
-                <Grid xs={3} item={true} className={classes.files}>
-                    <Grid
-                        container
-                        direction="row"
-                        className={classes.contingencyIcons}
-                        id="contingencyTitle"
+            <div className={classes.containerLists}>
+                <div className={classes.addNewList}>
+                    <div
+                        className={classes.containerAddNewList}
+                        onClick={() => handleOpenPopupAddNewList()}
                     >
-                        <Grid
-                            xs={3}
-                            item={true}
-                            className={classes.iconButton}
-                            htmlFor="addContingencyList"
-                            style={{ marginTop: '5px' }}
-                        >
-                            <label className={classes.iconSvg}>
-                                <AddIcon
-                                    aria-label="New file"
-                                    style={{ fontSize: 36 }}
-                                    onClick={() => handleOpenPopupAddNewList()}
-                                />
-                            </label>
-                            <span className={classes.iconLabel}>
-                                <FormattedMessage id="newList" />
-                            </span>
-                        </Grid>
-                    </Grid>
-                    <h3 className={classes.contingencyTitle}>
-                        <FormattedMessage id="contingencyTitle" />
-                    </h3>
+                        <label className={classes.svgIcon}>
+                            <AddIcon
+                                aria-label="New file"
+                                style={{ fontSize: 36 }}
+                            />
+                        </label>
+                        <span className={classes.svgLabel}>
+                            <FormattedMessage id="newList" />
+                        </span>
+                    </div>
+                </div>
+                <h3 className={classes.contingencyTitle}>
+                    <FormattedMessage id="contingencyTitle" />
+                </h3>
+                <div className={classes.contingencyLists} >
                     {contingencyLists.length > 0 ? (
                         <>
                             <List className={classes.root}>
@@ -663,6 +644,7 @@ const ContingencyLists = () => {
                             </NewFileCreatedList>
                         )}
                     </>
+                </div>
 
                     {/* Dialog */}
                     <div>
@@ -746,28 +728,27 @@ const ContingencyLists = () => {
                     </div>
                 </Grid>
 
-                <Grid xs={9} item={true} className={classes.aceEditor}>
-                    {currentItemType === scriptTypes.FILTERS && (
-                        <FiltersEditor
-                            item={currentFiltersContingency}
-                            onChange={onChangeFiltersContingency}
-                        />
-                    )}
+            <div className={classes.aceEditor}>
+                {currentItemType === scriptTypes.FILTERS && (
+                    <FiltersEditor
+                        item={currentFiltersContingency}
+                        onChange={onChangeFiltersContingency}
+                    />
+                )}
 
-                    {currentItemType === scriptTypes.SCRIPT && (
-                        <AceEditor
-                            className={classes.editor}
-                            mode="groovy"
-                            placeholder="Insert your groovy script here"
-                            theme={themeForAceEditor()}
-                            onChange={(val) => onChangeAceEditor(val)}
-                            value={aceEditorContent}
-                            fontSize="18px"
-                            editorProps={{ $blockScrolling: true }}
-                        />
-                    )}
-                </Grid>
-            </Grid>
+                {currentItemType === scriptTypes.SCRIPT && (
+                    <AceEditor
+                        className={classes.editor}
+                        mode="groovy"
+                        placeholder="Insert your groovy script here"
+                        theme={themeForAceEditor()}
+                        onChange={(val) => onChangeAceEditor(val)}
+                        value={aceEditorContent}
+                        fontSize="18px"
+                        editorProps={{ $blockScrolling: true }}
+                    />
+                )}
+            </div>
         </div>
     );
 };
