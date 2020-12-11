@@ -185,13 +185,13 @@ const ContingencyLists = () => {
     const [newListName, setNewListName] = useState(null);
 
     const [alertEmptyList, setAlertEmptyList] = useState(true);
-    const [alertNotSelectedList, setAlertNotSelectedList] = useState(false);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [openPopupNewList, setOpenPopupNewList] = useState(false);
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
     const [openPopupInfo, setOpenPopupInfo] = useState(false);
+    const [openPopupConfirmDelete, setOpenPopupConfirmDelete] = useState(false);
 
     const [equipmentID, setEquipmentID] = useState('.*');
     const [equipmentName, setEquipmentName] = useState('.*');
@@ -211,9 +211,7 @@ const ContingencyLists = () => {
             setSelectedIndex(index);
             setCurrentItemName(item.name);
             setCurrentItemType(item.type);
-
             setBtnSaveListDisabled(true);
-            setAlertNotSelectedList(false);
         }
     };
 
@@ -359,9 +357,17 @@ const ContingencyLists = () => {
     };
 
     /**
-     * Delete list by name
+     * Show popup confirm delete list
      */
     const handleDeleteList = () => {
+        setAnchorEl(null);
+        setOpenPopupConfirmDelete(true);
+    };
+
+    /**
+     * Delete list by name
+     */
+    const confirmDeleteList = () => {
         setAnchorEl(null);
         if (currentItemName) {
             if (
@@ -374,7 +380,7 @@ const ContingencyLists = () => {
                 setSelectedIndex(selectedIndex);
                 fetchScriptByNameList(selectedIndex + 1);
             }
-
+            setOpenPopupConfirmDelete(false);
             deleteListByName(currentItemName).then(() => {
                 getContingencyLists().then((data) => {
                     dispatch(updateContingencyList(data));
@@ -386,9 +392,14 @@ const ContingencyLists = () => {
                     }
                 });
             });
-        } else {
-            setAlertNotSelectedList(true);
         }
+    };
+
+    /**
+     * Cancel delete list
+     */
+    const cancelDeleteList = () => {
+        setOpenPopupConfirmDelete(false);
     };
 
     const handleOpenMenu = (event, name) => {
@@ -532,96 +543,101 @@ const ContingencyLists = () => {
                     {contingencyLists.length > 0 ? (
                         <>
                             <List className={classes.root}>
-                                {contingencyLists.map((item, index) => (
-                                    <div key={item.name + 'div'}>
-                                        <CustomListItem
-                                            button
-                                            key={item.name}
-                                            selected={selectedIndex === index}
-                                            onClick={() =>
-                                                handleListItemClicked(
-                                                    item,
-                                                    index
-                                                )
-                                            }
-                                        >
-                                            <div style={{ marginLeft: '5px' }}>
-                                                {item.type ===
-                                                    scriptTypes.FILTERS && (
-                                                    <PanToolIcon />
-                                                )}
-                                                {item.type ===
-                                                    scriptTypes.SCRIPT && (
-                                                    <DescriptionIcon />
-                                                )}
-                                            </div>
-                                            <ListItemText
-                                                className={classes.listItemText}
-                                                primary={item.name}
-                                            />
-                                            <IconButton
-                                                aria-label="settings"
-                                                aria-controls="list-menu"
-                                                aria-haspopup="true"
-                                                variant="contained"
-                                                onClick={(event) =>
-                                                    handleOpenMenu(
-                                                        event,
-                                                        item.name
+                                {contingencyLists
+                                    .slice()
+                                    .sort((a, b) =>
+                                        a.name.localeCompare(b.name)
+                                    )
+                                    .map((item, index) => (
+                                        <div key={item.name + 'div'}>
+                                            <CustomListItem
+                                                button
+                                                key={item.name}
+                                                selected={
+                                                    selectedIndex === index
+                                                }
+                                                onClick={() =>
+                                                    handleListItemClicked(
+                                                        item,
+                                                        index
                                                     )
                                                 }
                                             >
-                                                <MoreVertIcon />
-                                            </IconButton>
-                                        </CustomListItem>
-                                        <StyledMenu
-                                            id="list-menu"
-                                            anchorEl={anchorEl}
-                                            open={Boolean(anchorEl)}
-                                            onClose={handleCloseMenu}
-                                        >
-                                            <MenuItem
-                                                onClick={handleDeleteList}
-                                            >
-                                                <ListItemIcon>
-                                                    <DeleteIcon fontSize="small" />
-                                                </ListItemIcon>
+                                                <div
+                                                    style={{
+                                                        marginLeft: '5px',
+                                                    }}
+                                                >
+                                                    {item.type ===
+                                                        scriptTypes.FILTERS && (
+                                                        <PanToolIcon />
+                                                    )}
+                                                    {item.type ===
+                                                        scriptTypes.SCRIPT && (
+                                                        <DescriptionIcon />
+                                                    )}
+                                                </div>
                                                 <ListItemText
-                                                    primary={
-                                                        <FormattedMessage id="delete" />
+                                                    className={
+                                                        classes.listItemText
                                                     }
+                                                    primary={item.name}
                                                 />
-                                            </MenuItem>
-                                            <MenuItem
-                                                onClick={() =>
-                                                    handleRenameList()
-                                                }
+                                                <IconButton
+                                                    aria-label="settings"
+                                                    aria-controls="list-menu"
+                                                    aria-haspopup="true"
+                                                    variant="contained"
+                                                    onClick={(event) =>
+                                                        handleOpenMenu(
+                                                            event,
+                                                            item.name
+                                                        )
+                                                    }
+                                                >
+                                                    <MoreVertIcon />
+                                                </IconButton>
+                                            </CustomListItem>
+                                            <StyledMenu
+                                                id="list-menu"
+                                                anchorEl={anchorEl}
+                                                open={Boolean(anchorEl)}
+                                                onClose={handleCloseMenu}
                                             >
-                                                <ListItemIcon>
-                                                    <EditIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText
-                                                    primary={
-                                                        <FormattedMessage id="rename" />
+                                                <MenuItem
+                                                    onClick={handleDeleteList}
+                                                >
+                                                    <ListItemIcon>
+                                                        <DeleteIcon fontSize="small" />
+                                                    </ListItemIcon>
+                                                    <ListItemText
+                                                        primary={
+                                                            <FormattedMessage id="delete" />
+                                                        }
+                                                    />
+                                                </MenuItem>
+                                                <MenuItem
+                                                    onClick={() =>
+                                                        handleRenameList()
                                                     }
-                                                />
-                                            </MenuItem>
-                                        </StyledMenu>
-                                    </div>
-                                ))}
+                                                >
+                                                    <ListItemIcon>
+                                                        <EditIcon fontSize="small" />
+                                                    </ListItemIcon>
+                                                    <ListItemText
+                                                        primary={
+                                                            <FormattedMessage id="rename" />
+                                                        }
+                                                    />
+                                                </MenuItem>
+                                            </StyledMenu>
+                                        </div>
+                                    ))}
                             </List>
-                            {/* To be replaced with snackbar */}
-                            {alertNotSelectedList && (
-                                <Alert
-                                    severity="error"
-                                    className={classes.alert}
-                                >
-                                    <FormattedMessage id="alertDeleteList" />
-                                </Alert>
-                            )}
                         </>
                     ) : alertEmptyList ? (
                         <Alert severity="error" className={classes.alert}>
+                            {/* To be replaced with snackbar */}
                             <FormattedMessage id="contingencyListIsEmpty" />
                         </Alert>
                     ) : (
@@ -682,8 +698,29 @@ const ContingencyLists = () => {
                         <PopupInfo
                             open={openPopupInfo}
                             onClose={() => setOpenPopupInfo(false)}
-                            handleSaveNewList={createListBeforeExit}
-                            handleCancelNewList={cancelCreateListBeforeExit}
+                            title={<FormattedMessage id="saveNewListTitle" />}
+                            customAlertMessage={
+                                <FormattedMessage id="saveNewListMsg" />
+                            }
+                            customTextValidationBtn={
+                                <FormattedMessage id="create" />
+                            }
+                            handleBtnSave={createListBeforeExit}
+                            handleBtnCancel={cancelCreateListBeforeExit}
+                        />
+                        {/* Alert to confirm delete list */}
+                        <PopupInfo
+                            open={openPopupConfirmDelete}
+                            onClose={() => setOpenPopupConfirmDelete(false)}
+                            title={<FormattedMessage id="deleteList" />}
+                            customAlertMessage={
+                                <FormattedMessage id="alertBeforeDeleteList" />
+                            }
+                            customTextValidationBtn={
+                                <FormattedMessage id="delete" />
+                            }
+                            handleBtnSave={confirmDeleteList}
+                            handleBtnCancel={cancelDeleteList}
                         />
                     </div>
                     <div className={classes.containerButtons}>
