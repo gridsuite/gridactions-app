@@ -116,12 +116,12 @@ const useStyles = makeStyles(() => ({
         padding: '15px 25px 15px',
         margin: '0',
     },
-    contingencyLists:{
+    contingencyLists: {
         overflowY: 'auto',
         top: '220px',
         height: 'calc(100vh - 294px)',
         minWidth: '350px',
-    }
+    },
 }));
 
 const CustomListItem = withStyles(() => ({
@@ -520,7 +520,7 @@ const ContingencyLists = () => {
                 <h3 className={classes.contingencyTitle}>
                     <FormattedMessage id="contingencyTitle" />
                 </h3>
-                <div className={classes.contingencyLists} >
+                <div className={classes.contingencyLists}>
                     {contingencyLists.length > 0 ? (
                         <>
                             <List className={classes.root}>
@@ -646,87 +646,81 @@ const ContingencyLists = () => {
                     </>
                 </div>
 
-                    {/* Dialog */}
-                    <div>
-                        {/* Popup for add new list */}
-                        <PopupWithInput
-                            open={openPopupNewList}
-                            onClose={() => setOpenPopupNewList(false)}
-                            title={<FormattedMessage id="addNewContencyFile" />}
-                            inputLabelText={<FormattedMessage id="listName" />}
-                            customTextValidationBtn={
-                                <FormattedMessage id="create" />
-                            }
-                            customTextCancelBtn={
-                                <FormattedMessage id="cancel" />
-                            }
-                            handleSaveNewList={addNewList}
-                            newList={true}
-                        />
-                        {/* Popup for rename exist list */}
-                        <PopupWithInput
-                            open={openPopupRenameList}
-                            onClose={() => setOpenPopupRenameList(false)}
-                            title={<FormattedMessage id="renameList" />}
-                            inputLabelText={
-                                <FormattedMessage id="newNameList" />
-                            }
-                            customTextValidationBtn={
-                                <FormattedMessage id="rename" />
-                            }
-                            customTextCancelBtn={
-                                <FormattedMessage id="cancel" />
-                            }
-                            handleRenameExistList={renameExistList}
-                            selectedListName={currentItemName}
-                            newList={false}
-                        />
-                        {/* Alert to save temporary list before switch to another */}
-                        <PopupInfo
-                            open={openPopupInfo}
-                            onClose={() => setOpenPopupInfo(false)}
-                            title={<FormattedMessage id="saveNewListTitle" />}
-                            customAlertMessage={
-                                <FormattedMessage id="saveNewListMsg" />
-                            }
-                            customTextValidationBtn={
-                                <FormattedMessage id="create" />
-                            }
-                            handleBtnSave={createListBeforeExit}
-                            handleBtnCancel={cancelCreateListBeforeExit}
-                        />
-                        {/* Alert to confirm delete list */}
-                        <PopupInfo
-                            open={openPopupConfirmDelete}
-                            onClose={() => setOpenPopupConfirmDelete(false)}
-                            title={<FormattedMessage id="deleteList" />}
-                            customAlertMessage={
-                                <FormattedMessage id="alertBeforeDeleteList" />
-                            }
-                            customTextValidationBtn={
-                                <FormattedMessage id="delete" />
-                            }
-                            handleBtnSave={confirmDeleteList}
-                            handleBtnCancel={cancelDeleteList}
-                        />
-                    </div>
-                    <div className={classes.containerButtons}>
-                        <Button
-                            style={{ marginRight: '15px' }}
-                            disabled={btnSaveListDisabled}
-                            onClick={() => cancelNewList()}
-                        >
-                            <FormattedMessage id="cancel" />
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            disabled={btnSaveListDisabled}
-                            onClick={() => saveNewList()}
-                        >
-                            <FormattedMessage id="save" />
-                        </Button>
-                    </div>
-                </Grid>
+                {/* Dialog */}
+                <div>
+                    {/* Popup for add new list */}
+                    <PopupWithInput
+                        open={openPopupNewList}
+                        onClose={() => setOpenPopupNewList(false)}
+                        title={<FormattedMessage id="addNewContencyFile" />}
+                        inputLabelText={<FormattedMessage id="listName" />}
+                        customTextValidationBtn={
+                            <FormattedMessage id="create" />
+                        }
+                        customTextCancelBtn={<FormattedMessage id="cancel" />}
+                        handleSaveNewList={addNewList}
+                        newList={true}
+                    />
+                    {/* Popup for rename exist list */}
+                    <PopupWithInput
+                        open={openPopupRenameList}
+                        onClose={() => setOpenPopupRenameList(false)}
+                        title={<FormattedMessage id="renameList" />}
+                        inputLabelText={<FormattedMessage id="newNameList" />}
+                        customTextValidationBtn={
+                            <FormattedMessage id="rename" />
+                        }
+                        customTextCancelBtn={<FormattedMessage id="cancel" />}
+                        handleRenameExistList={renameExistList}
+                        selectedListName={currentItemName}
+                        newList={false}
+                    />
+                    {/* Alert to save temporary list before switch to another */}
+                    <PopupInfo
+                        open={openPopupInfo}
+                        onClose={() => setOpenPopupInfo(false)}
+                        title={<FormattedMessage id="saveNewListTitle" />}
+                        customAlertMessage={
+                            <FormattedMessage id="saveNewListMsg" />
+                        }
+                        customTextValidationBtn={
+                            <FormattedMessage id="create" />
+                        }
+                        handleBtnSave={createListBeforeExit}
+                        handleBtnCancel={cancelCreateListBeforeExit}
+                    />
+                    {/* Alert to confirm delete list */}
+                    <PopupInfo
+                        open={openPopupConfirmDelete}
+                        onClose={() => setOpenPopupConfirmDelete(false)}
+                        title={<FormattedMessage id="deleteList" />}
+                        customAlertMessage={
+                            <FormattedMessage id="alertBeforeDeleteList" />
+                        }
+                        customTextValidationBtn={
+                            <FormattedMessage id="delete" />
+                        }
+                        handleBtnSave={confirmDeleteList}
+                        handleBtnCancel={cancelDeleteList}
+                    />
+                </div>
+                <div className={classes.containerButtons}>
+                    <Button
+                        style={{ marginRight: '15px' }}
+                        disabled={btnSaveListDisabled}
+                        onClick={() => cancelNewList()}
+                    >
+                        <FormattedMessage id="cancel" />
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        disabled={btnSaveListDisabled}
+                        onClick={() => saveNewList()}
+                    >
+                        <FormattedMessage id="save" />
+                    </Button>
+                </div>
+            </div>
 
             <div className={classes.aceEditor}>
                 {currentItemType === scriptTypes.FILTERS && (
