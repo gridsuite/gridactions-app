@@ -29,7 +29,6 @@ import AddIcon from '@material-ui/icons/Add';
 import DescriptionIcon from '@material-ui/icons/Description';
 import PanToolIcon from '@material-ui/icons/PanTool';
 import { DoubleArrow } from '@material-ui/icons';
-import { MenuOpen } from '@material-ui/icons';
 
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -51,7 +50,7 @@ import {
 import { scriptTypes } from '../utils/script-types';
 import { equipmentTypes } from '../utils/equipment-types';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         padding: '0',
     },
@@ -64,12 +63,12 @@ const useStyles = makeStyles(() => ({
         height: 'calc(100vh - 70px)',
     },
     containerLists: {
-        minWidth: '350px',
+        width: '350px',
     },
     smallContainer: {
-        minWidth: '70px',
+        minWidth: '80px',
         textAlign: 'center',
-        marginTop: '14px',
+        marginTop: '10px',
     },
     contingencyTitle: {
         padding: '15px 10px 10px 15px',
@@ -80,10 +79,9 @@ const useStyles = makeStyles(() => ({
     },
     addNewList: {
         textAlign: 'center',
-        display: 'inline-block',
         padding: '10px 15px',
         borderBottom: '1px solid #ccc',
-        width: '100%',
+        minHeight: '80px',
     },
     editor: {
         width: '100% !important',
@@ -119,22 +117,26 @@ const useStyles = makeStyles(() => ({
         bottom: '0',
         textAlign: 'center',
         padding: '15px 20px',
-        minWidth: '350px',
+        width: '350px',
     },
     listItemText: {
         padding: '15px 25px 15px',
         margin: '0',
+        overflow: 'hidden',
     },
     contingencyLists: {
         overflowY: 'auto',
         top: '220px',
-        height: 'calc(100vh - 305px)',
-        minWidth: '350px',
+        height: 'calc(100vh - 300px)',
+        width: '350px',
     },
-    doubleArrowIcon: {
-        padding: '5px',
-        margin: '4px 2px 0',
+    arrowOpen: {
         float: 'right',
+        margin: '10px 3px 0',
+        color: theme.palette.type === 'light' ? '#000' : '#fff',
+    },
+    arrowClose: {
+        color: theme.palette.type === 'light' ? '#000' : '#fff',
     },
 }));
 
@@ -526,7 +528,22 @@ const ContingencyLists = () => {
                         : classes.smallContainer
                 }
             >
-                {showContainerList ? (
+                <IconButton
+                    onClick={collapseList}
+                    className={
+                        showContainerList
+                            ? classes.arrowOpen
+                            : classes.arrowClose
+                    }
+                >
+                    <DoubleArrow
+                        transform={
+                            showContainerList ? 'rotate(180)' : 'rotate(0)'
+                        }
+                        style={{ fontSize: '40px' }}
+                    />
+                </IconButton>
+                {showContainerList && (
                     <div className={classes.addNewList}>
                         <div
                             className={classes.containerAddNewList}
@@ -542,23 +559,7 @@ const ContingencyLists = () => {
                                 <FormattedMessage id="newList" />
                             </span>
                         </div>
-                        <IconButton
-                            onClick={collapseList}
-                            className={classes.doubleArrowIcon}
-                        >
-                            <DoubleArrow
-                                transform={'rotate(180)'}
-                                style={{ fontSize: '40px' }}
-                            />
-                        </IconButton>
                     </div>
-                ) : (
-                    <IconButton
-                        onClick={collapseList}
-                        style={{ padding: '5px' }}
-                    >
-                        <MenuOpen style={{ fontSize: '40px' }} />
-                    </IconButton>
                 )}
                 {showContainerList && (
                     <>
