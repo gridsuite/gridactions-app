@@ -193,8 +193,8 @@ const ContingencyLists = () => {
     const [openPopupInfo, setOpenPopupInfo] = useState(false);
     const [openPopupConfirmDelete, setOpenPopupConfirmDelete] = useState(false);
 
-    const [equipmentID, setEquipmentID] = useState('.*');
-    const [equipmentName, setEquipmentName] = useState('.*');
+    const [equipmentID, setEquipmentID] = useState('*');
+    const [equipmentName, setEquipmentName] = useState('*');
     const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
     const [nominalVoltage, setNominalVoltage] = useState('');
@@ -309,7 +309,9 @@ const ContingencyLists = () => {
         saveNewListResponse().then(() => {
             getContingencyLists().then((data) => {
                 if (data) {
-                    const index = data.findIndex(
+                    const index = data.sort((a, b) =>
+                        a.name.localeCompare(b.name)
+                    ).findIndex(
                         (element) => element.name === newListName
                     );
                     setSelectedIndex(index);
@@ -565,7 +567,9 @@ const ContingencyLists = () => {
                                             >
                                                 <div
                                                     style={{
-                                                        marginLeft: '5px',
+                                                        marginLeft: '10px',
+                                                        marginRight: '15px',
+
                                                     }}
                                                 >
                                                     {item.type ===
