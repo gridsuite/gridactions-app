@@ -653,6 +653,20 @@ const ContingencyLists = () => {
                         {newListCreated && (
                             <NewFileCreatedList>
                                 <CustomListItem button selected>
+                                    <div
+                                        style={{
+                                            marginLeft: '5px',
+                                        }}
+                                    >
+                                        {currentItemType ===
+                                            scriptTypes.FILTERS && (
+                                            <PanToolIcon />
+                                        )}
+                                        {currentItemType ===
+                                            scriptTypes.SCRIPT && (
+                                            <DescriptionIcon />
+                                        )}
+                                    </div>
                                     <ListItemText
                                         key={'temporary'}
                                         className={classes.listItemText}
