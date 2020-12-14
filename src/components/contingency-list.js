@@ -469,7 +469,6 @@ const ContingencyLists = () => {
      **/
     const getAllContingencyLists = useCallback(() => {
         getContingencyLists().then((data) => {
-            console.log(data);
             if (data) {
                 dispatch(updateContingencyList(data));
             }
