@@ -309,11 +309,9 @@ const ContingencyLists = () => {
         saveNewListResponse().then(() => {
             getContingencyLists().then((data) => {
                 if (data) {
-                    const index = data.sort((a, b) =>
-                        a.name.localeCompare(b.name)
-                    ).findIndex(
-                        (element) => element.name === newListName
-                    );
+                    const index = data
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .findIndex((element) => element.name === newListName);
                     setSelectedIndex(index);
                     setBtnSaveListDisabled(true);
                     setNewListCreated(false);
@@ -567,9 +565,8 @@ const ContingencyLists = () => {
                                             >
                                                 <div
                                                     style={{
-                                                        marginLeft: '10px',
-                                                        marginRight: '15px',
-
+                                                        margin:
+                                                            '0 15px 0 10px;',
                                                     }}
                                                 >
                                                     {item.type ===
