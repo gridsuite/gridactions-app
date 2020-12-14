@@ -565,8 +565,7 @@ const ContingencyLists = () => {
                                             >
                                                 <div
                                                     style={{
-                                                        margin:
-                                                            '0 15px 0 10px;',
+                                                        margin: '0 15px 0 10px;'
                                                     }}
                                                 >
                                                     {item.type ===
@@ -652,7 +651,7 @@ const ContingencyLists = () => {
                                 <CustomListItem button selected>
                                     <div
                                         style={{
-                                            marginLeft: '5px',
+                                            margin: '0 15px 0 10px;'
                                         }}
                                     >
                                         {currentItemType ===
