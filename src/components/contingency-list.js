@@ -28,7 +28,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import AddIcon from '@material-ui/icons/Add';
 import DescriptionIcon from '@material-ui/icons/Description';
 import PanToolIcon from '@material-ui/icons/PanTool';
-import { DoubleArrow } from '@material-ui/icons';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -82,6 +83,7 @@ const useStyles = makeStyles((theme) => ({
         padding: '10px 15px',
         borderBottom: '1px solid #ccc',
         minHeight: '80px',
+        marginTop: '12px',
     },
     editor: {
         width: '100% !important',
@@ -130,12 +132,12 @@ const useStyles = makeStyles((theme) => ({
         height: 'calc(100vh - 300px)',
         width: '350px',
     },
-    arrowOpen: {
+    chevronLeft: {
         float: 'right',
-        margin: '10px 3px 0',
+        margin: '8px 3px 0',
         color: theme.palette.type === 'light' ? '#000' : '#fff',
     },
-    arrowClose: {
+    chevronRight: {
         color: theme.palette.type === 'light' ? '#000' : '#fff',
     },
 }));
@@ -532,37 +534,34 @@ const ContingencyLists = () => {
                     onClick={collapseList}
                     className={
                         showContainerList
-                            ? classes.arrowOpen
-                            : classes.arrowClose
+                            ? classes.chevronLeft
+                            : classes.chevronRight
                     }
                 >
-                    <DoubleArrow
-                        transform={
-                            showContainerList ? 'rotate(180)' : 'rotate(0)'
-                        }
-                        style={{ fontSize: '40px' }}
-                    />
+                    {showContainerList ? (
+                        <ChevronLeftIcon style={{ fontSize: '40px' }} />
+                    ) : (
+                        <ChevronRightIcon style={{ fontSize: '40px' }} />
+                    )}
                 </IconButton>
                 {showContainerList && (
-                    <div className={classes.addNewList}>
-                        <div
-                            className={classes.containerAddNewList}
-                            onClick={() => handleOpenPopupAddNewList()}
-                        >
-                            <label className={classes.svgIcon}>
-                                <AddIcon
-                                    aria-label="New file"
-                                    style={{ fontSize: 36 }}
-                                />
-                            </label>
-                            <span className={classes.svgLabel}>
-                                <FormattedMessage id="newList" />
-                            </span>
-                        </div>
-                    </div>
-                )}
-                {showContainerList && (
                     <>
+                        <div className={classes.addNewList}>
+                            <div
+                                className={classes.containerAddNewList}
+                                onClick={() => handleOpenPopupAddNewList()}
+                            >
+                                <label className={classes.svgIcon}>
+                                    <AddIcon
+                                        aria-label="New file"
+                                        style={{ fontSize: 36 }}
+                                    />
+                                </label>
+                                <span className={classes.svgLabel}>
+                                    <FormattedMessage id="newList" />
+                                </span>
+                            </div>
+                        </div>
                         <h3 className={classes.contingencyTitle}>
                             <FormattedMessage id="contingencyTitle" />
                         </h3>
