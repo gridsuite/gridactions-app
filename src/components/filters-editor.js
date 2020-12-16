@@ -56,8 +56,8 @@ const CustomTextField = withStyles(() => ({
 const FiltersEditor = ({ item, onChange }) => {
     const classes = useStyles();
 
-    const [equipmentID, setEquipmentID] = useState('.*');
-    const [equipmentName, setEquipmentName] = useState('.*');
+    const [equipmentID, setEquipmentID] = useState('*');
+    const [equipmentName, setEquipmentName] = useState('*');
     const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
     const [nominalVoltage, setNominalVoltage] = useState('');
@@ -113,8 +113,8 @@ const FiltersEditor = ({ item, onChange }) => {
             }
             setEquipmentType(item.equipmentType);
         } else {
-            setEquipmentName('.*');
-            setEquipmentID('.*');
+            setEquipmentName('*');
+            setEquipmentID('*');
             setNominalVoltageOperator('=');
             setNominalVoltage('');
             setEquipmentType(equipmentTypes.LINE);
