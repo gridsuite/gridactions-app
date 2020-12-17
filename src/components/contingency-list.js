@@ -17,7 +17,6 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import Alert from '@material-ui/lab/Alert';
 
 import IconButton from '@material-ui/core/IconButton';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
@@ -39,7 +38,7 @@ import { PopupWithInput, PopupInfo } from './popup';
 
 import { makeStyles } from '@material-ui/core/styles';
 
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import {
     getContingencyLists,
     addScriptContingencyList,
@@ -50,6 +49,7 @@ import {
 } from '../utils/rest-api';
 import { scriptTypes } from '../utils/script-types';
 import { equipmentTypes } from '../utils/equipment-types';
+import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -173,6 +173,8 @@ const StyledMenu = withStyles({
 
 const ContingencyLists = () => {
     const classes = useStyles();
+    const intl = useIntl();
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const dispatch = useDispatch();
     const selectedTheme = useSelector((state) => state.theme);
 
@@ -194,8 +196,6 @@ const ContingencyLists = () => {
     const [newListCreated, setNewListCreated] = useState(false);
     const [newListName, setNewListName] = useState(null);
 
-    const [alertEmptyList, setAlertEmptyList] = useState(true);
-
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [openPopupNewList, setOpenPopupNewList] = useState(false);
@@ -209,6 +209,23 @@ const ContingencyLists = () => {
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
     const [nominalVoltage, setNominalVoltage] = useState('');
     const [showContainerList, setShowContainerList] = useState(true);
+
+    const messageIdForSnakbar = 'contingencyListIsEmpty';
+
+    /**
+     * Show snackbar notification
+     * @param messagedId
+     * @param variant
+     */
+    const showSnackBarNotification = useCallback(
+        (messagedId) => {
+            const message = intl.formatMessage({ id: messagedId });
+            enqueueSnackbar(message, {
+                variant: 'warning',
+            });
+        },
+        [enqueueSnackbar, intl]
+    );
 
     /**
      * On click in item on the list
@@ -249,7 +266,6 @@ const ContingencyLists = () => {
         setNewListName(name);
         setNewListCreated(true);
         setSelectedIndex(null);
-        setAlertEmptyList(false);
         setOpenPopupNewList(false);
         setBtnSaveListDisabled(false);
     };
@@ -327,6 +343,9 @@ const ContingencyLists = () => {
                     setBtnSaveListDisabled(true);
                     setNewListCreated(false);
                     dispatch(updateContingencyList(data));
+                    if (data.length > 0) {
+                        closeSnackbar();
+                    }
                 }
             });
         });
@@ -336,6 +355,9 @@ const ContingencyLists = () => {
      * Cancel create list, reset editor and hide new name from list
      */
     const cancelNewList = () => {
+        if (contingencyLists.length === 0) {
+            showSnackBarNotification(messageIdForSnakbar);
+        }
         setCurrentItemType(null);
         setNewListCreated(false);
         setBtnSaveListDisabled(true);
@@ -398,8 +420,8 @@ const ContingencyLists = () => {
                     if (data.length > 0) {
                         dispatch(updateContingencyList(data));
                     } else {
+                        showSnackBarNotification(messageIdForSnakbar);
                         setCurrentItemType(null);
-                        setAlertEmptyList(true);
                     }
                 });
             });
@@ -482,9 +504,12 @@ const ContingencyLists = () => {
         getContingencyLists().then((data) => {
             if (data) {
                 dispatch(updateContingencyList(data));
+                if (data.length === 0) {
+                    showSnackBarNotification(messageIdForSnakbar);
+                }
             }
         });
-    }, [dispatch]);
+    }, [dispatch, showSnackBarNotification]);
 
     const getCurrentContingencyList = useCallback(
         (currentItemType, currentItemName) => {
@@ -568,7 +593,7 @@ const ContingencyLists = () => {
                             <FormattedMessage id="contingencyTitle" />
                         </h3>
                         <div className={classes.contingencyLists}>
-                            {contingencyLists.length > 0 ? (
+                            {contingencyLists.length > 0 && (
                                 <List className={classes.root}>
                                     {contingencyLists.map((item, index) => (
                                         <div key={item.name + 'div'}>
@@ -654,16 +679,6 @@ const ContingencyLists = () => {
                                         </div>
                                     ))}
                                 </List>
-                            ) : alertEmptyList ? (
-                                <Alert
-                                    severity="error"
-                                    className={classes.alert}
-                                >
-                                    {/* To be replaced with snackbar */}
-                                    <FormattedMessage id="contingencyListIsEmpty" />
-                                </Alert>
-                            ) : (
-                                ''
                             )}
 
                             {/* Temporary list : new file created */}
