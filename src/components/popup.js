@@ -78,7 +78,6 @@ const CustomDialogActions = withStyles(() => ({
 const DialogContainer = withStyles(() => ({
     paper: {
         width: '500px',
-        height: '250px',
     },
 }))(Dialog);
 
