@@ -210,7 +210,7 @@ const ContingencyLists = () => {
     const [nominalVoltage, setNominalVoltage] = useState('');
     const [showContainerList, setShowContainerList] = useState(true);
 
-    // The message id will be displayed in the snack from the translation file
+    // The id of message that will be displayed in the snackbar from the translation files
     const messageIdForSnakbar = 'contingencyListIsEmpty';
 
     /**
