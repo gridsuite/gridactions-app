@@ -15,6 +15,8 @@ import InputBase from '@material-ui/core/InputBase';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { equipmentTypes } from '../utils/equipment-types';
 import { FormattedMessage, useIntl } from 'react-intl';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { Chip } from '@material-ui/core';
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -47,11 +49,22 @@ const BootstrapInput = withStyles(() => ({
     },
 }))(InputBase);
 
+// need english countries to save the country list
+export const en_countries = require('localized-countries')(
+    require('localized-countries/data/en')
+);
+
 const CustomTextField = withStyles(() => ({
     root: {
         width: '263px',
     },
 }))(TextField);
+
+const CustomAutocomplete = withStyles(() => ({
+    root: {
+        width: '263px',
+    },
+}))(Autocomplete);
 
 const FiltersEditor = ({ item, onChange }) => {
     const classes = useStyles();
@@ -61,7 +74,18 @@ const FiltersEditor = ({ item, onChange }) => {
     const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
     const [nominalVoltage, setNominalVoltage] = useState('');
+    const [countriesSelection, setCountriesSelection] = useState([]);
 
+    let countriesList;
+    try {
+        countriesList = require('localized-countries')(
+            require('localized-countries/data/' +
+                navigator.language.substr(0, 2))
+        );
+    } catch (error) {
+        // fallback to english if no localised list found
+        countriesList = en_countries;
+    }
     const intl = useIntl();
 
     function handleOperator(event) {
@@ -70,6 +94,10 @@ const FiltersEditor = ({ item, onChange }) => {
 
     function handleEquipmentType(event) {
         setEquipmentType(event.target.value);
+    }
+
+    function handleCountrySelection(newValue) {
+        setCountriesSelection(newValue);
     }
 
     function handleEquipmentID(event) {
@@ -90,7 +118,8 @@ const FiltersEditor = ({ item, onChange }) => {
             equipmentName,
             equipmentType,
             nominalVoltageOperator,
-            nominalVoltage
+            nominalVoltage,
+            countriesSelection
         );
     }, [
         onChange,
@@ -99,6 +128,7 @@ const FiltersEditor = ({ item, onChange }) => {
         equipmentType,
         nominalVoltage,
         nominalVoltageOperator,
+        countriesSelection,
     ]);
 
     useEffect(() => {
@@ -112,6 +142,16 @@ const FiltersEditor = ({ item, onChange }) => {
                 setNominalVoltage(item.nominalVoltage);
             }
             setEquipmentType(item.equipmentType);
+            if (item.countries) {
+                let countries = [];
+                for (const [key, val] of Object.entries(
+                    en_countries.object()
+                )) {
+                    if (item.countries.indexOf(val.toUpperCase()) !== -1)
+                        countries.push(key);
+                }
+                setCountriesSelection(countries);
+            }
         } else {
             setEquipmentName('*');
             setEquipmentID('*');
@@ -205,6 +245,42 @@ const FiltersEditor = ({ item, onChange }) => {
                             ))}
                         </CustomNativeSelect>
                     </FormControl>
+                </Grid>
+            </Grid>
+
+            <Grid container direction="row" spacing={1}>
+                <Grid item xs={12} sm={3}>
+                    <h3>
+                        <FormattedMessage id="Countries" />
+                    </h3>
+                </Grid>
+                <Grid item xs={12} sm={9}>
+                    <CustomAutocomplete
+                        id="select_countries"
+                        value={countriesSelection}
+                        multiple={true}
+                        onChange={(event, newValue) => {
+                            handleCountrySelection(newValue);
+                        }}
+                        input={<BootstrapInput />}
+                        options={Object.keys(countriesList.object())}
+                        style={BootstrapInput.input}
+                        getOptionLabel={(code) => countriesList.get(code)}
+                        renderInput={(props) => (
+                            <TextField {...props} variant="outlined" />
+                        )}
+                        renderTags={(val, getTagsProps) =>
+                            val.map((code, index) => (
+                                <Chip
+                                    id={'chip_' + code}
+                                    size={'small'}
+                                    label={code}
+                                    title={countriesList.get(code)}
+                                    {...getTagsProps({ index })}
+                                />
+                            ))
+                        }
+                    />
                 </Grid>
             </Grid>
         </div>
