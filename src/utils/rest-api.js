@@ -97,7 +97,9 @@ export function updateConfigParameters(name, value) {
  */
 export function getContingencyLists() {
     const url = PREFIX_ACTIONS_QUERIES + '/v1/contingency-lists';
-    return backendFetch(url).then((response) => response.json());
+    return backendFetch(url)
+        .then((response) => response.json())
+        .then((res) => res.sort((a, b) => a.name.localeCompare(b.name)));
 }
 
 /**

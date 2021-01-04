@@ -19,9 +19,16 @@ import { FormattedMessage, useIntl } from 'react-intl';
 const useStyles = makeStyles(() => ({
     root: {
         flexGrow: 1,
-        paddingLeft: '40px',
+        padding: '15px 40px',
     },
 }));
+
+const CustomNativeSelect = withStyles((theme) => ({
+    select: {
+        color: theme.palette.type === 'light' ? '#000 !important' : '#fff',
+        backgroundColor: 'transparent !important',
+    },
+}))(NativeSelect);
 
 const BootstrapInput = withStyles(() => ({
     input: {
@@ -49,8 +56,8 @@ const CustomTextField = withStyles(() => ({
 const FiltersEditor = ({ item, onChange }) => {
     const classes = useStyles();
 
-    const [equipmentID, setEquipmentID] = useState('.*');
-    const [equipmentName, setEquipmentName] = useState('.*');
+    const [equipmentID, setEquipmentID] = useState('*');
+    const [equipmentName, setEquipmentName] = useState('*');
     const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
     const [nominalVoltage, setNominalVoltage] = useState('');
@@ -106,8 +113,8 @@ const FiltersEditor = ({ item, onChange }) => {
             }
             setEquipmentType(item.equipmentType);
         } else {
-            setEquipmentName('.*');
-            setEquipmentID('.*');
+            setEquipmentName('*');
+            setEquipmentID('*');
             setNominalVoltageOperator('=');
             setNominalVoltage('');
             setEquipmentType(equipmentTypes.LINE);
@@ -185,7 +192,7 @@ const FiltersEditor = ({ item, onChange }) => {
                 </Grid>
                 <Grid item xs={12} sm={9}>
                     <FormControl>
-                        <NativeSelect
+                        <CustomNativeSelect
                             id="demo-customized-select-native"
                             value={equipmentType}
                             onChange={handleEquipmentType}
@@ -196,7 +203,7 @@ const FiltersEditor = ({ item, onChange }) => {
                                     {intl.formatMessage({ id: val })}
                                 </option>
                             ))}
-                        </NativeSelect>
+                        </CustomNativeSelect>
                     </FormControl>
                 </Grid>
             </Grid>
