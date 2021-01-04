@@ -42,7 +42,6 @@ import {
     connectNotificationsWsUpdateConfig,
     fetchAppsAndUrls,
     fetchConfigParameters,
-    updateConfigParameters,
 } from '../utils/rest-api';
 import { PARAMS_THEME_KEY } from '../utils/config-params';
 
@@ -173,18 +172,6 @@ const App = () => {
             fetchConfigParameters().then((params) => {
                 console.debug('received UI parameters :');
                 console.debug(params);
-
-                //if it's the user first connexion we want to set the default parameters in the database
-                if (params.length === 0) {
-                    let configJson = JSON.stringify([
-                        {
-                            name: PARAMS_THEME_KEY,
-                            value: 'Dark',
-                        },
-                    ]);
-                    updateConfigParameters(configJson);
-                }
-
                 params.forEach((param) => {
                     if (param.key === PARAMS_THEME_KEY) {
                         dispatch(selectTheme(param.value));
