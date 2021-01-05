@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -19,7 +19,7 @@ import {
 
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { LIGHT_THEME } from '../redux/actions';
+import { LIGHT_THEME, selectTheme } from '../redux/actions';
 
 import {
     TopBar,
@@ -38,7 +38,12 @@ import Parameters from './parameters';
 
 import { ReactComponent as GridActionsLogoDark } from '../images/GridActions_logo_dark.svg';
 import { ReactComponent as GridActionsLogoLight } from '../images/GridActions_logo_light.svg';
-import { fetchAppsAndUrls } from '../utils/rest-api';
+import {
+    connectNotificationsWsUpdateConfig,
+    fetchAppsAndUrls,
+    fetchConfigParameters,
+} from '../utils/rest-api';
+import { PARAMS_THEME_KEY } from '../utils/config-params';
 
 const lightTheme = createMuiTheme({
     palette: {
@@ -143,6 +148,42 @@ const App = () => {
             });
         }
     }, [user]);
+
+    const connectNotificationsUpdateConfig = useCallback(() => {
+        const ws = connectNotificationsWsUpdateConfig();
+
+        ws.onmessage = function (event) {
+            fetchConfigParameters().then((params) => {
+                params.forEach((param) => {
+                    if (param.name === PARAMS_THEME_KEY) {
+                        dispatch(selectTheme(param.value));
+                    }
+                });
+            });
+        };
+        ws.onerror = function (event) {
+            console.error('Unexpected Notification WebSocket error', event);
+        };
+        return ws;
+    }, [dispatch]);
+
+    useEffect(() => {
+        if (user !== null) {
+            fetchConfigParameters().then((params) => {
+                console.debug('received UI parameters :');
+                console.debug(params);
+                params.forEach((param) => {
+                    if (param.key === PARAMS_THEME_KEY) {
+                        dispatch(selectTheme(param.value));
+                    }
+                });
+            });
+            const ws = connectNotificationsUpdateConfig();
+            return function () {
+                ws.close();
+            };
+        }
+    }, [user, dispatch, connectNotificationsUpdateConfig]);
 
     function onLogoClicked() {
         history.replace('/');
