@@ -10,4 +10,13 @@ module.exports = function (app) {
             pathRewrite: { '^/api/gateway/': '/' },
         })
     );
+    app.use(
+        createProxyMiddleware(
+            'http://localhost:9000/ws/gateway/config-notification',
+            {
+                pathRewrite: { '^/ws/gateway/': '/' },
+                ws: true,
+            }
+        )
+    );
 };
