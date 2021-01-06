@@ -33,5 +33,6 @@
     "STATIC_VAR_COMPENSATOR": "CSPR",
     "SHUNT_COMPENSATOR": "MCS",
     "HVDC_LINE": "HVDC",
-    "BUSBAR_SECTION": "SJB"
+    "BUSBAR_SECTION": "SJB",
+    "nameAlreadyExist": "Il existe déjà une liste de contingences avec ce nom"
 }
