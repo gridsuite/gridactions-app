@@ -158,6 +158,7 @@ const FiltersEditor = ({ item, onChange }) => {
             setNominalVoltageOperator('=');
             setNominalVoltage('');
             setEquipmentType(equipmentTypes.LINE);
+            setCountriesSelection([]);
         }
     }, [item]);
 
