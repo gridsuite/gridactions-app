@@ -17,7 +17,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import TextField from '@material-ui/core/TextField';
 import { useSelector } from 'react-redux';
 import FormControl from '@material-ui/core/FormControl';
@@ -25,7 +25,6 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
 import Grid from '@material-ui/core/Grid';
-import { useSnackbar } from 'notistack';
 
 const styles = (theme) => ({
     root: {
@@ -94,8 +93,6 @@ const PopupWithInput = ({
     selectedListName,
     newList,
 }) => {
-    const intl = useIntl();
-    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const contingencyLists = useSelector((state) => state.contingencyLists);
     const [disableBtnRenameList, setDisableBtnRenameList] = useState(true);
     const [newNameList, setNewNameList] = useState(false);
@@ -106,18 +103,13 @@ const PopupWithInput = ({
      * @param name
      */
     const onChangeInputName = (name) => {
-        const message = intl.formatMessage({ id: 'nameAlreadyExist' });
         if (name.length === 0) {
             setDisableBtnRenameList(true);
         } else {
             if (contingencyLists.length > 0) {
                 if (contingencyLists.some((list) => list.name === name)) {
                     setDisableBtnRenameList(true);
-                    enqueueSnackbar(message, {
-                        variant: 'error',
-                    });
                 } else {
-                    closeSnackbar();
                     setNewNameList(name);
                     setDisableBtnRenameList(false);
                 }
