@@ -134,6 +134,9 @@ const PopupWithInput = ({
     };
 
     const handleClose = () => {
+        if (showErrorTextField) {
+            setShowErrorTextField(false);
+        }
         onClose();
     };
 
