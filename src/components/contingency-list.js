@@ -126,11 +126,11 @@ const useStyles = makeStyles((theme) => ({
         padding: '15px 25px 15px',
         margin: '0',
         overflow: 'hidden',
-        '& span' : {
+        '& span': {
             width: 220,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-        }
+        },
     },
     contingencyLists: {
         overflowY: 'auto',
@@ -194,7 +194,7 @@ const CustomTooltip = (props) => {
     const classes = useStylesCustomTooltip();
 
     return <Tooltip arrow classes={classes} {...props} />;
-}
+};
 
 const ContingencyLists = () => {
     const classes = useStyles();
@@ -235,7 +235,7 @@ const ContingencyLists = () => {
     const [nominalVoltage, setNominalVoltage] = useState('');
     const [showContainerList, setShowContainerList] = useState(true);
 
-    const maxLengthListName = 21;  // Max length of list name
+    const maxLengthListName = 21; // Max length of list name
 
     /**
      * On click in item on the list
@@ -624,16 +624,23 @@ const ContingencyLists = () => {
                                                         <DescriptionIcon />
                                                     )}
                                                 </div>
-                                                {item.name.length > maxLengthListName ? (
-                                                    <CustomTooltip title={item.name}>
+                                                {item.name.length >
+                                                maxLengthListName ? (
+                                                    <CustomTooltip
+                                                        title={item.name}
+                                                    >
                                                         <ListItemText
-                                                            className={classes.listItemText}
+                                                            className={
+                                                                classes.listItemText
+                                                            }
                                                             primary={item.name}
                                                         />
                                                     </CustomTooltip>
                                                 ) : (
                                                     <ListItemText
-                                                        className={classes.listItemText}
+                                                        className={
+                                                            classes.listItemText
+                                                        }
                                                         primary={item.name}
                                                     />
                                                 )}
@@ -714,11 +721,14 @@ const ContingencyLists = () => {
                                                 <DescriptionIcon />
                                             )}
                                         </div>
-                                        {newListName.length > maxLengthListName ? (
+                                        {newListName.length >
+                                        maxLengthListName ? (
                                             <CustomTooltip title={newListName}>
                                                 <ListItemText
                                                     key={'temporary'}
-                                                    className={classes.listItemText}
+                                                    className={
+                                                        classes.listItemText
+                                                    }
                                                     primary={newListName}
                                                 />
                                             </CustomTooltip>
