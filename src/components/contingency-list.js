@@ -18,6 +18,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Alert from '@material-ui/lab/Alert';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import IconButton from '@material-ui/core/IconButton';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
@@ -125,6 +126,11 @@ const useStyles = makeStyles((theme) => ({
         padding: '15px 25px 15px',
         margin: '0',
         overflow: 'hidden',
+        '& span' : {
+            width: 220,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+        }
     },
     contingencyLists: {
         overflowY: 'auto',
@@ -171,6 +177,25 @@ const StyledMenu = withStyles({
     },
 })(Menu);
 
+const useStylesBootstrap = makeStyles((theme) => ({
+    arrow: {
+        color: theme.palette.type === 'dark' ? '#404040' : '#f0f0f0',
+    },
+    tooltip: {
+        backgroundColor: theme.palette.type === 'dark' ? '#404040' : '#f0f0f0',
+        color: theme.palette.type === 'dark' ? '#f0f0f0' : '#404040',
+        boxShadow: theme.shadows[1],
+        fontSize: '20px',
+        textTransform: 'capitalize',
+    },
+}));
+
+const BootstrapTooltip = (props) => {
+    const classes = useStylesBootstrap();
+
+    return <Tooltip arrow classes={classes} {...props} />;
+}
+
 const ContingencyLists = () => {
     const classes = useStyles();
     const dispatch = useDispatch();
@@ -209,6 +234,8 @@ const ContingencyLists = () => {
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
     const [nominalVoltage, setNominalVoltage] = useState('');
     const [showContainerList, setShowContainerList] = useState(true);
+
+    const maxLenghtListName = 21;
 
     /**
      * On click in item on the list
@@ -597,12 +624,19 @@ const ContingencyLists = () => {
                                                         <DescriptionIcon />
                                                     )}
                                                 </div>
-                                                <ListItemText
-                                                    className={
-                                                        classes.listItemText
-                                                    }
-                                                    primary={item.name}
-                                                />
+                                                {item.name.length > maxLenghtListName ? (
+                                                    <BootstrapTooltip title={item.name}>
+                                                        <ListItemText
+                                                            className={classes.listItemText}
+                                                            primary={item.name}
+                                                        />
+                                                    </BootstrapTooltip>
+                                                ) : (
+                                                    <ListItemText
+                                                        className={classes.listItemText}
+                                                        primary={item.name}
+                                                    />
+                                                )}
                                                 <IconButton
                                                     aria-label="settings"
                                                     aria-controls="list-menu"
@@ -680,11 +714,21 @@ const ContingencyLists = () => {
                                                 <DescriptionIcon />
                                             )}
                                         </div>
-                                        <ListItemText
-                                            key={'temporary'}
-                                            className={classes.listItemText}
-                                            primary={newListName}
-                                        />
+                                        {newListName.length > maxLenghtListName ? (
+                                            <BootstrapTooltip title={newListName}>
+                                                <ListItemText
+                                                    key={'temporary'}
+                                                    className={classes.listItemText}
+                                                    primary={newListName}
+                                                />
+                                            </BootstrapTooltip>
+                                        ) : (
+                                            <ListItemText
+                                                key={'temporary'}
+                                                className={classes.listItemText}
+                                                primary={newListName}
+                                            />
+                                        )}
                                     </CustomListItem>
                                 </NewFileCreatedList>
                             )}
