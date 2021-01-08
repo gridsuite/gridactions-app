@@ -17,6 +17,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import Alert from '@material-ui/lab/Alert';
 
 import IconButton from '@material-ui/core/IconButton';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
@@ -38,7 +39,7 @@ import { PopupWithInput, PopupInfo } from './popup';
 
 import { makeStyles } from '@material-ui/core/styles';
 
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import {
     getContingencyLists,
     addScriptContingencyList,
@@ -173,8 +174,7 @@ const StyledMenu = withStyles({
 
 const ContingencyLists = () => {
     const classes = useStyles();
-    const intl = useIntl();
-    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const { enqueueSnackbar } = useSnackbar();
     const dispatch = useDispatch();
     const selectedTheme = useSelector((state) => state.theme);
 
@@ -196,6 +196,7 @@ const ContingencyLists = () => {
     const [newListCreated, setNewListCreated] = useState(false);
     const [newListName, setNewListName] = useState(null);
 
+    const [alertEmptyList, setAlertEmptyList] = useState(true);
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [openPopupNewList, setOpenPopupNewList] = useState(false);
@@ -210,22 +211,18 @@ const ContingencyLists = () => {
     const [nominalVoltage, setNominalVoltage] = useState('');
     const [showContainerList, setShowContainerList] = useState(true);
 
-    // The id of message that will be displayed in the snackbar from the translation files
-    const messageIdForSnakbar = 'contingencyListIsEmpty';
-
     /**
      * Show snackbar notification
      * @param messagedId
      * @param variant
      */
     const showSnackBarNotification = useCallback(
-        (messagedId) => {
-            const message = intl.formatMessage({ id: messagedId });
+        (message) => {
             enqueueSnackbar(message, {
-                variant: 'warning',
+                variant: 'error',
             });
         },
-        [enqueueSnackbar, intl]
+        [enqueueSnackbar]
     );
 
     /**
@@ -267,6 +264,7 @@ const ContingencyLists = () => {
         setNewListName(name);
         setNewListCreated(true);
         setSelectedIndex(null);
+        setAlertEmptyList(false);
         setOpenPopupNewList(false);
         setBtnSaveListDisabled(false);
     };
@@ -277,13 +275,17 @@ const ContingencyLists = () => {
      * @param newName
      */
     const renameExistList = (oldName, newName) => {
-        renameListByName(oldName, newName).then((response) => {
-            if (response.ok) {
-                getAllContingencyLists();
-            } else {
-                console.error(response.statusText);
-            }
-        });
+        renameListByName(oldName, newName)
+            .then((response) => {
+                if (response.ok) {
+                    getAllContingencyLists();
+                } else {
+                    showSnackBarNotification(response.statusText);
+                }
+            })
+            .catch((error) => {
+                showSnackBarNotification(error.message);
+            });
         setOpenPopupRenameList(false);
     };
 
@@ -335,8 +337,8 @@ const ContingencyLists = () => {
 
     const saveNewList = () => {
         saveNewListResponse().then(() => {
-            getContingencyLists().then((data) => {
-                if (data) {
+            getContingencyLists()
+                .then((data) => {
                     const index = data.findIndex(
                         (element) => element.name === newListName
                     );
@@ -344,11 +346,10 @@ const ContingencyLists = () => {
                     setBtnSaveListDisabled(true);
                     setNewListCreated(false);
                     dispatch(updateContingencyList(data));
-                    if (data.length > 0) {
-                        closeSnackbar();
-                    }
-                }
-            });
+                })
+                .catch((error) => {
+                    showSnackBarNotification(error.message);
+                });
         });
     };
 
@@ -356,9 +357,6 @@ const ContingencyLists = () => {
      * Cancel create list, reset editor and hide new name from list
      */
     const cancelNewList = () => {
-        if (contingencyLists.length === 0) {
-            showSnackBarNotification(messageIdForSnakbar);
-        }
         setCurrentItemType(null);
         setNewListCreated(false);
         setBtnSaveListDisabled(true);
@@ -415,17 +413,25 @@ const ContingencyLists = () => {
                 fetchScriptByNameList(selectedIndex + 1);
             }
             setOpenPopupConfirmDelete(false);
-            deleteListByName(currentItemName).then(() => {
-                getContingencyLists().then((data) => {
-                    dispatch(updateContingencyList(data));
-                    if (data.length > 0) {
-                        dispatch(updateContingencyList(data));
-                    } else {
-                        showSnackBarNotification(messageIdForSnakbar);
-                        setCurrentItemType(null);
-                    }
+            deleteListByName(currentItemName)
+                .then(() => {
+                    getContingencyLists()
+                        .then((data) => {
+                            dispatch(updateContingencyList(data));
+                            if (data.length > 0) {
+                                dispatch(updateContingencyList(data));
+                            } else {
+                                setCurrentItemType(null);
+                                setAlertEmptyList(true);
+                            }
+                        })
+                        .catch((error) => {
+                            showSnackBarNotification(error.message);
+                        });
+                })
+                .catch((error) => {
+                    showSnackBarNotification(error.message);
                 });
-            });
         }
     };
 
@@ -502,20 +508,21 @@ const ContingencyLists = () => {
      * Get all contingency lists on load page
      **/
     const getAllContingencyLists = useCallback(() => {
-        getContingencyLists().then((data) => {
-            if (data) {
-                dispatch(updateContingencyList(data));
-                if (data.length === 0) {
-                    showSnackBarNotification(messageIdForSnakbar);
+        getContingencyLists()
+            .then((data) => {
+                if (data) {
+                    dispatch(updateContingencyList(data));
                 }
-            }
-        });
+            })
+            .catch((error) => {
+                showSnackBarNotification(error.message);
+            });
     }, [dispatch, showSnackBarNotification]);
 
     const getCurrentContingencyList = useCallback(
         (currentItemType, currentItemName) => {
-            getContingencyList(currentItemType, currentItemName).then(
-                (data) => {
+            getContingencyList(currentItemType, currentItemName)
+                .then((data) => {
                     if (data) {
                         if (currentItemType === scriptTypes.SCRIPT) {
                             setCurrentScriptContingency(data);
@@ -523,10 +530,12 @@ const ContingencyLists = () => {
                             setCurrentFiltersContingency(data);
                         }
                     }
-                }
-            );
+                })
+                .catch((error) => {
+                    showSnackBarNotification(error.message);
+                });
         },
-        []
+        [showSnackBarNotification]
     );
 
     const collapseList = () => {
@@ -594,7 +603,7 @@ const ContingencyLists = () => {
                             <FormattedMessage id="contingencyTitle" />
                         </h3>
                         <div className={classes.contingencyLists}>
-                            {contingencyLists.length > 0 && (
+                            {contingencyLists.length > 0 ? (
                                 <List className={classes.root}>
                                     {contingencyLists.map((item, index) => (
                                         <div key={item.name + 'div'}>
@@ -680,6 +689,15 @@ const ContingencyLists = () => {
                                         </div>
                                     ))}
                                 </List>
+                            ) : alertEmptyList ? (
+                                <Alert
+                                    severity="error"
+                                    className={classes.alert}
+                                >
+                                    <FormattedMessage id="contingencyListIsEmpty" />
+                                </Alert>
+                            ) : (
+                                ''
                             )}
 
                             {/* Temporary list : new file created */}
