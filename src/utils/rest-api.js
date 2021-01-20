@@ -103,7 +103,7 @@ export function getContingencyLists() {
 }
 
 /**
- * Get all contingency lists
+ * Get contingency list by type
  * @returns {Promise<Response>}
  */
 export function getContingencyList(type, name) {

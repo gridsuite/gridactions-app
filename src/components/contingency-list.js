@@ -156,12 +156,6 @@ const CustomListItem = withStyles(() => ({
     },
 }))(ListItem);
 
-const NewFileCreatedList = withStyles(() => ({
-    root: {
-        padding: '0',
-    },
-}))(List);
-
 const StyledMenu = withStyles({
     paper: {
         border: '1px solid #d3d4d5',
@@ -200,7 +194,6 @@ const ContingencyLists = () => {
 
     const [openPopupNewList, setOpenPopupNewList] = useState(false);
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
-    const [openPopupInfo, setOpenPopupInfo] = useState(false);
     const [openPopupConfirmDelete, setOpenPopupConfirmDelete] = useState(false);
 
     const [equipmentID, setEquipmentID] = useState('*');
@@ -216,42 +209,19 @@ const ContingencyLists = () => {
      * @param index
      */
     const handleListItemClicked = (item, index) => {
-        if (newListCreated) {
-            setOpenPopupInfo(true);
-        } else {
-            setSelectedIndex(index);
-            setCurrentItemName(item.name);
-            setCurrentItemType(item.type);
-            setBtnSaveListDisabled(true);
-        }
+        setSelectedIndex(index);
+        setCurrentItemName(item.name);
+        setCurrentItemType(item.type);
+        setBtnSaveListDisabled(true);
     };
 
     /**
      * Handler open dialog
      */
-    const handleOpenPopupAddNewList = () => {
-        setOpenPopupNewList(true);
-    };
-
-    /**
-     * Add new list name
-     * @param name
-     * @param type
-     */
-    const addNewList = (name, type) => {
-        if (type === 'SCRIPT') {
-            setAceEditorContent('');
-            setCurrentItemType('SCRIPT');
-        } else {
-            setCurrentFiltersContingency(null);
-            setCurrentItemType(scriptTypes.FILTERS);
-        }
-        setNewListName(name);
-        setNewListCreated(true);
-        setSelectedIndex(null);
-        setAlertEmptyList(false);
-        setOpenPopupNewList(false);
-        setBtnSaveListDisabled(false);
+    const handleEventPopupAddNewList = (event) => {
+        setOpenPopupNewList(event);
+        setNewListCreated(event);
+        setAceEditorContent('');
     };
 
     /**
@@ -271,29 +241,11 @@ const ContingencyLists = () => {
     };
 
     /**
-     * Alert : Add the script and save the new list
-     */
-    const createListBeforeExit = () => {
-        saveNewList();
-        setOpenPopupInfo(false);
-    };
-
-    /**
-     * Alert : Cancel create new list
-     */
-    const cancelCreateListBeforeExit = () => {
-        setNewListCreated(false);
-        setOpenPopupInfo(false);
-        setBtnSaveListDisabled(true);
-        setCurrentItemType(null);
-    };
-
-    /**
      * Save new list added: submit name and script
      */
-    const saveNewListResponse = () => {
-        if (currentItemType === scriptTypes.FILTERS) {
-            if (currentFiltersContingency !== null) {
+    const saveNewListResponse = (name, type) => {
+        if (type === scriptTypes.FILTERS) {
+            if (currentFiltersContingency !== null && !newListCreated) {
                 currentFiltersContingency.equipmentID = equipmentID;
                 currentFiltersContingency.equipmentName = equipmentName;
                 currentFiltersContingency.nominalVoltage = nominalVoltage;
@@ -301,7 +253,7 @@ const ContingencyLists = () => {
                 currentFiltersContingency.equipmentType = equipmentType;
             }
             return addFiltersContingencyList(
-                newListCreated ? newListName : currentItemName,
+                newListCreated ? name : currentItemName,
                 equipmentID,
                 equipmentName,
                 equipmentType,
@@ -310,19 +262,38 @@ const ContingencyLists = () => {
             );
         } else {
             return addScriptContingencyList(
-                newListCreated ? newListName : currentItemName,
+                newListCreated ? name : currentItemName,
                 aceEditorContent
             );
         }
     };
 
-    const saveNewList = () => {
-        saveNewListResponse().then(() => {
+    const saveNewList = (name, type) => {
+        if (newListCreated) {
+            if (type === 'SCRIPT') {
+                setAceEditorContent('');
+                setCurrentItemType('SCRIPT');
+            } else {
+                setCurrentFiltersContingency(null);
+                setCurrentItemType(scriptTypes.FILTERS);
+            }
+            setNewListName(name);
+            setSelectedIndex(null);
+            setAlertEmptyList(false);
+            setOpenPopupNewList(false);
+            setBtnSaveListDisabled(true);
+        }
+
+        saveNewListResponse(name, type).then(() => {
             getContingencyLists().then((data) => {
                 if (data) {
-                    const index = data.findIndex(
-                        (element) => element.name === newListName
-                    );
+                    const index = data.findIndex((element) => {
+                        if (element.name === name) {
+                            setCurrentItemName(element.name);
+                            setCurrentItemType(element.type);
+                        }
+                        return element;
+                    });
                     setSelectedIndex(index);
                     setBtnSaveListDisabled(true);
                     setNewListCreated(false);
@@ -551,7 +522,7 @@ const ContingencyLists = () => {
                         <div className={classes.addNewList}>
                             <div
                                 className={classes.containerAddNewList}
-                                onClick={() => handleOpenPopupAddNewList()}
+                                onClick={() => handleEventPopupAddNewList(true)}
                             >
                                 <label className={classes.svgIcon}>
                                     <AddIcon
@@ -665,29 +636,6 @@ const ContingencyLists = () => {
                             ) : (
                                 ''
                             )}
-
-                            {/* Temporary list : new file created */}
-                            {newListCreated && (
-                                <NewFileCreatedList>
-                                    <CustomListItem button selected>
-                                        <div className={classes.iconList}>
-                                            {currentItemType ===
-                                                scriptTypes.FILTERS && (
-                                                <PanToolIcon />
-                                            )}
-                                            {currentItemType ===
-                                                scriptTypes.SCRIPT && (
-                                                <DescriptionIcon />
-                                            )}
-                                        </div>
-                                        <ListItemText
-                                            key={'temporary'}
-                                            className={classes.listItemText}
-                                            primary={newListName}
-                                        />
-                                    </CustomListItem>
-                                </NewFileCreatedList>
-                            )}
                         </div>
                         <div className={classes.containerButtons}>
                             <Button
@@ -700,7 +648,12 @@ const ContingencyLists = () => {
                             <Button
                                 variant="outlined"
                                 disabled={btnSaveListDisabled}
-                                onClick={() => saveNewList()}
+                                onClick={() =>
+                                    saveNewList(
+                                        currentItemName,
+                                        currentItemType
+                                    )
+                                }
                             >
                                 <FormattedMessage id="save" />
                             </Button>
@@ -713,14 +666,14 @@ const ContingencyLists = () => {
                     {/* Popup for add new list */}
                     <PopupWithInput
                         open={openPopupNewList}
-                        onClose={() => setOpenPopupNewList(false)}
+                        onClose={() => handleEventPopupAddNewList(false)}
                         title={<FormattedMessage id="addNewContencyFile" />}
                         inputLabelText={<FormattedMessage id="listName" />}
                         customTextValidationBtn={
                             <FormattedMessage id="create" />
                         }
                         customTextCancelBtn={<FormattedMessage id="cancel" />}
-                        handleSaveNewList={addNewList}
+                        handleSaveNewList={saveNewList}
                         newList={true}
                     />
                     {/* Popup for rename exist list */}
@@ -736,20 +689,6 @@ const ContingencyLists = () => {
                         handleRenameExistList={renameExistList}
                         selectedListName={currentItemName}
                         newList={false}
-                    />
-                    {/* Alert to save temporary list before switch to another */}
-                    <PopupInfo
-                        open={openPopupInfo}
-                        onClose={() => setOpenPopupInfo(false)}
-                        title={<FormattedMessage id="saveNewListTitle" />}
-                        customAlertMessage={
-                            <FormattedMessage id="saveNewListMsg" />
-                        }
-                        customTextValidationBtn={
-                            <FormattedMessage id="create" />
-                        }
-                        handleBtnSave={createListBeforeExit}
-                        handleBtnCancel={cancelCreateListBeforeExit}
                     />
                     {/* Alert to confirm delete list */}
                     <PopupInfo

@@ -107,7 +107,11 @@ const PopupWithInput = ({
             setDisableBtnRenameList(true);
         } else {
             if (contingencyLists.length > 0) {
-                if (contingencyLists.some((list) => list.name === name)) {
+                if (
+                    contingencyLists.some(
+                        (list) => list.name === name.toLowerCase()
+                    )
+                ) {
                     setDisableBtnRenameList(true);
                 } else {
                     setNewNameList(name);
