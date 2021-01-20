@@ -106,11 +106,7 @@ const FiltersEditor = ({ item, onChange }) => {
             setEquipmentName(item.equipmentName);
             setEquipmentID(item.equipmentID);
             setNominalVoltageOperator(item.nominalVoltageOperator);
-            if (item.nominalVoltage === -1) {
-                setNominalVoltage('');
-            } else {
-                setNominalVoltage(item.nominalVoltage);
-            }
+            setNominalVoltage(item.nominalVoltage);
             setEquipmentType(item.equipmentType);
         } else {
             setEquipmentName('*');
@@ -178,7 +174,7 @@ const FiltersEditor = ({ item, onChange }) => {
                     <CustomTextField
                         onChange={handleNominalVoltage}
                         variant="outlined"
-                        value={nominalVoltage}
+                        value={nominalVoltage === -1 ? '' : nominalVoltage}
                     />
                 </Grid>
             </Grid>

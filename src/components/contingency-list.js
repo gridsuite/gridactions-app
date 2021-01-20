@@ -291,8 +291,9 @@ const ContingencyLists = () => {
                         if (element.name === name) {
                             setCurrentItemName(element.name);
                             setCurrentItemType(element.type);
+                            return element;
                         }
-                        return element;
+                        return null;
                     });
                     setSelectedIndex(index);
                     setBtnSaveListDisabled(true);
