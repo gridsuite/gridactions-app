@@ -34,6 +34,7 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import FiltersEditor from './filters-editor';
+import { en_countries } from './filters-editor';
 import { updateContingencyList } from '../redux/actions';
 import { PopupWithInput, PopupInfo } from './popup';
 
@@ -208,6 +209,7 @@ const ContingencyLists = () => {
     const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
     const [nominalVoltage, setNominalVoltage] = useState('');
+    const [countries, setCountries] = useState([]);
     const [showContainerList, setShowContainerList] = useState(true);
 
     /**
@@ -299,6 +301,7 @@ const ContingencyLists = () => {
                 currentFiltersContingency.nominalVoltage = nominalVoltage;
                 currentFiltersContingency.nominalVoltageOperator = nominalVoltageOperator;
                 currentFiltersContingency.equipmentType = equipmentType;
+                currentFiltersContingency.countries = countries;
             }
             return addFiltersContingencyList(
                 newListCreated ? newListName : currentItemName,
@@ -306,7 +309,8 @@ const ContingencyLists = () => {
                 equipmentName,
                 equipmentType,
                 nominalVoltage,
-                nominalVoltageOperator
+                nominalVoltageOperator,
+                countries.map((code) => en_countries.get(code).toUpperCase())
             );
         } else {
             return addScriptContingencyList(
@@ -450,7 +454,8 @@ const ContingencyLists = () => {
         equipmentName,
         equipmentType,
         nominalVoltageOperator,
-        nominalVoltage
+        nominalVoltage,
+        newCountries
     ) {
         if (currentFiltersContingency !== null) {
             if (
@@ -459,7 +464,8 @@ const ContingencyLists = () => {
                 equipmentType !== currentFiltersContingency.equipmentType ||
                 nominalVoltageOperator !==
                     currentFiltersContingency.nominalVoltageOperator ||
-                nominalVoltage !== currentFiltersContingency.nominalVoltage
+                nominalVoltage !== currentFiltersContingency.nominalVoltage ||
+                newCountries !== currentFiltersContingency.countries
             ) {
                 setBtnSaveListDisabled(false);
             } else {
@@ -473,6 +479,7 @@ const ContingencyLists = () => {
         setEquipmentType(equipmentType);
         setNominalVoltageOperator(nominalVoltageOperator);
         setNominalVoltage(nominalVoltage);
+        setCountries(newCountries);
     }
 
     /**
