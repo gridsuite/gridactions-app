@@ -181,7 +181,8 @@ export function addFiltersContingencyList(
     equipmentName,
     equipmentType,
     nominalVoltage,
-    nominalVoltageOperator
+    nominalVoltageOperator,
+    countries
 ) {
     const url =
         PREFIX_ACTIONS_QUERIES +
@@ -196,6 +197,7 @@ export function addFiltersContingencyList(
             equipmentType: equipmentType,
             nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage,
             nominalVoltageOperator: nominalVoltageOperator,
+            countries: countries,
         }),
     });
 }
