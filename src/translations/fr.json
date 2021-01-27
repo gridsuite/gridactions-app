@@ -34,5 +34,6 @@
     "SHUNT_COMPENSATOR": "MCS",
     "HVDC_LINE": "HVDC",
     "BUSBAR_SECTION": "SJB",
-    "Countries": "Pays"
+    "Countries": "Pays",
+    "nameAlreadyExist": "Il existe déjà une liste de contingences avec ce nom"
 }
