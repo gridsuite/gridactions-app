@@ -1,6 +1,6 @@
 {
     "contingencyTitle": "Listes de contingences",
-    "contingencyListIsEmpty": "La liste de contingence est vide",
+    "contingencyListIsEmpty": "Aucune liste de contingences n'a encore été définie",
     "addNewContencyFile": "Nom de la nouvelle liste",
     "parameters": "Paramètres",
     "General": "Général",
