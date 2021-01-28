@@ -52,7 +52,7 @@ import {
 import { scriptTypes } from '../utils/script-types';
 import { equipmentTypes } from '../utils/equipment-types';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     root: {
         padding: '0',
     },
@@ -140,10 +140,6 @@ const useStyles = makeStyles((theme) => ({
     chevronLeft: {
         float: 'right',
         margin: '8px 3px 0',
-        color: theme.palette.type === 'light' ? '#000' : '#fff',
-    },
-    chevronRight: {
-        color: theme.palette.type === 'light' ? '#000' : '#fff',
     },
     iconList: {
         margin: '0 15px 0 10px',
@@ -178,12 +174,7 @@ const StyledMenu = withStyles({
 })(Menu);
 
 const useStylesCustomTooltip = makeStyles((theme) => ({
-    arrow: {
-        color: theme.palette.type === 'dark' ? '#404040' : '#f0f0f0',
-    },
     tooltip: {
-        backgroundColor: theme.palette.type === 'dark' ? '#404040' : '#f0f0f0',
-        color: theme.palette.type === 'dark' ? '#f0f0f0' : '#404040',
         boxShadow: theme.shadows[1],
         fontSize: '20px',
         textTransform: 'capitalize',
