@@ -1,6 +1,6 @@
 {
     "contingencyTitle": "Contingency lists",
-    "contingencyListIsEmpty": "Contingency lists are empty",
+    "contingencyListIsEmpty": "No contingency list has been defined yet",
     "addNewContencyFile": "Name of the new list",
     "parameters": "Parameters",
     "General": "General",
@@ -33,5 +33,7 @@
     "STATIC_VAR_COMPENSATOR": "STATIC VAR COMPENSATOR",
     "SHUNT_COMPENSATOR": "SHUNT COMPENSATOR",
     "HVDC_LINE": "HVDC LINE",
-    "BUSBAR_SECTION": "BUSBAR SECTION"
+    "BUSBAR_SECTION": "BUSBAR SECTION",
+    "Countries": "Countries",
+    "nameAlreadyExist": "There is already a contingency list with the same name"
 }

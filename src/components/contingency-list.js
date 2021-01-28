@@ -34,6 +34,7 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import FiltersEditor from './filters-editor';
+import { en_countries } from './filters-editor';
 import { updateContingencyList } from '../redux/actions';
 import { PopupWithInput, PopupInfo } from './popup';
 
@@ -50,6 +51,7 @@ import {
 } from '../utils/rest-api';
 import { scriptTypes } from '../utils/script-types';
 import { equipmentTypes } from '../utils/equipment-types';
+import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -167,6 +169,7 @@ const StyledMenu = withStyles({
 
 const ContingencyLists = () => {
     const classes = useStyles();
+    const { enqueueSnackbar } = useSnackbar();
     const dispatch = useDispatch();
     const selectedTheme = useSelector((state) => state.theme);
 
@@ -186,7 +189,6 @@ const ContingencyLists = () => {
     const [aceEditorContent, setAceEditorContent] = useState('');
 
     const [alertEmptyList, setAlertEmptyList] = useState(true);
-
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [openPopupNewList, setOpenPopupNewList] = useState(false);
@@ -198,7 +200,22 @@ const ContingencyLists = () => {
     const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
     const [nominalVoltage, setNominalVoltage] = useState('');
+    const [countries, setCountries] = useState([]);
     const [showContainerList, setShowContainerList] = useState(true);
+
+    /**
+     * Show snackbar notification
+     * @param messagedId
+     * @param variant
+     */
+    const showSnackBarNotification = useCallback(
+        (message) => {
+            enqueueSnackbar(message, {
+                variant: 'error',
+            });
+        },
+        [enqueueSnackbar]
+    );
 
     /**
      * On click in item on the list
@@ -227,14 +244,18 @@ const ContingencyLists = () => {
      * @param newName
      */
     const renameExistList = (oldName, newName) => {
-        renameListByName(oldName, newName).then((response) => {
-            if (response.ok) {
-                getAllContingencyLists();
-                setCurrentItemName(newName);
-            } else {
-                console.error(response.statusText);
-            }
-        });
+        renameListByName(oldName, newName)
+            .then((response) => {
+                if (response.ok) {
+                    getAllContingencyLists();
+                    setCurrentItemName(newName);
+                } else {
+                    showSnackBarNotification(response.statusText);
+                }
+            })
+            .catch((error) => {
+                showSnackBarNotification(error.message);
+            });
         setOpenPopupRenameList(false);
     };
 
@@ -252,6 +273,7 @@ const ContingencyLists = () => {
                 currentFiltersContingency.nominalVoltage = nominalVoltage;
                 currentFiltersContingency.nominalVoltageOperator = nominalVoltageOperator;
                 currentFiltersContingency.equipmentType = equipmentType;
+                currentFiltersContingency.countries = countries;
             }
             return addFiltersContingencyList(
                 name,
@@ -259,7 +281,8 @@ const ContingencyLists = () => {
                 equipmentName,
                 equipmentType,
                 nominalVoltage,
-                nominalVoltageOperator
+                nominalVoltageOperator,
+                countries.map((code) => en_countries.get(code).toUpperCase())
             );
         } else {
             return addScriptContingencyList(name, aceEditorContent);
@@ -273,8 +296,8 @@ const ContingencyLists = () => {
      */
     const saveNewList = (name, type) => {
         saveNewListResponse(name, type).then(() => {
-            getContingencyLists().then((data) => {
-                if (data) {
+            getContingencyLists()
+                .then((data) => {
                     const index = data.findIndex((element) => {
                         if (element.name === name) {
                             setCurrentItemName(element.name);
@@ -287,8 +310,10 @@ const ContingencyLists = () => {
                     setBtnSaveListDisabled(true);
                     setOpenPopupNewList(false);
                     dispatch(updateContingencyList(data));
-                }
-            });
+                })
+                .catch((error) => {
+                    showSnackBarNotification(error.message);
+                });
         });
     };
 
@@ -351,18 +376,26 @@ const ContingencyLists = () => {
                 fetchScriptByNameList(selectedIndex + 1);
             }
             setOpenPopupConfirmDelete(false);
-            deleteListByName(currentItemName).then(() => {
-                getContingencyLists().then((data) => {
-                    dispatch(updateContingencyList(data));
-                    if (data.length > 0) {
-                        dispatch(updateContingencyList(data));
-                        setCurrentItemName(null);
-                    } else {
-                        setCurrentItemType(null);
-                        setAlertEmptyList(true);
-                    }
+            deleteListByName(currentItemName)
+                .then(() => {
+                    getContingencyLists()
+                        .then((data) => {
+                            dispatch(updateContingencyList(data));
+                            if (data.length > 0) {
+                                dispatch(updateContingencyList(data));
+                                setCurrentItemName(null);
+                            } else {
+                                setCurrentItemType(null);
+                                setAlertEmptyList(true);
+                            }
+                        })
+                        .catch((error) => {
+                            showSnackBarNotification(error.message);
+                        });
+                })
+                .catch((error) => {
+                    showSnackBarNotification(error.message);
                 });
-            });
         }
     };
 
@@ -407,7 +440,8 @@ const ContingencyLists = () => {
         equipmentName,
         equipmentType,
         nominalVoltageOperator,
-        nominalVoltage
+        nominalVoltage,
+        newCountries
     ) {
         if (currentFiltersContingency !== null) {
             if (
@@ -416,7 +450,8 @@ const ContingencyLists = () => {
                 equipmentType !== currentFiltersContingency.equipmentType ||
                 nominalVoltageOperator !==
                     currentFiltersContingency.nominalVoltageOperator ||
-                nominalVoltage !== currentFiltersContingency.nominalVoltage
+                nominalVoltage !== currentFiltersContingency.nominalVoltage ||
+                newCountries !== currentFiltersContingency.countries
             ) {
                 setBtnSaveListDisabled(false);
             } else {
@@ -430,23 +465,28 @@ const ContingencyLists = () => {
         setEquipmentType(equipmentType);
         setNominalVoltageOperator(nominalVoltageOperator);
         setNominalVoltage(nominalVoltage);
+        setCountries(newCountries);
     }
 
     /**
      * Get all contingency lists on load page
      **/
     const getAllContingencyLists = useCallback(() => {
-        getContingencyLists().then((data) => {
-            if (data) {
-                dispatch(updateContingencyList(data));
-            }
-        });
-    }, [dispatch]);
+        getContingencyLists()
+            .then((data) => {
+                if (data) {
+                    dispatch(updateContingencyList(data));
+                }
+            })
+            .catch((error) => {
+                showSnackBarNotification(error.message);
+            });
+    }, [dispatch, showSnackBarNotification]);
 
     const getCurrentContingencyList = useCallback(
         (currentItemType, currentItemName) => {
-            getContingencyList(currentItemType, currentItemName).then(
-                (data) => {
+            getContingencyList(currentItemType, currentItemName)
+                .then((data) => {
                     if (data) {
                         if (currentItemType === scriptTypes.SCRIPT) {
                             setCurrentScriptContingency(data);
@@ -454,10 +494,12 @@ const ContingencyLists = () => {
                             setCurrentFiltersContingency(data);
                         }
                     }
-                }
-            );
+                })
+                .catch((error) => {
+                    showSnackBarNotification(error.message);
+                });
         },
-        []
+        [showSnackBarNotification]
     );
 
     const collapseList = () => {

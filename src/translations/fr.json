@@ -1,6 +1,6 @@
 {
     "contingencyTitle": "Listes de contingences",
-    "contingencyListIsEmpty": "La liste de contingence est vide",
+    "contingencyListIsEmpty": "Aucune liste de contingences n'a encore été définie",
     "addNewContencyFile": "Nom de la nouvelle liste",
     "parameters": "Paramètres",
     "General": "Général",
@@ -33,5 +33,7 @@
     "STATIC_VAR_COMPENSATOR": "CSPR",
     "SHUNT_COMPENSATOR": "MCS",
     "HVDC_LINE": "HVDC",
-    "BUSBAR_SECTION": "SJB"
+    "BUSBAR_SECTION": "SJB",
+    "Countries": "Pays",
+    "nameAlreadyExist": "Il existe déjà une liste de contingences avec ce nom"
 }

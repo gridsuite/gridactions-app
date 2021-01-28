@@ -17,7 +17,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import TextField from '@material-ui/core/TextField';
 import { useSelector } from 'react-redux';
 import FormControl from '@material-ui/core/FormControl';
@@ -77,7 +77,7 @@ const CustomDialogActions = withStyles(() => ({
 
 const DialogContainer = withStyles(() => ({
     paper: {
-        width: '500px',
+        width: '600px',
     },
 }))(Dialog);
 
@@ -93,8 +93,10 @@ const PopupWithInput = ({
     selectedListName,
     newList,
 }) => {
+    const intl = useIntl();
     const contingencyLists = useSelector((state) => state.contingencyLists);
     const [disableBtnRenameList, setDisableBtnRenameList] = useState(true);
+    const [showErrorTextField, setShowErrorTextField] = useState(false);
     const [newNameList, setNewNameList] = useState(false);
     const [newListType, setNewListType] = useState('SCRIPT');
 
@@ -113,12 +115,15 @@ const PopupWithInput = ({
                     )
                 ) {
                     setDisableBtnRenameList(true);
+                    setShowErrorTextField(true);
                 } else {
                     setNewNameList(name);
                     setDisableBtnRenameList(false);
+                    setShowErrorTextField(false);
                 }
             } else {
                 setDisableBtnRenameList(false);
+                setShowErrorTextField(false);
                 setNewNameList(name);
             }
         }
@@ -133,6 +138,9 @@ const PopupWithInput = ({
     };
 
     const handleClose = () => {
+        if (showErrorTextField) {
+            setShowErrorTextField(false);
+        }
         onClose();
     };
 
@@ -145,6 +153,14 @@ const PopupWithInput = ({
                         <TextField
                             style={{ width: '100%' }}
                             defaultValue={newList ? '' : selectedListName}
+                            error={showErrorTextField ? true : false}
+                            helperText={
+                                showErrorTextField
+                                    ? intl.formatMessage({
+                                          id: 'nameAlreadyExist',
+                                      })
+                                    : ''
+                            }
                             onChange={(event) =>
                                 onChangeInputName(event.target.value)
                             }
