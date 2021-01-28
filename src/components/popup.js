@@ -64,7 +64,7 @@ const CustomDialogTitle = withStyles(styles)((props) => {
 
 const CustomDialogContent = withStyles(() => ({
     root: {
-        padding: '15px',
+        padding: '25px 15px',
     },
 }))(DialogContent);
 
