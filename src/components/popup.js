@@ -95,7 +95,7 @@ const PopupWithInput = ({
 }) => {
     const intl = useIntl();
     const contingencyLists = useSelector((state) => state.contingencyLists);
-    const [disableBtnRenameList, setDisableBtnRenameList] = useState(true);
+    const [disableBtnSaveList, setDisableBtnSaveList] = useState(true);
     const [showErrorTextField, setShowErrorTextField] = useState(false);
     const [newNameList, setNewNameList] = useState(false);
     const [newListType, setNewListType] = useState('SCRIPT');
@@ -106,23 +106,23 @@ const PopupWithInput = ({
      */
     const onChangeInputName = (name) => {
         if (name.length === 0) {
-            setDisableBtnRenameList(true);
+            setDisableBtnSaveList(true);
         } else {
             if (contingencyLists.length > 0) {
                 if (
                     contingencyLists.some(
-                        (list) => list.name === name.toLowerCase()
+                        (list) => list.name.toLowerCase() === name.toLowerCase()
                     )
                 ) {
-                    setDisableBtnRenameList(true);
+                    setDisableBtnSaveList(true);
                     setShowErrorTextField(true);
                 } else {
                     setNewNameList(name);
-                    setDisableBtnRenameList(false);
+                    setDisableBtnSaveList(false);
                     setShowErrorTextField(false);
                 }
             } else {
-                setDisableBtnRenameList(false);
+                setDisableBtnSaveList(false);
                 setShowErrorTextField(false);
                 setNewNameList(name);
             }
@@ -205,7 +205,7 @@ const PopupWithInput = ({
                     variant="outlined"
                     size="small"
                     onClick={handleSave}
-                    disabled={disableBtnRenameList}
+                    disabled={disableBtnSaveList}
                 >
                     {customTextValidationBtn}
                 </Button>
