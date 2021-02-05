@@ -298,8 +298,8 @@ const ContingencyLists = () => {
         saveNewListResponse(name, type).then(() => {
             getContingencyLists()
                 .then((data) => {
-                    const index = data.findIndex((element) => {
-                        if (element.name === name) {
+                    const index = data.findIndex((element, type) => {
+                        if (element.name === name && element.type === type) {
                             setCurrentItemName(element.name);
                             setCurrentItemType(element.type);
                             return element;
