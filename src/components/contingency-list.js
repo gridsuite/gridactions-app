@@ -132,6 +132,7 @@ const useStyles = makeStyles(() => ({
             width: 220,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
         },
     },
     contingencyLists: {
