@@ -134,6 +134,70 @@ export function addScriptContingencyList(name, script) {
 }
 
 /**
+ * Replace filters contingency list with script contingency list
+ * @returns {Promise<Response>}
+ */
+export function replaceFiltersWithScriptContingencyList(
+    name,
+    equipmentID,
+    equipmentName,
+    equipmentType,
+    nominalVoltage,
+    nominalVoltageOperator,
+    countries
+) {
+    const url =
+        PREFIX_ACTIONS_QUERIES +
+        '/v1/filters-contingency-lists/' +
+        encodeURIComponent(name) +
+        '/replace-with-script';
+    return backendFetch(url, {
+        method: 'put',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            equipmentID: equipmentID,
+            equipmentName: equipmentName,
+            equipmentType: equipmentType,
+            nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage,
+            nominalVoltageOperator: nominalVoltageOperator,
+            countries: countries,
+        }),
+    });
+}
+
+/**
+ * Save new script contingency list from filters contingency list
+ * @returns {Promise<Response>}
+ */
+export function newScriptFromFiltersContingencyList(
+    name,
+    equipmentID,
+    equipmentName,
+    equipmentType,
+    nominalVoltage,
+    nominalVoltageOperator,
+    countries
+) {
+    const url =
+        PREFIX_ACTIONS_QUERIES +
+        '/v1/filters-contingency-lists/' +
+        encodeURIComponent(name) +
+        '/new-script';
+    return backendFetch(url, {
+        method: 'put',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            equipmentID: equipmentID,
+            equipmentName: equipmentName,
+            equipmentType: equipmentType,
+            nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage,
+            nominalVoltageOperator: nominalVoltageOperator,
+            countries: countries,
+        }),
+    });
+}
+
+/**
  * Delete contingency list by name
  * @param name
  * @returns {Promise<Response>}
