@@ -115,6 +115,8 @@ export function getContingencyList(type, name) {
     }
     url += name;
 
+    console.log(url);
+
     return backendFetch(url).then((response) => response.json());
 }
 

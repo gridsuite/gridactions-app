@@ -73,7 +73,7 @@ const FiltersEditor = ({ item, onChange }) => {
     const [equipmentName, setEquipmentName] = useState('*');
     const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
     const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
-    const [nominalVoltage, setNominalVoltage] = useState('');
+    const [nominalVoltage, setNominalVoltage] = useState(-1);
     const [countriesSelection, setCountriesSelection] = useState([]);
 
     let countriesList;
@@ -152,7 +152,7 @@ const FiltersEditor = ({ item, onChange }) => {
             setEquipmentName('*');
             setEquipmentID('*');
             setNominalVoltageOperator('=');
-            setNominalVoltage('');
+            setNominalVoltage(-1);
             setEquipmentType(equipmentTypes.LINE);
             setCountriesSelection([]);
         }

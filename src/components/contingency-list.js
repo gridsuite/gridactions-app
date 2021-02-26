@@ -176,6 +176,7 @@ const ContingencyLists = () => {
     const contingencyLists = useSelector((state) => state.contingencyLists);
     const [currentItemType, setCurrentItemType] = useState(null);
     const [currentItemName, setCurrentItemName] = useState(null);
+    const [currentItem, setCurrentItem] = useState(null);
     const [currentScriptContingency, setCurrentScriptContingency] = useState(
         null
     );
@@ -223,19 +224,21 @@ const ContingencyLists = () => {
      * @param index
      */
     const handleListItemClicked = (item, index) => {
+        console.log(item.name, index);
+        console.log(item);
         setSelectedIndex(index);
+        // TODO
         setCurrentItemName(item.name);
         setCurrentItemType(item.type);
+        setCurrentItem(item);
         setBtnSaveListDisabled(true);
     };
 
     /**
      * Handler open dialog
      */
-    const handleEventPopupAddNewList = (event) => {
-        setOpenPopupNewList(event);
-        setAceEditorContent('');
-        setCurrentFiltersContingency(null);
+    const handleEventPopupAddNewList = (val) => {
+        setOpenPopupNewList(val);
     };
 
     /**
@@ -263,29 +266,43 @@ const ContingencyLists = () => {
      * Save new list response if list type is filters or script
      * @param name
      * @param type
+     * @param isNewList
      * @returns {Promise<Response>}
      */
-    const saveNewListResponse = (name, type) => {
-        if (type === scriptTypes.FILTERS) {
-            if (currentFiltersContingency !== null) {
-                currentFiltersContingency.equipmentID = equipmentID;
-                currentFiltersContingency.equipmentName = equipmentName;
-                currentFiltersContingency.nominalVoltage = nominalVoltage;
-                currentFiltersContingency.nominalVoltageOperator = nominalVoltageOperator;
-                currentFiltersContingency.equipmentType = equipmentType;
-                currentFiltersContingency.countries = countries;
+    const saveListResponse = (name, type, isNewList) => {
+        if (isNewList) {
+            if (type === scriptTypes.FILTERS) {
+                setCurrentFiltersContingency(null);
+                return addFiltersContingencyList(
+                    name,
+                    '*',
+                    '*',
+                    equipmentTypes.LINE,
+                    '',
+                    '=',
+                    []
+                );
+            } else {
+                setAceEditorContent('');
+                setCurrentScriptContingency(null);
+                return addScriptContingencyList(name, '');
             }
-            return addFiltersContingencyList(
-                name,
-                equipmentID,
-                equipmentName,
-                equipmentType,
-                nominalVoltage,
-                nominalVoltageOperator,
-                countries.map((code) => en_countries.get(code).toUpperCase())
-            );
         } else {
-            return addScriptContingencyList(name, aceEditorContent);
+            if (type === scriptTypes.FILTERS) {
+                return addFiltersContingencyList(
+                    name,
+                    equipmentID,
+                    equipmentName,
+                    equipmentType,
+                    nominalVoltage,
+                    nominalVoltageOperator,
+                    countries.map((code) =>
+                        en_countries.get(code).toUpperCase()
+                    )
+                );
+            } else {
+                return addScriptContingencyList(name, aceEditorContent);
+            }
         }
     };
 
@@ -293,19 +310,27 @@ const ContingencyLists = () => {
      * Save new added list
      * @param name
      * @param type
+     * @param isNewList
      */
-    const saveNewList = (name, type) => {
-        saveNewListResponse(name, type).then(() => {
+    const saveList = (name, type, isNewList) => {
+        console.log('saveList: ', name, type, isNewList);
+        saveListResponse(name, type, isNewList).then(() => {
             getContingencyLists()
                 .then((data) => {
                     const index = data.findIndex((element) => {
                         if (element.name === name) {
+                            setCurrentItem({
+                                type: element.type,
+                                name: element.name,
+                            });
                             setCurrentItemName(element.name);
                             setCurrentItemType(element.type);
+                            console.log(element);
                             return element;
                         }
                         return null;
                     });
+                    console.log(index);
                     setSelectedIndex(index);
                     setBtnSaveListDisabled(true);
                     setOpenPopupNewList(false);
@@ -321,7 +346,8 @@ const ContingencyLists = () => {
      * Cancel create list, reset editor and hide new name from list
      */
     const cancelSaveList = () => {
-        setCurrentItemType(null);
+        //TODO
+        //setCurrentItemType(null);
         setBtnSaveListDisabled(true);
     };
 
@@ -344,7 +370,7 @@ const ContingencyLists = () => {
     const fetchScriptByNameList = (itemIndex) => {
         let script = '';
         contingencyLists.map((item, index) => {
-            if (index + 1 === itemIndex + 1) {
+            if (index + 1 === itemIndex + 1) { // LOL
                 script = item.script;
             }
             return setAceEditorContent(script);
@@ -364,28 +390,21 @@ const ContingencyLists = () => {
      */
     const confirmDeleteList = () => {
         setAnchorEl(null);
-        if (currentItemName) {
-            if (
-                contingencyLists !== null &&
-                contingencyLists.length === selectedIndex + 1
-            ) {
-                setSelectedIndex(selectedIndex - 1);
-                fetchScriptByNameList(selectedIndex - 1);
-            } else {
-                setSelectedIndex(selectedIndex);
-                fetchScriptByNameList(selectedIndex + 1);
-            }
+        if (currentItem) {
             setOpenPopupConfirmDelete(false);
-            deleteListByName(currentItemName)
+            deleteListByName(currentItem.name)
                 .then(() => {
                     getContingencyLists()
                         .then((data) => {
                             dispatch(updateContingencyList(data));
                             if (data.length > 0) {
                                 dispatch(updateContingencyList(data));
-                                setCurrentItemName(null);
+                                setSelectedIndex(0);
+                                setCurrentItem(data[0]);
+                                setCurrentItemType(data[0].type);
+                                setCurrentItemName(data[0].name);
                             } else {
-                                setCurrentItemType(null);
+                                setCurrentItem(null);
                                 setAlertEmptyList(true);
                             }
                         })
@@ -424,10 +443,8 @@ const ContingencyLists = () => {
      */
     const onChangeAceEditor = (newScript) => {
         setAceEditorContent(newScript);
-        if (
-            newScript !== '' ||
-            (currentScriptContingency !== null &&
-                newScript !== currentScriptContingency.script)
+        if (currentScriptContingency !== null &&
+            newScript !== currentScriptContingency.script
         ) {
             setBtnSaveListDisabled(false);
         } else {
@@ -451,7 +468,8 @@ const ContingencyLists = () => {
                 nominalVoltageOperator !==
                     currentFiltersContingency.nominalVoltageOperator ||
                 nominalVoltage !== currentFiltersContingency.nominalVoltage ||
-                newCountries !== currentFiltersContingency.countries
+                newCountries.sort().join(',') !==
+                    currentFiltersContingency.countries.sort().join(',')
             ) {
                 setBtnSaveListDisabled(false);
             } else {
@@ -485,6 +503,8 @@ const ContingencyLists = () => {
 
     const getCurrentContingencyList = useCallback(
         (currentItemType, currentItemName) => {
+            console.log("get CURRENT ITEM");
+            console.log("get CURRENT ITEM");
             getContingencyList(currentItemType, currentItemName)
                 .then((data) => {
                     if (data) {
@@ -511,16 +531,20 @@ const ContingencyLists = () => {
     }, [getAllContingencyLists]);
 
     useEffect(() => {
+        console.log('currentScriptContingency: ', currentScriptContingency);
         if (currentScriptContingency !== null) {
             setAceEditorContent(currentScriptContingency.script);
+        } else {
+            setAceEditorContent('');
         }
     }, [currentScriptContingency]);
 
     useEffect(() => {
-        if (currentItemName !== null) {
-            getCurrentContingencyList(currentItemType, currentItemName);
+        console.log('currentItem: ', currentItem);
+        if (currentItem !== null) {
+            getCurrentContingencyList(currentItem.type, currentItem.name);
         }
-    }, [getCurrentContingencyList, currentItemType, currentItemName]);
+    }, [getCurrentContingencyList, currentItem]);
 
     return (
         <div className={classes.container}>
@@ -676,9 +700,10 @@ const ContingencyLists = () => {
                                 variant="outlined"
                                 disabled={btnSaveListDisabled}
                                 onClick={() =>
-                                    saveNewList(
+                                    saveList(
                                         currentItemName,
-                                        currentItemType
+                                        currentItemType,
+                                        false
                                     )
                                 }
                             >
@@ -700,7 +725,7 @@ const ContingencyLists = () => {
                             <FormattedMessage id="create" />
                         }
                         customTextCancelBtn={<FormattedMessage id="cancel" />}
-                        handleSaveNewList={saveNewList}
+                        handleSaveNewList={saveList}
                         newList={true}
                     />
                     {/* Popup for rename exist list */}

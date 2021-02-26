@@ -131,7 +131,7 @@ const PopupWithInput = ({
 
     const handleSave = () => {
         if (newList) {
-            handleSaveNewList(newNameList, newListType);
+            handleSaveNewList(newNameList, newListType, true);
         } else {
             handleRenameExistList(selectedListName, newNameList);
         }
