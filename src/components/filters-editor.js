@@ -147,9 +147,7 @@ const FiltersEditor = ({ item, onChange, cancelChangments }) => {
             setNominalVoltageOperator(item.nominalVoltageOperator);
             setNominalVoltage(item.nominalVoltage);
             setEquipmentType(item.equipmentType);
-            if (item.countries) {
-                setCountriesSelection(getCountriesKeys(item.countries));
-            }
+            setCountriesSelection(item.countries);
         } else {
             setEquipmentName('*');
             setEquipmentID('*');
