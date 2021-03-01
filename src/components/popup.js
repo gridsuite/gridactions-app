@@ -96,8 +96,8 @@ const PopupWithInput = ({
     const intl = useIntl();
     const contingencyLists = useSelector((state) => state.contingencyLists);
     const [disableBtnSave, setDisableBtnSave] = useState(true);
-    const [showErrorTextField, setShowErrorTextField] = useState(false);
-    const [newNameList, setNewNameList] = useState(false);
+    const [showError, setShowError] = useState(false);
+    const [newNameList, setNewListName] = useState(false);
     const [newListType, setNewListType] = useState('SCRIPT');
 
     /**
@@ -115,16 +115,16 @@ const PopupWithInput = ({
                     )
                 ) {
                     setDisableBtnSave(true);
-                    setShowErrorTextField(true);
+                    setShowError(true);
                 } else {
-                    setNewNameList(name);
+                    setNewListName(name);
                     setDisableBtnSave(false);
-                    setShowErrorTextField(false);
+                    setShowError(false);
                 }
             } else {
                 setDisableBtnSave(false);
-                setShowErrorTextField(false);
-                setNewNameList(name);
+                setShowError(false);
+                setNewListName(name);
             }
         }
     };
@@ -138,8 +138,8 @@ const PopupWithInput = ({
     };
 
     const handleClose = () => {
-        if (showErrorTextField) {
-            setShowErrorTextField(false);
+        if (showError) {
+            setShowError(false);
         }
         onClose();
     };
@@ -153,9 +153,9 @@ const PopupWithInput = ({
                         <TextField
                             style={{ width: '100%' }}
                             defaultValue={newList ? '' : selectedListName}
-                            error={showErrorTextField}
+                            error={showError}
                             helperText={
-                                showErrorTextField
+                                showError
                                     ? intl.formatMessage({
                                           id: 'nameAlreadyExist',
                                       })

@@ -181,7 +181,6 @@ const ContingencyLists = () => {
         null
     );
 
-    //TODO to be removed use list name instead
     const [selectedIndex, setSelectedIndex] = useState(null);
 
     const [btnSaveListDisabled, setBtnSaveListDisabled] = useState(true);
@@ -224,20 +223,20 @@ const ContingencyLists = () => {
     );
 
     /**
-     * On click in item on the list
+     * On click on contingency list item
      * @param item
      * @param index
      */
-    const handleListItemClicked = (item, index) => {
+    const handleContingencyListItemClicked = (item, index) => {
         setSelectedIndex(index);
         setCurrentItem(item);
         setBtnSaveListDisabled(true);
     };
 
     /**
-     * Handler open dialog
+     * Add new list handler
      */
-    const handleEventPopupAddNewList = (val) => {
+    const handleAddNewListClicked = (val) => {
         setOpenPopupNewList(val);
     };
 
@@ -246,7 +245,7 @@ const ContingencyLists = () => {
      * @param oldName
      * @param newName
      */
-    const renameExistList = (oldName, newName) => {
+    const renameList = (oldName, newName) => {
         renameListByName(oldName, newName)
             .then((response) => {
                 if (response.ok) {
@@ -289,7 +288,7 @@ const ContingencyLists = () => {
     };
 
     /**
-     * Save new added list
+     * Save list
      * @param name
      * @param type
      * @param isNewList
@@ -317,7 +316,7 @@ const ContingencyLists = () => {
     };
 
     /**
-     * Cancel create list, reset editor and hide new name from list
+     * Cancel update list
      */
     const cancelSaveList = () => {
         if (
@@ -350,7 +349,7 @@ const ContingencyLists = () => {
     };
 
     /**
-     * Show popup confirm delete list
+     * Show popup to confirm list deletion
      */
     const handleDeleteList = () => {
         setAnchorEl(null);
@@ -388,7 +387,7 @@ const ContingencyLists = () => {
         }
     };
 
-    const handleOpenMenu = (event, name) => {
+    const handleOpenMenu = (event) => {
         setAnchorEl(event.currentTarget);
     };
 
@@ -526,7 +525,7 @@ const ContingencyLists = () => {
                         <div className={classes.addNewList}>
                             <div
                                 className={classes.containerAddNewList}
-                                onClick={() => handleEventPopupAddNewList(true)}
+                                onClick={() => handleAddNewListClicked(true)}
                             >
                                 <label className={classes.svgIcon}>
                                     <AddIcon
@@ -554,7 +553,7 @@ const ContingencyLists = () => {
                                                     selectedIndex === index
                                                 }
                                                 onClick={() =>
-                                                    handleListItemClicked(
+                                                    handleContingencyListItemClicked(
                                                         item,
                                                         index
                                                     )
@@ -585,8 +584,7 @@ const ContingencyLists = () => {
                                                     variant="contained"
                                                     onClick={(event) =>
                                                         handleOpenMenu(
-                                                            event,
-                                                            item.name
+                                                            event
                                                         )
                                                     }
                                                 >
@@ -670,7 +668,7 @@ const ContingencyLists = () => {
                     {/* Popup for add new list */}
                     <PopupWithInput
                         open={openPopupNewList}
-                        onClose={() => handleEventPopupAddNewList(false)}
+                        onClose={() => handleAddNewListClicked(false)}
                         title={<FormattedMessage id="addNewContencyFile" />}
                         inputLabelText={<FormattedMessage id="listName" />}
                         customTextValidationBtn={
@@ -690,7 +688,7 @@ const ContingencyLists = () => {
                             <FormattedMessage id="rename" />
                         }
                         customTextCancelBtn={<FormattedMessage id="cancel" />}
-                        handleRenameExistList={renameExistList}
+                        handleRenameExistList={renameList}
                         selectedListName={currentItem ? currentItem.name : ''}
                         newList={false}
                     />
