@@ -271,7 +271,7 @@ const FiltersEditor = ({ item, onChange, cancelChangments }) => {
                                 <Chip
                                     id={'chip_' + code}
                                     size={'small'}
-                                    label={code}
+                                    label={countriesList.get(code)}
                                     title={countriesList.get(code)}
                                     {...getTagsProps({ index })}
                                 />
