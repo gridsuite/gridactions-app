@@ -142,16 +142,7 @@ const FiltersEditor = ({ item, onChange }) => {
                 setNominalVoltage(item.nominalVoltage);
             }
             setEquipmentType(item.equipmentType);
-            if (item.countries) {
-                let countries = [];
-                for (const [key, val] of Object.entries(
-                    en_countries.object()
-                )) {
-                    if (item.countries.indexOf(val.toUpperCase()) !== -1)
-                        countries.push(key);
-                }
-                setCountriesSelection(countries);
-            }
+            setCountriesSelection(item.countries);
         } else {
             setEquipmentName('*');
             setEquipmentID('*');
