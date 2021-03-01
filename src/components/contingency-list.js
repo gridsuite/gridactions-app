@@ -186,7 +186,6 @@ const ContingencyLists = () => {
 
     const [btnSaveListDisabled, setBtnSaveListDisabled] = useState(true);
 
-    //TODO use currentScriptContingency.script instead
     const [aceEditorContent, setAceEditorContent] = useState('');
 
     const [alertEmptyList, setAlertEmptyList] = useState(true);
@@ -196,16 +195,17 @@ const ContingencyLists = () => {
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
     const [openPopupConfirmDelete, setOpenPopupConfirmDelete] = useState(false);
 
-    const [cancelChanges, setCancelChanges] = useState(false);
-
-    const [newFiltersContingency, setNewFiltersContingency] = useState({
+    const emptyFiltersContingency = {
         equipmentID: '*',
         equipmentName: '*',
         equipmentType: equipmentTypes.LINE,
         nominalVoltageOperator: '=',
         nominalVoltage: '',
         countries: [],
-    });
+    };
+    const [newFiltersContingency, setNewFiltersContingency] = useState(
+        emptyFiltersContingency
+    );
 
     const [showContainerList, setShowContainerList] = useState(true);
 
@@ -229,7 +229,6 @@ const ContingencyLists = () => {
      * @param index
      */
     const handleListItemClicked = (item, index) => {
-        console.log('handleListItemClicked', item);
         setSelectedIndex(index);
         setCurrentItem(item);
         setBtnSaveListDisabled(true);
@@ -274,15 +273,7 @@ const ContingencyLists = () => {
         if (isNewList) {
             if (type === scriptTypes.FILTERS) {
                 setCurrentFiltersContingency(null);
-                return addFiltersContingencyList(
-                    name,
-                    '*',
-                    '*',
-                    equipmentTypes.LINE,
-                    '',
-                    '=',
-                    []
-                );
+                return addFiltersContingencyList(name, emptyFiltersContingency);
             } else {
                 setAceEditorContent('');
                 setCurrentScriptContingency(null);
@@ -304,19 +295,16 @@ const ContingencyLists = () => {
      * @param isNewList
      */
     const saveList = (name, type, isNewList) => {
-        console.log('saveList: ', name, type, isNewList);
         saveListResponse(name, type, isNewList).then(() => {
             getContingencyLists()
                 .then((data) => {
                     const index = data.findIndex((element) => {
                         if (element.name === name) {
                             setCurrentItem(element);
-                            console.log(element);
                             return element;
                         }
                         return null;
                     });
-                    console.log(index);
                     setSelectedIndex(index);
                     setBtnSaveListDisabled(true);
                     setOpenPopupNewList(false);
@@ -336,8 +324,7 @@ const ContingencyLists = () => {
             currentItem.type === scriptTypes.FILTERS &&
             currentFiltersContingency !== null
         ) {
-            console.log('YESS', currentFiltersContingency.equipmentID);
-            setCancelChanges(true);
+            setNewFiltersContingency(currentFiltersContingency);
         }
 
         if (
@@ -447,20 +434,10 @@ const ContingencyLists = () => {
                 newFiltersContingency.nominalVoltageOperator !==
                     currentFiltersContingency.nominalVoltageOperator ||
                 newFiltersContingency.nominalVoltage !==
-                    currentFiltersContingency.nominalVoltage ||
+                    currentFiltersContingency.nominalVoltage + '' ||
                 newFiltersContingency.countries.sort().join(',') !==
                     currentFiltersContingency.countries.sort().join(',')
             ) {
-                console.log(newFiltersContingency.countries.sort().join(','));
-                console.log(
-                    currentFiltersContingency.countries.sort().join(',')
-                );
-
-                console.log(
-                    newFiltersContingency.countries.sort().join(',') !==
-                        currentFiltersContingency.countries.sort().join(',')
-                );
-
                 setBtnSaveListDisabled(false);
             } else {
                 setBtnSaveListDisabled(true);
@@ -469,12 +446,6 @@ const ContingencyLists = () => {
             setBtnSaveListDisabled(false);
         }
         setNewFiltersContingency(newFiltersContingency);
-        /*setEquipmentID(equipmentID);
-        setEquipmentName(equipmentName);
-        setEquipmentType(equipmentType);
-        setNominalVoltageOperator(nominalVoltageOperator);
-        setNominalVoltage(nominalVoltage);
-        setCountries(newCountries);*/
     }
 
     /**
@@ -494,16 +465,15 @@ const ContingencyLists = () => {
 
     const getCurrentContingencyList = useCallback(
         (currentItemType, currentItemName) => {
-            console.log('get CURRENT ITEM');
-            console.log('get CURRENT ITEM');
             getContingencyList(currentItemType, currentItemName)
                 .then((data) => {
                     if (data) {
                         if (currentItemType === scriptTypes.SCRIPT) {
-                            console.log('data', data);
                             setCurrentScriptContingency(data);
+                            setAceEditorContent(data.script);
                         } else {
                             setCurrentFiltersContingency(data);
+                            setNewFiltersContingency(data);
                         }
                     }
                 })
@@ -523,16 +493,6 @@ const ContingencyLists = () => {
     }, [getAllContingencyLists]);
 
     useEffect(() => {
-        console.log('currentScriptContingency: ', currentScriptContingency);
-        if (currentScriptContingency !== null) {
-            setAceEditorContent(currentScriptContingency.script);
-        } else {
-            setAceEditorContent('');
-        }
-    }, [currentScriptContingency]);
-
-    useEffect(() => {
-        console.log('currentItem: ', currentItem);
         if (currentItem !== null) {
             getCurrentContingencyList(currentItem.type, currentItem.name);
         }
@@ -754,9 +714,8 @@ const ContingencyLists = () => {
             <div className={classes.aceEditor}>
                 {currentItem && currentItem.type === scriptTypes.FILTERS && (
                     <FiltersEditor
-                        item={currentFiltersContingency}
+                        filtersContingency={newFiltersContingency}
                         onChange={onChangeFiltersContingency}
-                        cancelChangments={cancelChanges}
                     />
                 )}
 
