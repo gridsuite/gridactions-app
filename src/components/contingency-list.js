@@ -34,7 +34,6 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import FiltersEditor from './filters-editor';
-import { en_countries } from './filters-editor';
 import { updateContingencyList } from '../redux/actions';
 import { PopupWithInput, PopupInfo } from './popup';
 
@@ -329,7 +328,7 @@ const ContingencyLists = () => {
                 equipmentType,
                 nominalVoltage,
                 nominalVoltageOperator,
-                countries.map((code) => en_countries.get(code).toUpperCase())
+                countries
             );
         } else {
             return addScriptContingencyList(
