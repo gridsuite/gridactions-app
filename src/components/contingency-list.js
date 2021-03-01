@@ -583,9 +583,7 @@ const ContingencyLists = () => {
                                                     aria-haspopup="true"
                                                     variant="contained"
                                                     onClick={(event) =>
-                                                        handleOpenMenu(
-                                                            event
-                                                        )
+                                                        handleOpenMenu(event)
                                                     }
                                                 >
                                                     <MoreVertIcon />
