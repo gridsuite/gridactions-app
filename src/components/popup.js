@@ -64,7 +64,7 @@ const CustomDialogTitle = withStyles(styles)((props) => {
 
 const CustomDialogContent = withStyles(() => ({
     root: {
-        padding: '25px 15px',
+        padding: '15px',
     },
 }))(DialogContent);
 
@@ -153,7 +153,7 @@ const PopupWithInput = ({
                         <TextField
                             style={{ width: '100%' }}
                             defaultValue={newList ? '' : selectedListName}
-                            error={showErrorTextField ? true : false}
+                            error={showErrorTextField}
                             helperText={
                                 showErrorTextField
                                     ? intl.formatMessage({
