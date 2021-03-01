@@ -180,10 +180,13 @@ const ContingencyLists = () => {
     const [currentFiltersContingency, setCurrentFiltersContingency] = useState(
         null
     );
+
+    //TODO to be removed use list name instead
     const [selectedIndex, setSelectedIndex] = useState(null);
 
     const [btnSaveListDisabled, setBtnSaveListDisabled] = useState(true);
 
+    //TODO use currentScriptContingency.script instead
     const [aceEditorContent, setAceEditorContent] = useState('');
 
     const [alertEmptyList, setAlertEmptyList] = useState(true);
@@ -193,13 +196,17 @@ const ContingencyLists = () => {
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
     const [openPopupConfirmDelete, setOpenPopupConfirmDelete] = useState(false);
 
-    const [cancelChangements, setCancelChangements] = useState(false);
-    const [equipmentID, setEquipmentID] = useState('*');
-    const [equipmentName, setEquipmentName] = useState('*');
-    const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
-    const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
-    const [nominalVoltage, setNominalVoltage] = useState('');
-    const [countries, setCountries] = useState([]);
+    const [cancelChanges, setCancelChanges] = useState(false);
+
+    const [newFiltersContingency, setNewFiltersContingency] = useState({
+        equipmentID: '*',
+        equipmentName: '*',
+        equipmentType: equipmentTypes.LINE,
+        nominalVoltageOperator: '=',
+        nominalVoltage: '',
+        countries: [],
+    });
+
     const [showContainerList, setShowContainerList] = useState(true);
 
     /**
@@ -283,15 +290,7 @@ const ContingencyLists = () => {
             }
         } else {
             if (type === scriptTypes.FILTERS) {
-                return addFiltersContingencyList(
-                    name,
-                    equipmentID,
-                    equipmentName,
-                    equipmentType,
-                    nominalVoltage,
-                    nominalVoltageOperator,
-                    countries
-                );
+                return addFiltersContingencyList(name, newFiltersContingency);
             } else {
                 return addScriptContingencyList(name, aceEditorContent);
             }
@@ -338,7 +337,7 @@ const ContingencyLists = () => {
             currentFiltersContingency !== null
         ) {
             console.log('YESS', currentFiltersContingency.equipmentID);
-            setCancelChangements(true);
+            setCancelChanges(true);
         }
 
         if (
@@ -361,21 +360,6 @@ const ContingencyLists = () => {
             : selectedTheme === 'Dark'
             ? 'clouds_midnight'
             : '';
-    };
-
-    /**
-     * Fetch the script by name in contingency lists
-     * @param itemIndex
-     */
-    const fetchScriptByNameList = (itemIndex) => {
-        let script = '';
-        contingencyLists.map((item, index) => {
-            if (index + 1 === itemIndex + 1) {
-                // LOL
-                script = item.script;
-            }
-            return setAceEditorContent(script);
-        });
     };
 
     /**
@@ -451,32 +435,29 @@ const ContingencyLists = () => {
         }
     };
 
-    function onChangeFiltersContingency(
-        equipmentID,
-        equipmentName,
-        equipmentType,
-        nominalVoltageOperator,
-        nominalVoltage,
-        newCountries
-    ) {
+    function onChangeFiltersContingency(newFiltersContingency) {
         if (currentFiltersContingency !== null) {
             if (
-                equipmentID !== currentFiltersContingency.equipmentID ||
-                equipmentName !== currentFiltersContingency.equipmentName ||
-                equipmentType !== currentFiltersContingency.equipmentType ||
-                nominalVoltageOperator !==
+                newFiltersContingency.equipmentID !==
+                    currentFiltersContingency.equipmentID ||
+                newFiltersContingency.equipmentName !==
+                    currentFiltersContingency.equipmentName ||
+                newFiltersContingency.equipmentType !==
+                    currentFiltersContingency.equipmentType ||
+                newFiltersContingency.nominalVoltageOperator !==
                     currentFiltersContingency.nominalVoltageOperator ||
-                nominalVoltage !== currentFiltersContingency.nominalVoltage ||
-                newCountries.sort().join(',') !==
+                newFiltersContingency.nominalVoltage !==
+                    currentFiltersContingency.nominalVoltage ||
+                newFiltersContingency.countries.sort().join(',') !==
                     currentFiltersContingency.countries.sort().join(',')
             ) {
-                console.log(newCountries.sort().join(','));
+                console.log(newFiltersContingency.countries.sort().join(','));
                 console.log(
                     currentFiltersContingency.countries.sort().join(',')
                 );
 
                 console.log(
-                    newCountries.sort().join(',') !==
+                    newFiltersContingency.countries.sort().join(',') !==
                         currentFiltersContingency.countries.sort().join(',')
                 );
 
@@ -487,12 +468,13 @@ const ContingencyLists = () => {
         } else {
             setBtnSaveListDisabled(false);
         }
-        setEquipmentID(equipmentID);
+        setNewFiltersContingency(newFiltersContingency);
+        /*setEquipmentID(equipmentID);
         setEquipmentName(equipmentName);
         setEquipmentType(equipmentType);
         setNominalVoltageOperator(nominalVoltageOperator);
         setNominalVoltage(nominalVoltage);
-        setCountries(newCountries);
+        setCountries(newCountries);*/
     }
 
     /**
@@ -774,7 +756,7 @@ const ContingencyLists = () => {
                     <FiltersEditor
                         item={currentFiltersContingency}
                         onChange={onChangeFiltersContingency}
-                        cancelChangments={cancelChangements}
+                        cancelChangments={cancelChanges}
                     />
                 )}
 
