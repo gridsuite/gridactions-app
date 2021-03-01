@@ -66,7 +66,7 @@ const CustomAutocomplete = withStyles(() => ({
     },
 }))(Autocomplete);
 
-const FiltersEditor = ({ item, onChange, cancelChangments }) => {
+const FiltersEditor = ({ item, onChange, cancelChanges }) => {
     const classes = useStyles();
 
     const [equipmentID, setEquipmentID] = useState('*');
@@ -131,17 +131,8 @@ const FiltersEditor = ({ item, onChange, cancelChangments }) => {
         countriesSelection,
     ]);
 
-    function getCountriesKeys(countriesValues) {
-        let countriesKeys = [];
-        for (const [key, val] of Object.entries(en_countries.object())) {
-            if (countriesValues.indexOf(val.toUpperCase()) !== -1)
-                countriesKeys.push(key);
-        }
-        return countriesKeys;
-    }
-
     useEffect(() => {
-        if (item !== null || cancelChangments === true) {
+        if (item !== null || cancelChanges === true) {
             setEquipmentName(item.equipmentName);
             setEquipmentID(item.equipmentID);
             setNominalVoltageOperator(item.nominalVoltageOperator);
@@ -156,7 +147,7 @@ const FiltersEditor = ({ item, onChange, cancelChangments }) => {
             setEquipmentType(equipmentTypes.LINE);
             setCountriesSelection([]);
         }
-    }, [item, cancelChangments]);
+    }, [item, cancelChanges]);
 
     return (
         <div className={classes.root}>
