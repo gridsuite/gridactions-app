@@ -174,8 +174,6 @@ const ContingencyLists = () => {
     const selectedTheme = useSelector((state) => state.theme);
 
     const contingencyLists = useSelector((state) => state.contingencyLists);
-    const [currentItemType, setCurrentItemType] = useState(null);
-    const [currentItemName, setCurrentItemName] = useState(null);
     const [currentItem, setCurrentItem] = useState(null);
     const [currentScriptContingency, setCurrentScriptContingency] = useState(
         null
@@ -196,6 +194,7 @@ const ContingencyLists = () => {
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
     const [openPopupConfirmDelete, setOpenPopupConfirmDelete] = useState(false);
 
+    const [cancelChangements, setCancelChangements] = useState(false);
     const [equipmentID, setEquipmentID] = useState('*');
     const [equipmentName, setEquipmentName] = useState('*');
     const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
@@ -224,12 +223,8 @@ const ContingencyLists = () => {
      * @param index
      */
     const handleListItemClicked = (item, index) => {
-        console.log(item.name, index);
-        console.log(item);
+        console.log('handleListItemClicked', item);
         setSelectedIndex(index);
-        // TODO
-        setCurrentItemName(item.name);
-        setCurrentItemType(item.type);
         setCurrentItem(item);
         setBtnSaveListDisabled(true);
     };
@@ -251,7 +246,7 @@ const ContingencyLists = () => {
             .then((response) => {
                 if (response.ok) {
                     getAllContingencyLists();
-                    setCurrentItemName(newName);
+                    setCurrentItem({ name: newName, type: currentItem.type });
                 } else {
                     showSnackBarNotification(response.statusText);
                 }
@@ -296,9 +291,7 @@ const ContingencyLists = () => {
                     equipmentType,
                     nominalVoltage,
                     nominalVoltageOperator,
-                    countries.map((code) =>
-                        en_countries.get(code).toUpperCase()
-                    )
+                    countries
                 );
             } else {
                 return addScriptContingencyList(name, aceEditorContent);
@@ -319,12 +312,7 @@ const ContingencyLists = () => {
                 .then((data) => {
                     const index = data.findIndex((element) => {
                         if (element.name === name) {
-                            setCurrentItem({
-                                type: element.type,
-                                name: element.name,
-                            });
-                            setCurrentItemName(element.name);
-                            setCurrentItemType(element.type);
+                            setCurrentItem(element);
                             console.log(element);
                             return element;
                         }
@@ -346,8 +334,21 @@ const ContingencyLists = () => {
      * Cancel create list, reset editor and hide new name from list
      */
     const cancelSaveList = () => {
-        //TODO
-        //setCurrentItemType(null);
+        if (
+            currentItem.type === scriptTypes.FILTERS &&
+            currentFiltersContingency !== null
+        ) {
+            console.log('YESS', currentFiltersContingency.equipmentID);
+            setCancelChangements(true);
+        }
+
+        if (
+            currentItem.type === scriptTypes.SCRIPT &&
+            currentScriptContingency !== null
+        ) {
+            setAceEditorContent(currentScriptContingency.script);
+        }
+
         setBtnSaveListDisabled(true);
     };
 
@@ -370,7 +371,8 @@ const ContingencyLists = () => {
     const fetchScriptByNameList = (itemIndex) => {
         let script = '';
         contingencyLists.map((item, index) => {
-            if (index + 1 === itemIndex + 1) { // LOL
+            if (index + 1 === itemIndex + 1) {
+                // LOL
                 script = item.script;
             }
             return setAceEditorContent(script);
@@ -401,8 +403,6 @@ const ContingencyLists = () => {
                                 dispatch(updateContingencyList(data));
                                 setSelectedIndex(0);
                                 setCurrentItem(data[0]);
-                                setCurrentItemType(data[0].type);
-                                setCurrentItemName(data[0].name);
                             } else {
                                 setCurrentItem(null);
                                 setAlertEmptyList(true);
@@ -420,7 +420,6 @@ const ContingencyLists = () => {
 
     const handleOpenMenu = (event, name) => {
         setAnchorEl(event.currentTarget);
-        setCurrentItemName(name);
     };
 
     const handleCloseMenu = () => {
@@ -443,7 +442,8 @@ const ContingencyLists = () => {
      */
     const onChangeAceEditor = (newScript) => {
         setAceEditorContent(newScript);
-        if (currentScriptContingency !== null &&
+        if (
+            currentScriptContingency !== null &&
             newScript !== currentScriptContingency.script
         ) {
             setBtnSaveListDisabled(false);
@@ -471,6 +471,16 @@ const ContingencyLists = () => {
                 newCountries.sort().join(',') !==
                     currentFiltersContingency.countries.sort().join(',')
             ) {
+                console.log(newCountries.sort().join(','));
+                console.log(
+                    currentFiltersContingency.countries.sort().join(',')
+                );
+
+                console.log(
+                    newCountries.sort().join(',') !==
+                        currentFiltersContingency.countries.sort().join(',')
+                );
+
                 setBtnSaveListDisabled(false);
             } else {
                 setBtnSaveListDisabled(true);
@@ -503,12 +513,13 @@ const ContingencyLists = () => {
 
     const getCurrentContingencyList = useCallback(
         (currentItemType, currentItemName) => {
-            console.log("get CURRENT ITEM");
-            console.log("get CURRENT ITEM");
+            console.log('get CURRENT ITEM');
+            console.log('get CURRENT ITEM');
             getContingencyList(currentItemType, currentItemName)
                 .then((data) => {
                     if (data) {
                         if (currentItemType === scriptTypes.SCRIPT) {
+                            console.log('data', data);
                             setCurrentScriptContingency(data);
                         } else {
                             setCurrentFiltersContingency(data);
@@ -701,8 +712,8 @@ const ContingencyLists = () => {
                                 disabled={btnSaveListDisabled}
                                 onClick={() =>
                                     saveList(
-                                        currentItemName,
-                                        currentItemType,
+                                        currentItem.name,
+                                        currentItem.type,
                                         false
                                     )
                                 }
@@ -739,7 +750,7 @@ const ContingencyLists = () => {
                         }
                         customTextCancelBtn={<FormattedMessage id="cancel" />}
                         handleRenameExistList={renameExistList}
-                        selectedListName={currentItemName}
+                        selectedListName={currentItem ? currentItem.name : ''}
                         newList={false}
                     />
                     {/* Alert to confirm delete list */}
@@ -760,14 +771,15 @@ const ContingencyLists = () => {
             </div>
 
             <div className={classes.aceEditor}>
-                {currentItemType === scriptTypes.FILTERS && (
+                {currentItem && currentItem.type === scriptTypes.FILTERS && (
                     <FiltersEditor
                         item={currentFiltersContingency}
                         onChange={onChangeFiltersContingency}
+                        cancelChangments={cancelChangements}
                     />
                 )}
 
-                {currentItemType === scriptTypes.SCRIPT && (
+                {currentItem && currentItem.type === scriptTypes.SCRIPT && (
                     <AceEditor
                         className={classes.editor}
                         mode="groovy"

@@ -66,7 +66,7 @@ const CustomAutocomplete = withStyles(() => ({
     },
 }))(Autocomplete);
 
-const FiltersEditor = ({ item, onChange }) => {
+const FiltersEditor = ({ item, onChange, cancelChangments }) => {
     const classes = useStyles();
 
     const [equipmentID, setEquipmentID] = useState('*');
@@ -131,22 +131,24 @@ const FiltersEditor = ({ item, onChange }) => {
         countriesSelection,
     ]);
 
+    function getCountriesKeys(countriesValues) {
+        let countriesKeys = [];
+        for (const [key, val] of Object.entries(en_countries.object())) {
+            if (countriesValues.indexOf(val.toUpperCase()) !== -1)
+                countriesKeys.push(key);
+        }
+        return countriesKeys;
+    }
+
     useEffect(() => {
-        if (item !== null) {
+        if (item !== null || cancelChangments === true) {
             setEquipmentName(item.equipmentName);
             setEquipmentID(item.equipmentID);
             setNominalVoltageOperator(item.nominalVoltageOperator);
             setNominalVoltage(item.nominalVoltage);
             setEquipmentType(item.equipmentType);
             if (item.countries) {
-                let countries = [];
-                for (const [key, val] of Object.entries(
-                    en_countries.object()
-                )) {
-                    if (item.countries.indexOf(val.toUpperCase()) !== -1)
-                        countries.push(key);
-                }
-                setCountriesSelection(countries);
+                setCountriesSelection(getCountriesKeys(item.countries));
             }
         } else {
             setEquipmentName('*');
@@ -156,7 +158,7 @@ const FiltersEditor = ({ item, onChange }) => {
             setEquipmentType(equipmentTypes.LINE);
             setCountriesSelection([]);
         }
-    }, [item]);
+    }, [item, cancelChangments]);
 
     return (
         <div className={classes.root}>
