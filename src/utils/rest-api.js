@@ -139,12 +139,7 @@ export function addScriptContingencyList(name, script) {
  */
 export function replaceFiltersWithScriptContingencyList(
     name,
-    equipmentID,
-    equipmentName,
-    equipmentType,
-    nominalVoltage,
-    nominalVoltageOperator,
-    countries
+    filtersContingency
 ) {
     const url =
         PREFIX_ACTIONS_QUERIES +
@@ -155,12 +150,15 @@ export function replaceFiltersWithScriptContingencyList(
         method: 'put',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            equipmentID: equipmentID,
-            equipmentName: equipmentName,
-            equipmentType: equipmentType,
-            nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage,
-            nominalVoltageOperator: nominalVoltageOperator,
-            countries: countries,
+            equipmentID: filtersContingency.equipmentID,
+            equipmentName: filtersContingency.equipmentName,
+            equipmentType: filtersContingency.equipmentType,
+            nominalVoltage:
+                filtersContingency.nominalVoltage === ''
+                    ? -1
+                    : filtersContingency.nominalVoltage,
+            nominalVoltageOperator: filtersContingency.nominalVoltageOperator,
+            countries: filtersContingency.countries,
         }),
     });
 }
@@ -169,15 +167,7 @@ export function replaceFiltersWithScriptContingencyList(
  * Save new script contingency list from filters contingency list
  * @returns {Promise<Response>}
  */
-export function newScriptFromFiltersContingencyList(
-    name,
-    equipmentID,
-    equipmentName,
-    equipmentType,
-    nominalVoltage,
-    nominalVoltageOperator,
-    countries
-) {
+export function newScriptFromFiltersContingencyList(name, filtersContingency) {
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/filters-contingency-lists/' +
@@ -187,12 +177,15 @@ export function newScriptFromFiltersContingencyList(
         method: 'put',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            equipmentID: equipmentID,
-            equipmentName: equipmentName,
-            equipmentType: equipmentType,
-            nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage,
-            nominalVoltageOperator: nominalVoltageOperator,
-            countries: countries,
+            equipmentID: filtersContingency.equipmentID,
+            equipmentName: filtersContingency.equipmentName,
+            equipmentType: filtersContingency.equipmentType,
+            nominalVoltage:
+                filtersContingency.nominalVoltage === ''
+                    ? -1
+                    : filtersContingency.nominalVoltage,
+            nominalVoltageOperator: filtersContingency.nominalVoltageOperator,
+            countries: filtersContingency.countries,
         }),
     });
 }

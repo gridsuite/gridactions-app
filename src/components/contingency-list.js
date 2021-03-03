@@ -406,18 +406,16 @@ const ContingencyLists = () => {
     const confirmReplaceWithScriptList = () => {
         setAnchorEl(null);
         replaceFiltersWithScriptContingencyList(
-            currentItemName,
-            equipmentID,
-            equipmentName,
-            equipmentType,
-            nominalVoltage,
-            nominalVoltageOperator,
-            countries.map((code) => en_countries.get(code).toUpperCase())
+            currentItem.name,
+            currentFiltersContingency
         )
             .then((response) => {
                 if (response.ok) {
                     getContingencyLists().then((data) => {
-                        setCurrentItemType(scriptTypes.SCRIPT);
+                        setCurrentItem({
+                            name: currentItem.name,
+                            type: scriptTypes.SCRIPT,
+                        });
                         setBtnSaveListDisabled(true);
                         dispatch(updateContingencyList(data));
                     });
@@ -441,15 +439,7 @@ const ContingencyLists = () => {
      * @param newName
      */
     const copyToScriptList = (name, newName) => {
-        newScriptFromFiltersContingencyList(
-            newName,
-            equipmentID,
-            equipmentName,
-            equipmentType,
-            nominalVoltage,
-            nominalVoltageOperator,
-            countries.map((code) => en_countries.get(code).toUpperCase())
-        )
+        newScriptFromFiltersContingencyList(newName, currentFiltersContingency)
             .then((response) => {
                 if (response.ok) {
                     getContingencyLists().then((data) => {
@@ -458,14 +448,15 @@ const ContingencyLists = () => {
                                 element.name === newName &&
                                 element.type === scriptTypes.SCRIPT
                             ) {
+                                setCurrentItem({
+                                    name: newName,
+                                    type: scriptTypes.SCRIPT,
+                                });
                                 return element;
                             }
                             return null;
                         });
                         setSelectedIndex(index);
-                        setCurrentItemName(null);
-                        setCurrentItemType(scriptTypes.SCRIPT);
-                        setCurrentItemName(newName);
                         setBtnSaveListDisabled(true);
                         dispatch(updateContingencyList(data));
                     });
@@ -723,40 +714,41 @@ const ContingencyLists = () => {
                                                         }
                                                     />
                                                 </MenuItem>
-                                                {currentItemType ===
-                                                    scriptTypes.FILTERS && (
-                                                    <div>
-                                                        <MenuItem
-                                                            onClick={() =>
-                                                                handleReplaceWithScriptList()
-                                                            }
-                                                        >
-                                                            <ListItemIcon>
-                                                                <InsertDriveFileIcon fontSize="small" />
-                                                            </ListItemIcon>
-                                                            <ListItemText
-                                                                primary={
-                                                                    <FormattedMessage id="replaceWithScript" />
+                                                {currentItem !== null &&
+                                                    currentItem.type ===
+                                                        scriptTypes.FILTERS && (
+                                                        <div>
+                                                            <MenuItem
+                                                                onClick={() =>
+                                                                    handleReplaceWithScriptList()
                                                                 }
-                                                            />
-                                                        </MenuItem>
+                                                            >
+                                                                <ListItemIcon>
+                                                                    <InsertDriveFileIcon fontSize="small" />
+                                                                </ListItemIcon>
+                                                                <ListItemText
+                                                                    primary={
+                                                                        <FormattedMessage id="replaceWithScript" />
+                                                                    }
+                                                                />
+                                                            </MenuItem>
 
-                                                        <MenuItem
-                                                            onClick={() =>
-                                                                handleCopyToScriptList()
-                                                            }
-                                                        >
-                                                            <ListItemIcon>
-                                                                <FileCopyIcon fontSize="small" />
-                                                            </ListItemIcon>
-                                                            <ListItemText
-                                                                primary={
-                                                                    <FormattedMessage id="copyToScript" />
+                                                            <MenuItem
+                                                                onClick={() =>
+                                                                    handleCopyToScriptList()
                                                                 }
-                                                            />
-                                                        </MenuItem>
-                                                    </div>
-                                                )}
+                                                            >
+                                                                <ListItemIcon>
+                                                                    <FileCopyIcon fontSize="small" />
+                                                                </ListItemIcon>
+                                                                <ListItemText
+                                                                    primary={
+                                                                        <FormattedMessage id="copyToScript" />
+                                                                    }
+                                                                />
+                                                            </MenuItem>
+                                                        </div>
+                                                    )}
                                             </StyledMenu>
                                         </div>
                                     ))}
@@ -866,7 +858,7 @@ const ContingencyLists = () => {
                         customTextValidationBtn={<FormattedMessage id="copy" />}
                         customTextCancelBtn={<FormattedMessage id="cancel" />}
                         handleCopyToScriptList={copyToScriptList}
-                        selectedListName={currentItemName}
+                        selectedListName={currentItem ? currentItem.name : ''}
                         newList={false}
                     />
                 </div>
