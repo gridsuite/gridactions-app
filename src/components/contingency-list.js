@@ -166,6 +166,15 @@ const StyledMenu = withStyles({
     },
 })(Menu);
 
+const emptyFiltersContingency = {
+    equipmentID: '*',
+    equipmentName: '*',
+    equipmentType: equipmentTypes.LINE,
+    nominalVoltageOperator: '=',
+    nominalVoltage: '',
+    countries: [],
+};
+
 const ContingencyLists = () => {
     const classes = useStyles();
     const { enqueueSnackbar } = useSnackbar();
@@ -194,14 +203,6 @@ const ContingencyLists = () => {
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
     const [openPopupConfirmDelete, setOpenPopupConfirmDelete] = useState(false);
 
-    const emptyFiltersContingency = {
-        equipmentID: '*',
-        equipmentName: '*',
-        equipmentType: equipmentTypes.LINE,
-        nominalVoltageOperator: '=',
-        nominalVoltage: '',
-        countries: [],
-    };
     const [newFiltersContingency, setNewFiltersContingency] = useState(
         emptyFiltersContingency
     );
