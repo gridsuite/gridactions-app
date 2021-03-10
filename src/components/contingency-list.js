@@ -178,6 +178,20 @@ const emptyFiltersContingency = {
     countries: [],
 };
 
+const useStylesCustomTooltip = makeStyles((theme) => ({
+    tooltip: {
+        boxShadow: theme.shadows[1],
+        fontSize: '20px',
+        textTransform: 'capitalize',
+    },
+}));
+
+const CustomTooltip = (props) => {
+    const classes = useStylesCustomTooltip();
+
+    return <Tooltip arrow classes={classes} {...props} />;
+};
+
 const ContingencyLists = () => {
     const classes = useStyles();
     const { enqueueSnackbar } = useSnackbar();
