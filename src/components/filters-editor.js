@@ -13,7 +13,7 @@ import Select from '@material-ui/core/Select';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import InputBase from '@material-ui/core/InputBase';
 import withStyles from '@material-ui/core/styles/withStyles';
-import { equipmentTypes } from '../utils/equipment-types';
+import { EquipmentTypes } from '../utils/equipment-types';
 import { FormattedMessage, useIntl } from 'react-intl';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { Chip } from '@material-ui/core';
@@ -228,7 +228,7 @@ const FiltersEditor = ({ filtersContingency, onChange }) => {
                             onChange={handleEquipmentType}
                             input={<BootstrapInput />}
                         >
-                            {Object.values(equipmentTypes).map((val) => (
+                            {Object.values(EquipmentTypes).map((val) => (
                                 <option value={val} key={val}>
                                     {intl.formatMessage({ id: val })}
                                 </option>
