@@ -716,7 +716,7 @@ const ContingencyLists = () => {
                                                 </MenuItem>
                                                 {currentItem !== null &&
                                                     currentItem.type ===
-                                                        scriptTypes.FILTERS && (
+                                                        ScriptTypes.FILTERS && (
                                                         <div>
                                                             <MenuItem
                                                                 onClick={() =>
@@ -865,7 +865,7 @@ const ContingencyLists = () => {
             </div>
 
             <div className={classes.aceEditor}>
-                {currentItem && currentItem.type === scriptTypes.FILTERS && (
+                {currentItem && currentItem.type === ScriptTypes.FILTERS && (
                     <FiltersEditor
                         filtersContingency={newFiltersContingency}
                         onChange={onChangeFiltersContingency}
