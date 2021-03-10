@@ -49,8 +49,8 @@ import {
     addFiltersContingencyList,
     getContingencyList,
 } from '../utils/rest-api';
-import { scriptTypes } from '../utils/script-types';
-import { equipmentTypes } from '../utils/equipment-types';
+import { ScriptTypes } from '../utils/script-types';
+import { EquipmentTypes } from '../utils/equipment-types';
 import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles(() => ({
@@ -160,12 +160,6 @@ const CustomListItem = withStyles(() => ({
     },
 }))(ListItem);
 
-const NewFileCreatedList = withStyles(() => ({
-    root: {
-        padding: '0',
-    },
-}))(List);
-
 const StyledMenu = withStyles({
     paper: {
         border: '1px solid #d3d4d5',
@@ -175,18 +169,13 @@ const StyledMenu = withStyles({
     },
 })(Menu);
 
-const useStylesCustomTooltip = makeStyles((theme) => ({
-    tooltip: {
-        boxShadow: theme.shadows[1],
-        fontSize: '20px',
-        textTransform: 'capitalize',
-    },
-}));
-
-const CustomTooltip = (props) => {
-    const classes = useStylesCustomTooltip();
-
-    return <Tooltip arrow classes={classes} {...props} />;
+const emptyFiltersContingency = {
+    equipmentID: '*',
+    equipmentName: '*',
+    equipmentType: EquipmentTypes.LINE,
+    nominalVoltageOperator: '=',
+    nominalVoltage: '',
+    countries: [],
 };
 
 const ContingencyLists = () => {
@@ -196,37 +185,31 @@ const ContingencyLists = () => {
     const selectedTheme = useSelector((state) => state.theme);
 
     const contingencyLists = useSelector((state) => state.contingencyLists);
-    const [currentItemType, setCurrentItemType] = useState(null);
-    const [currentItemName, setCurrentItemName] = useState(null);
+    const [currentItem, setCurrentItem] = useState(null);
     const [currentScriptContingency, setCurrentScriptContingency] = useState(
         null
     );
     const [currentFiltersContingency, setCurrentFiltersContingency] = useState(
         null
     );
+
     const [selectedIndex, setSelectedIndex] = useState(null);
 
     const [btnSaveListDisabled, setBtnSaveListDisabled] = useState(true);
 
     const [aceEditorContent, setAceEditorContent] = useState('');
 
-    const [newListCreated, setNewListCreated] = useState(false);
-    const [newListName, setNewListName] = useState(null);
-
     const [alertEmptyList, setAlertEmptyList] = useState(true);
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [openPopupNewList, setOpenPopupNewList] = useState(false);
     const [openPopupRenameList, setOpenPopupRenameList] = useState(false);
-    const [openPopupInfo, setOpenPopupInfo] = useState(false);
     const [openPopupConfirmDelete, setOpenPopupConfirmDelete] = useState(false);
 
-    const [equipmentID, setEquipmentID] = useState('*');
-    const [equipmentName, setEquipmentName] = useState('*');
-    const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
-    const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
-    const [nominalVoltage, setNominalVoltage] = useState('');
-    const [countries, setCountries] = useState([]);
+    const [newFiltersContingency, setNewFiltersContingency] = useState(
+        emptyFiltersContingency
+    );
+
     const [showContainerList, setShowContainerList] = useState(true);
 
     const maxLengthListName = 21; // Max length of list name
@@ -246,47 +229,21 @@ const ContingencyLists = () => {
     );
 
     /**
-     * On click in item on the list
+     * On click on contingency list item
      * @param item
      * @param index
      */
-    const handleListItemClicked = (item, index) => {
-        if (newListCreated) {
-            setOpenPopupInfo(true);
-        } else {
-            setSelectedIndex(index);
-            setCurrentItemName(item.name);
-            setCurrentItemType(item.type);
-            setBtnSaveListDisabled(true);
-        }
+    const handleContingencyListItemClicked = (item, index) => {
+        setSelectedIndex(index);
+        setCurrentItem(item);
+        setBtnSaveListDisabled(true);
     };
 
     /**
-     * Handler open dialog
+     * Add new list handler
      */
-    const handleOpenPopupAddNewList = () => {
-        setOpenPopupNewList(true);
-    };
-
-    /**
-     * Add new list name
-     * @param name
-     * @param type
-     */
-    const addNewList = (name, type) => {
-        if (type === 'SCRIPT') {
-            setAceEditorContent('');
-            setCurrentItemType('SCRIPT');
-        } else {
-            setCurrentFiltersContingency(null);
-            setCurrentItemType(scriptTypes.FILTERS);
-        }
-        setNewListName(name);
-        setNewListCreated(true);
-        setSelectedIndex(null);
-        setAlertEmptyList(false);
-        setOpenPopupNewList(false);
-        setBtnSaveListDisabled(false);
+    const handleAddNewListClicked = (val) => {
+        setOpenPopupNewList(val);
     };
 
     /**
@@ -294,11 +251,12 @@ const ContingencyLists = () => {
      * @param oldName
      * @param newName
      */
-    const renameExistList = (oldName, newName) => {
+    const renameList = (oldName, newName) => {
         renameListByName(oldName, newName)
             .then((response) => {
                 if (response.ok) {
                     getAllContingencyLists();
+                    setCurrentItem({ name: newName, type: currentItem.type });
                 } else {
                     showSnackBarNotification(response.statusText);
                 }
@@ -310,63 +268,51 @@ const ContingencyLists = () => {
     };
 
     /**
-     * Alert : Add the script and save the new list
+     * Save new list response if list type is filters or script
+     * @param name
+     * @param type
+     * @param isNewList
+     * @returns {Promise<Response>}
      */
-    const createListBeforeExit = () => {
-        saveNewList();
-        setOpenPopupInfo(false);
-    };
-
-    /**
-     * Alert : Cancel create new list
-     */
-    const cancelCreateListBeforeExit = () => {
-        setNewListCreated(false);
-        setOpenPopupInfo(false);
-        setBtnSaveListDisabled(true);
-        setCurrentItemType(null);
-    };
-
-    /**
-     * Save new list added: submit name and script
-     */
-    const saveNewListResponse = () => {
-        if (currentItemType === scriptTypes.FILTERS) {
-            if (currentFiltersContingency !== null) {
-                currentFiltersContingency.equipmentID = equipmentID;
-                currentFiltersContingency.equipmentName = equipmentName;
-                currentFiltersContingency.nominalVoltage = nominalVoltage;
-                currentFiltersContingency.nominalVoltageOperator = nominalVoltageOperator;
-                currentFiltersContingency.equipmentType = equipmentType;
-                currentFiltersContingency.countries = countries;
+    const saveListResponse = (name, type, isNewList) => {
+        if (isNewList) {
+            if (type === ScriptTypes.FILTERS) {
+                setCurrentFiltersContingency(null);
+                return addFiltersContingencyList(name, emptyFiltersContingency);
+            } else {
+                setAceEditorContent('');
+                setCurrentScriptContingency(null);
+                return addScriptContingencyList(name, '');
             }
-            return addFiltersContingencyList(
-                newListCreated ? newListName : currentItemName,
-                equipmentID,
-                equipmentName,
-                equipmentType,
-                nominalVoltage,
-                nominalVoltageOperator,
-                countries
-            );
         } else {
-            return addScriptContingencyList(
-                newListCreated ? newListName : currentItemName,
-                aceEditorContent
-            );
+            if (type === ScriptTypes.FILTERS) {
+                return addFiltersContingencyList(name, newFiltersContingency);
+            } else {
+                return addScriptContingencyList(name, aceEditorContent);
+            }
         }
     };
 
-    const saveNewList = () => {
-        saveNewListResponse().then(() => {
+    /**
+     * Save list
+     * @param name
+     * @param type
+     * @param isNewList
+     */
+    const saveList = (name, type, isNewList) => {
+        saveListResponse(name, type, isNewList).then(() => {
             getContingencyLists()
                 .then((data) => {
-                    const index = data.findIndex(
-                        (element) => element.name === newListName
-                    );
+                    const index = data.findIndex((element) => {
+                        if (element.name === name) {
+                            setCurrentItem(element);
+                            return element;
+                        }
+                        return null;
+                    });
                     setSelectedIndex(index);
                     setBtnSaveListDisabled(true);
-                    setNewListCreated(false);
+                    setOpenPopupNewList(false);
                     dispatch(updateContingencyList(data));
                 })
                 .catch((error) => {
@@ -376,11 +322,23 @@ const ContingencyLists = () => {
     };
 
     /**
-     * Cancel create list, reset editor and hide new name from list
+     * Cancel update list
      */
-    const cancelNewList = () => {
-        setCurrentItemType(null);
-        setNewListCreated(false);
+    const cancelSaveList = () => {
+        if (
+            currentItem.type === ScriptTypes.FILTERS &&
+            currentFiltersContingency !== null
+        ) {
+            setNewFiltersContingency(currentFiltersContingency);
+        }
+
+        if (
+            currentItem.type === ScriptTypes.SCRIPT &&
+            currentScriptContingency !== null
+        ) {
+            setAceEditorContent(currentScriptContingency.script);
+        }
+
         setBtnSaveListDisabled(true);
     };
 
@@ -397,21 +355,7 @@ const ContingencyLists = () => {
     };
 
     /**
-     * Fetch the script by name in contingency lists
-     * @param itemIndex
-     */
-    const fetchScriptByNameList = (itemIndex) => {
-        let script = '';
-        contingencyLists.map((item, index) => {
-            if (index + 1 === itemIndex + 1) {
-                script = item.script;
-            }
-            return setAceEditorContent(script);
-        });
-    };
-
-    /**
-     * Show popup confirm delete list
+     * Show popup to confirm list deletion
      */
     const handleDeleteList = () => {
         setAnchorEl(null);
@@ -423,27 +367,19 @@ const ContingencyLists = () => {
      */
     const confirmDeleteList = () => {
         setAnchorEl(null);
-        if (currentItemName) {
-            if (
-                contingencyLists !== null &&
-                contingencyLists.length === selectedIndex + 1
-            ) {
-                setSelectedIndex(selectedIndex - 1);
-                fetchScriptByNameList(selectedIndex - 1);
-            } else {
-                setSelectedIndex(selectedIndex);
-                fetchScriptByNameList(selectedIndex + 1);
-            }
+        if (currentItem) {
             setOpenPopupConfirmDelete(false);
-            deleteListByName(currentItemName)
+            deleteListByName(currentItem.name)
                 .then(() => {
                     getContingencyLists()
                         .then((data) => {
                             dispatch(updateContingencyList(data));
                             if (data.length > 0) {
                                 dispatch(updateContingencyList(data));
+                                setSelectedIndex(0);
+                                setCurrentItem(data[0]);
                             } else {
-                                setCurrentItemType(null);
+                                setCurrentItem(null);
                                 setAlertEmptyList(true);
                             }
                         })
@@ -457,16 +393,8 @@ const ContingencyLists = () => {
         }
     };
 
-    /**
-     * Cancel delete list
-     */
-    const cancelDeleteList = () => {
-        setOpenPopupConfirmDelete(false);
-    };
-
-    const handleOpenMenu = (event, name) => {
+    const handleOpenMenu = (event) => {
         setAnchorEl(event.currentTarget);
-        setCurrentItemName(name);
     };
 
     const handleCloseMenu = () => {
@@ -478,6 +406,10 @@ const ContingencyLists = () => {
         setOpenPopupRenameList(true);
     };
 
+    const cancelDeleteList = () => {
+        setOpenPopupConfirmDelete(false);
+    };
+
     /**
      * On change editor, check if data is the same to disabled submit button
      * @param newScript
@@ -486,9 +418,8 @@ const ContingencyLists = () => {
     const onChangeAceEditor = (newScript) => {
         setAceEditorContent(newScript);
         if (
-            (newListName != null && newScript !== '') ||
-            (currentScriptContingency !== null &&
-                newScript !== currentScriptContingency.script)
+            currentScriptContingency !== null &&
+            newScript !== currentScriptContingency.script
         ) {
             setBtnSaveListDisabled(false);
         } else {
@@ -496,23 +427,21 @@ const ContingencyLists = () => {
         }
     };
 
-    function onChangeFiltersContingency(
-        equipmentID,
-        equipmentName,
-        equipmentType,
-        nominalVoltageOperator,
-        nominalVoltage,
-        newCountries
-    ) {
+    function onChangeFiltersContingency(newFiltersContingency) {
         if (currentFiltersContingency !== null) {
             if (
-                equipmentID !== currentFiltersContingency.equipmentID ||
-                equipmentName !== currentFiltersContingency.equipmentName ||
-                equipmentType !== currentFiltersContingency.equipmentType ||
-                nominalVoltageOperator !==
+                newFiltersContingency.equipmentID !==
+                    currentFiltersContingency.equipmentID ||
+                newFiltersContingency.equipmentName !==
+                    currentFiltersContingency.equipmentName ||
+                newFiltersContingency.equipmentType !==
+                    currentFiltersContingency.equipmentType ||
+                newFiltersContingency.nominalVoltageOperator !==
                     currentFiltersContingency.nominalVoltageOperator ||
-                nominalVoltage !== currentFiltersContingency.nominalVoltage ||
-                newCountries !== currentFiltersContingency.countries
+                newFiltersContingency.nominalVoltage !==
+                    currentFiltersContingency.nominalVoltage + '' ||
+                newFiltersContingency.countries.sort().join(',') !==
+                    currentFiltersContingency.countries.sort().join(',')
             ) {
                 setBtnSaveListDisabled(false);
             } else {
@@ -521,12 +450,7 @@ const ContingencyLists = () => {
         } else {
             setBtnSaveListDisabled(false);
         }
-        setEquipmentID(equipmentID);
-        setEquipmentName(equipmentName);
-        setEquipmentType(equipmentType);
-        setNominalVoltageOperator(nominalVoltageOperator);
-        setNominalVoltage(nominalVoltage);
-        setCountries(newCountries);
+        setNewFiltersContingency(newFiltersContingency);
     }
 
     /**
@@ -549,10 +473,12 @@ const ContingencyLists = () => {
             getContingencyList(currentItemType, currentItemName)
                 .then((data) => {
                     if (data) {
-                        if (currentItemType === scriptTypes.SCRIPT) {
+                        if (currentItemType === ScriptTypes.SCRIPT) {
                             setCurrentScriptContingency(data);
+                            setAceEditorContent(data.script);
                         } else {
                             setCurrentFiltersContingency(data);
+                            setNewFiltersContingency(data);
                         }
                     }
                 })
@@ -572,16 +498,10 @@ const ContingencyLists = () => {
     }, [getAllContingencyLists]);
 
     useEffect(() => {
-        if (currentScriptContingency !== null) {
-            setAceEditorContent(currentScriptContingency.script);
+        if (currentItem !== null) {
+            getCurrentContingencyList(currentItem.type, currentItem.name);
         }
-    }, [currentScriptContingency]);
-
-    useEffect(() => {
-        if (currentItemName !== null) {
-            getCurrentContingencyList(currentItemType, currentItemName);
-        }
-    }, [getCurrentContingencyList, currentItemType, currentItemName]);
+    }, [getCurrentContingencyList, currentItem]);
 
     return (
         <div className={classes.container}>
@@ -611,7 +531,7 @@ const ContingencyLists = () => {
                         <div className={classes.addNewList}>
                             <div
                                 className={classes.containerAddNewList}
-                                onClick={() => handleOpenPopupAddNewList()}
+                                onClick={() => handleAddNewListClicked(true)}
                             >
                                 <label className={classes.svgIcon}>
                                     <AddIcon
@@ -639,7 +559,7 @@ const ContingencyLists = () => {
                                                     selectedIndex === index
                                                 }
                                                 onClick={() =>
-                                                    handleListItemClicked(
+                                                    handleContingencyListItemClicked(
                                                         item,
                                                         index
                                                     )
@@ -649,11 +569,11 @@ const ContingencyLists = () => {
                                                     className={classes.iconList}
                                                 >
                                                     {item.type ===
-                                                        scriptTypes.FILTERS && (
+                                                        ScriptTypes.FILTERS && (
                                                         <PanToolIcon />
                                                     )}
                                                     {item.type ===
-                                                        scriptTypes.SCRIPT && (
+                                                        ScriptTypes.SCRIPT && (
                                                         <DescriptionIcon />
                                                     )}
                                                 </div>
@@ -683,10 +603,7 @@ const ContingencyLists = () => {
                                                     aria-haspopup="true"
                                                     variant="contained"
                                                     onClick={(event) =>
-                                                        handleOpenMenu(
-                                                            event,
-                                                            item.name
-                                                        )
+                                                        handleOpenMenu(event)
                                                     }
                                                 >
                                                     <MoreVertIcon />
@@ -699,18 +616,6 @@ const ContingencyLists = () => {
                                                 onClose={handleCloseMenu}
                                             >
                                                 <MenuItem
-                                                    onClick={handleDeleteList}
-                                                >
-                                                    <ListItemIcon>
-                                                        <DeleteIcon fontSize="small" />
-                                                    </ListItemIcon>
-                                                    <ListItemText
-                                                        primary={
-                                                            <FormattedMessage id="delete" />
-                                                        }
-                                                    />
-                                                </MenuItem>
-                                                <MenuItem
                                                     onClick={() =>
                                                         handleRenameList()
                                                     }
@@ -721,6 +626,18 @@ const ContingencyLists = () => {
                                                     <ListItemText
                                                         primary={
                                                             <FormattedMessage id="rename" />
+                                                        }
+                                                    />
+                                                </MenuItem>
+                                                <MenuItem
+                                                    onClick={handleDeleteList}
+                                                >
+                                                    <ListItemIcon>
+                                                        <DeleteIcon fontSize="small" />
+                                                    </ListItemIcon>
+                                                    <ListItemText
+                                                        primary={
+                                                            <FormattedMessage id="delete" />
                                                         }
                                                     />
                                                 </MenuItem>
@@ -738,55 +655,25 @@ const ContingencyLists = () => {
                             ) : (
                                 ''
                             )}
-
-                            {/* Temporary list : new file created */}
-                            {newListCreated && (
-                                <NewFileCreatedList>
-                                    <CustomListItem button selected>
-                                        <div className={classes.iconList}>
-                                            {currentItemType ===
-                                                scriptTypes.FILTERS && (
-                                                <PanToolIcon />
-                                            )}
-                                            {currentItemType ===
-                                                scriptTypes.SCRIPT && (
-                                                <DescriptionIcon />
-                                            )}
-                                        </div>
-                                        {newListName.length >
-                                        maxLengthListName ? (
-                                            <CustomTooltip title={newListName}>
-                                                <ListItemText
-                                                    key={'temporary'}
-                                                    className={
-                                                        classes.listItemText
-                                                    }
-                                                    primary={newListName}
-                                                />
-                                            </CustomTooltip>
-                                        ) : (
-                                            <ListItemText
-                                                key={'temporary'}
-                                                className={classes.listItemText}
-                                                primary={newListName}
-                                            />
-                                        )}
-                                    </CustomListItem>
-                                </NewFileCreatedList>
-                            )}
                         </div>
                         <div className={classes.containerButtons}>
                             <Button
                                 style={{ marginRight: '15px' }}
                                 disabled={btnSaveListDisabled}
-                                onClick={() => cancelNewList()}
+                                onClick={() => cancelSaveList()}
                             >
                                 <FormattedMessage id="cancel" />
                             </Button>
                             <Button
                                 variant="outlined"
                                 disabled={btnSaveListDisabled}
-                                onClick={() => saveNewList()}
+                                onClick={() =>
+                                    saveList(
+                                        currentItem.name,
+                                        currentItem.type,
+                                        false
+                                    )
+                                }
                             >
                                 <FormattedMessage id="save" />
                             </Button>
@@ -799,14 +686,14 @@ const ContingencyLists = () => {
                     {/* Popup for add new list */}
                     <PopupWithInput
                         open={openPopupNewList}
-                        onClose={() => setOpenPopupNewList(false)}
+                        onClose={() => handleAddNewListClicked(false)}
                         title={<FormattedMessage id="addNewContencyFile" />}
                         inputLabelText={<FormattedMessage id="listName" />}
                         customTextValidationBtn={
                             <FormattedMessage id="create" />
                         }
                         customTextCancelBtn={<FormattedMessage id="cancel" />}
-                        handleSaveNewList={addNewList}
+                        handleSaveNewList={saveList}
                         newList={true}
                     />
                     {/* Popup for rename exist list */}
@@ -819,23 +706,9 @@ const ContingencyLists = () => {
                             <FormattedMessage id="rename" />
                         }
                         customTextCancelBtn={<FormattedMessage id="cancel" />}
-                        handleRenameExistList={renameExistList}
-                        selectedListName={currentItemName}
+                        handleRenameExistList={renameList}
+                        selectedListName={currentItem ? currentItem.name : ''}
                         newList={false}
-                    />
-                    {/* Alert to save temporary list before switch to another */}
-                    <PopupInfo
-                        open={openPopupInfo}
-                        onClose={() => setOpenPopupInfo(false)}
-                        title={<FormattedMessage id="saveNewListTitle" />}
-                        customAlertMessage={
-                            <FormattedMessage id="saveNewListMsg" />
-                        }
-                        customTextValidationBtn={
-                            <FormattedMessage id="create" />
-                        }
-                        handleBtnSave={createListBeforeExit}
-                        handleBtnCancel={cancelCreateListBeforeExit}
                     />
                     {/* Alert to confirm delete list */}
                     <PopupInfo
@@ -855,14 +728,14 @@ const ContingencyLists = () => {
             </div>
 
             <div className={classes.aceEditor}>
-                {currentItemType === scriptTypes.FILTERS && (
+                {currentItem && currentItem.type === ScriptTypes.FILTERS && (
                     <FiltersEditor
-                        item={currentFiltersContingency}
+                        filtersContingency={newFiltersContingency}
                         onChange={onChangeFiltersContingency}
                     />
                 )}
 
-                {currentItemType === scriptTypes.SCRIPT && (
+                {currentItem && currentItem.type === ScriptTypes.SCRIPT && (
                     <AceEditor
                         className={classes.editor}
                         mode="groovy"
