@@ -95,9 +95,9 @@ const PopupWithInput = ({
 }) => {
     const intl = useIntl();
     const contingencyLists = useSelector((state) => state.contingencyLists);
-    const [disableBtnRenameList, setDisableBtnRenameList] = useState(true);
-    const [showErrorTextField, setShowErrorTextField] = useState(false);
-    const [newNameList, setNewNameList] = useState(false);
+    const [disableBtnSave, setDisableBtnSave] = useState(true);
+    const [showError, setShowError] = useState(false);
+    const [newNameList, setNewListName] = useState(false);
     const [newListType, setNewListType] = useState('SCRIPT');
 
     /**
@@ -106,36 +106,40 @@ const PopupWithInput = ({
      */
     const onChangeInputName = (name) => {
         if (name.length === 0) {
-            setDisableBtnRenameList(true);
+            setDisableBtnSave(true);
         } else {
             if (contingencyLists.length > 0) {
-                if (contingencyLists.some((list) => list.name === name)) {
-                    setDisableBtnRenameList(true);
-                    setShowErrorTextField(true);
+                if (
+                    contingencyLists.some(
+                        (list) => list.name.toLowerCase() === name.toLowerCase()
+                    )
+                ) {
+                    setDisableBtnSave(true);
+                    setShowError(true);
                 } else {
-                    setNewNameList(name);
-                    setDisableBtnRenameList(false);
-                    setShowErrorTextField(false);
+                    setNewListName(name);
+                    setDisableBtnSave(false);
+                    setShowError(false);
                 }
             } else {
-                setDisableBtnRenameList(false);
-                setShowErrorTextField(false);
-                setNewNameList(name);
+                setDisableBtnSave(false);
+                setShowError(false);
+                setNewListName(name);
             }
         }
     };
 
     const handleSave = () => {
         if (newList) {
-            handleSaveNewList(newNameList, newListType);
+            handleSaveNewList(newNameList, newListType, true);
         } else {
             handleRenameExistList(selectedListName, newNameList);
         }
     };
 
     const handleClose = () => {
-        if (showErrorTextField) {
-            setShowErrorTextField(false);
+        if (showError) {
+            setShowError(false);
         }
         onClose();
     };
@@ -149,9 +153,9 @@ const PopupWithInput = ({
                         <TextField
                             style={{ width: '100%' }}
                             defaultValue={newList ? '' : selectedListName}
-                            error={showErrorTextField ? true : false}
+                            error={showError}
                             helperText={
-                                showErrorTextField
+                                showError
                                     ? intl.formatMessage({
                                           id: 'nameAlreadyExist',
                                       })
@@ -201,7 +205,7 @@ const PopupWithInput = ({
                     variant="outlined"
                     size="small"
                     onClick={handleSave}
-                    disabled={disableBtnRenameList}
+                    disabled={disableBtnSave}
                 >
                     {customTextValidationBtn}
                 </Button>

@@ -103,7 +103,7 @@ export function getContingencyLists() {
 }
 
 /**
- * Get all contingency lists
+ * Get contingency list by type
  * @returns {Promise<Response>}
  */
 export function getContingencyList(type, name) {
@@ -175,15 +175,7 @@ export function renameListByName(oldName, newName) {
  * Add new Filter contingency list
  * @returns {Promise<Response>}
  */
-export function addFiltersContingencyList(
-    name,
-    equipmentID,
-    equipmentName,
-    equipmentType,
-    nominalVoltage,
-    nominalVoltageOperator,
-    countries
-) {
+export function addFiltersContingencyList(name, newFiltersContingency) {
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/filters-contingency-lists/' +
@@ -192,12 +184,16 @@ export function addFiltersContingencyList(
         method: 'put',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            equipmentID: equipmentID,
-            equipmentName: equipmentName,
-            equipmentType: equipmentType,
-            nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage,
-            nominalVoltageOperator: nominalVoltageOperator,
-            countries: countries,
+            equipmentID: newFiltersContingency.equipmentID,
+            equipmentName: newFiltersContingency.equipmentName,
+            equipmentType: newFiltersContingency.equipmentType,
+            nominalVoltage:
+                newFiltersContingency.nominalVoltage === ''
+                    ? -1
+                    : newFiltersContingency.nominalVoltage,
+            nominalVoltageOperator:
+                newFiltersContingency.nominalVoltageOperator,
+            countries: newFiltersContingency.countries,
         }),
     });
 }

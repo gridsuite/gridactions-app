@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
@@ -13,7 +13,7 @@ import Select from '@material-ui/core/Select';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import InputBase from '@material-ui/core/InputBase';
 import withStyles from '@material-ui/core/styles/withStyles';
-import { equipmentTypes } from '../utils/equipment-types';
+import { EquipmentTypes } from '../utils/equipment-types';
 import { FormattedMessage, useIntl } from 'react-intl';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { Chip } from '@material-ui/core';
@@ -66,15 +66,8 @@ const CustomAutocomplete = withStyles(() => ({
     },
 }))(Autocomplete);
 
-const FiltersEditor = ({ item, onChange }) => {
+const FiltersEditor = ({ filtersContingency, onChange }) => {
     const classes = useStyles();
-
-    const [equipmentID, setEquipmentID] = useState('*');
-    const [equipmentName, setEquipmentName] = useState('*');
-    const [equipmentType, setEquipmentType] = useState(equipmentTypes.LINE);
-    const [nominalVoltageOperator, setNominalVoltageOperator] = useState('=');
-    const [nominalVoltage, setNominalVoltage] = useState('');
-    const [countriesSelection, setCountriesSelection] = useState([]);
 
     let countriesList;
     try {
@@ -89,69 +82,70 @@ const FiltersEditor = ({ item, onChange }) => {
     const intl = useIntl();
 
     function handleOperator(event) {
-        setNominalVoltageOperator(event.target.value);
+        onChange({
+            equipmentID: filtersContingency.equipmentID,
+            equipmentName: filtersContingency.equipmentName,
+            equipmentType: filtersContingency.equipmentType,
+            nominalVoltageOperator: event.target.value,
+            nominalVoltage: filtersContingency.nominalVoltage,
+            countries: filtersContingency.countries,
+        });
     }
 
     function handleEquipmentType(event) {
-        setEquipmentType(event.target.value);
+        onChange({
+            equipmentID: filtersContingency.equipmentID,
+            equipmentName: filtersContingency.equipmentName,
+            equipmentType: event.target.value,
+            nominalVoltageOperator: filtersContingency.nominalVoltageOperator,
+            nominalVoltage: filtersContingency.nominalVoltage,
+            countries: filtersContingency.countries,
+        });
     }
 
     function handleCountrySelection(newValue) {
-        setCountriesSelection(newValue);
+        onChange({
+            equipmentID: filtersContingency.equipmentID,
+            equipmentName: filtersContingency.equipmentName,
+            equipmentType: filtersContingency.equipmentType,
+            nominalVoltageOperator: filtersContingency.nominalVoltageOperator,
+            nominalVoltage: filtersContingency.nominalVoltage,
+            countries: newValue,
+        });
     }
 
     function handleEquipmentID(event) {
-        setEquipmentID(event.target.value);
+        onChange({
+            equipmentID: event.target.value,
+            equipmentName: filtersContingency.equipmentName,
+            equipmentType: filtersContingency.equipmentType,
+            nominalVoltageOperator: filtersContingency.nominalVoltageOperator,
+            nominalVoltage: filtersContingency.nominalVoltage,
+            countries: filtersContingency.countries,
+        });
     }
 
     function handleEquipmentName(event) {
-        setEquipmentName(event.target.value);
+        onChange({
+            equipmentID: filtersContingency.equipmentID,
+            equipmentName: event.target.value,
+            equipmentType: filtersContingency.equipmentType,
+            nominalVoltageOperator: filtersContingency.nominalVoltageOperator,
+            nominalVoltage: filtersContingency.nominalVoltage,
+            countries: filtersContingency.countries,
+        });
     }
 
     function handleNominalVoltage(event) {
-        setNominalVoltage(event.target.value);
+        onChange({
+            equipmentID: filtersContingency.equipmentID,
+            equipmentName: filtersContingency.equipmentName,
+            equipmentType: filtersContingency.equipmentType,
+            nominalVoltageOperator: filtersContingency.nominalVoltageOperator,
+            nominalVoltage: event.target.value,
+            countries: filtersContingency.countries,
+        });
     }
-
-    useEffect(() => {
-        onChange(
-            equipmentID,
-            equipmentName,
-            equipmentType,
-            nominalVoltageOperator,
-            nominalVoltage,
-            countriesSelection
-        );
-    }, [
-        onChange,
-        equipmentID,
-        equipmentName,
-        equipmentType,
-        nominalVoltage,
-        nominalVoltageOperator,
-        countriesSelection,
-    ]);
-
-    useEffect(() => {
-        if (item !== null) {
-            setEquipmentName(item.equipmentName);
-            setEquipmentID(item.equipmentID);
-            setNominalVoltageOperator(item.nominalVoltageOperator);
-            if (item.nominalVoltage === -1) {
-                setNominalVoltage('');
-            } else {
-                setNominalVoltage(item.nominalVoltage);
-            }
-            setEquipmentType(item.equipmentType);
-            setCountriesSelection(item.countries);
-        } else {
-            setEquipmentName('*');
-            setEquipmentID('*');
-            setNominalVoltageOperator('=');
-            setNominalVoltage('');
-            setEquipmentType(equipmentTypes.LINE);
-            setCountriesSelection([]);
-        }
-    }, [item]);
 
     return (
         <div className={classes.root}>
@@ -165,7 +159,7 @@ const FiltersEditor = ({ item, onChange }) => {
                     <CustomTextField
                         onChange={handleEquipmentID}
                         variant="outlined"
-                        value={equipmentID}
+                        value={filtersContingency.equipmentID}
                     />
                 </Grid>
             </Grid>
@@ -180,7 +174,7 @@ const FiltersEditor = ({ item, onChange }) => {
                     <CustomTextField
                         onChange={handleEquipmentName}
                         variant="outlined"
-                        value={equipmentName}
+                        value={filtersContingency.equipmentName}
                     />
                 </Grid>
             </Grid>
@@ -195,7 +189,7 @@ const FiltersEditor = ({ item, onChange }) => {
                     <FormControl className={classes.formControl}>
                         <Select
                             native
-                            value={nominalVoltageOperator}
+                            value={filtersContingency.nominalVoltageOperator}
                             onChange={handleOperator}
                         >
                             <option value={'='}>=</option>
@@ -210,7 +204,11 @@ const FiltersEditor = ({ item, onChange }) => {
                     <CustomTextField
                         onChange={handleNominalVoltage}
                         variant="outlined"
-                        value={nominalVoltage}
+                        value={
+                            filtersContingency.nominalVoltage === -1
+                                ? ''
+                                : filtersContingency.nominalVoltage
+                        }
                     />
                 </Grid>
             </Grid>
@@ -226,11 +224,11 @@ const FiltersEditor = ({ item, onChange }) => {
                     <FormControl>
                         <CustomNativeSelect
                             id="demo-customized-select-native"
-                            value={equipmentType}
+                            value={filtersContingency.equipmentType}
                             onChange={handleEquipmentType}
                             input={<BootstrapInput />}
                         >
-                            {Object.values(equipmentTypes).map((val) => (
+                            {Object.values(EquipmentTypes).map((val) => (
                                 <option value={val} key={val}>
                                     {intl.formatMessage({ id: val })}
                                 </option>
@@ -249,7 +247,7 @@ const FiltersEditor = ({ item, onChange }) => {
                 <Grid item xs={12} sm={9}>
                     <CustomAutocomplete
                         id="select_countries"
-                        value={countriesSelection}
+                        value={filtersContingency.countries}
                         multiple={true}
                         onChange={(event, newValue) => {
                             handleCountrySelection(newValue);
@@ -267,7 +265,6 @@ const FiltersEditor = ({ item, onChange }) => {
                                     id={'chip_' + code}
                                     size={'small'}
                                     label={countriesList.get(code)}
-                                    title={countriesList.get(code)}
                                     {...getTagsProps({ index })}
                                 />
                             ))
