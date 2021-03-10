@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-export const equipmentTypes = {
+export const EquipmentTypes = {
     LINE: 'LINE',
     TWO_WINDINGS_TRANSFORMER: 'TWO_WINDINGS_TRANSFORMER',
     GENERATOR: 'GENERATOR',

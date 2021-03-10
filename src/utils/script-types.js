@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-export const scriptTypes = {
+export const ScriptTypes = {
     FILTERS: 'FILTERS',
     SCRIPT: 'SCRIPT',
 };

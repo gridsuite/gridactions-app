@@ -52,8 +52,8 @@ import {
     replaceFiltersWithScriptContingencyList,
     newScriptFromFiltersContingencyList,
 } from '../utils/rest-api';
-import { scriptTypes } from '../utils/script-types';
-import { equipmentTypes } from '../utils/equipment-types';
+import { ScriptTypes } from '../utils/script-types';
+import { EquipmentTypes } from '../utils/equipment-types';
 import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles((theme) => ({
@@ -173,7 +173,7 @@ const StyledMenu = withStyles({
 const emptyFiltersContingency = {
     equipmentID: '*',
     equipmentName: '*',
-    equipmentType: equipmentTypes.LINE,
+    equipmentType: EquipmentTypes.LINE,
     nominalVoltageOperator: '=',
     nominalVoltage: '',
     countries: [],
@@ -283,7 +283,7 @@ const ContingencyLists = () => {
      */
     const saveListResponse = (name, type, isNewList) => {
         if (isNewList) {
-            if (type === scriptTypes.FILTERS) {
+            if (type === ScriptTypes.FILTERS) {
                 setCurrentFiltersContingency(null);
                 return addFiltersContingencyList(name, emptyFiltersContingency);
             } else {
@@ -292,7 +292,7 @@ const ContingencyLists = () => {
                 return addScriptContingencyList(name, '');
             }
         } else {
-            if (type === scriptTypes.FILTERS) {
+            if (type === ScriptTypes.FILTERS) {
                 return addFiltersContingencyList(name, newFiltersContingency);
             } else {
                 return addScriptContingencyList(name, aceEditorContent);
@@ -333,14 +333,14 @@ const ContingencyLists = () => {
      */
     const cancelSaveList = () => {
         if (
-            currentItem.type === scriptTypes.FILTERS &&
+            currentItem.type === ScriptTypes.FILTERS &&
             currentFiltersContingency !== null
         ) {
             setNewFiltersContingency(currentFiltersContingency);
         }
 
         if (
-            currentItem.type === scriptTypes.SCRIPT &&
+            currentItem.type === ScriptTypes.SCRIPT &&
             currentScriptContingency !== null
         ) {
             setAceEditorContent(currentScriptContingency.script);
@@ -414,7 +414,7 @@ const ContingencyLists = () => {
                     getContingencyLists().then((data) => {
                         setCurrentItem({
                             name: currentItem.name,
-                            type: scriptTypes.SCRIPT,
+                            type: ScriptTypes.SCRIPT,
                         });
                         setBtnSaveListDisabled(true);
                         dispatch(updateContingencyList(data));
@@ -446,11 +446,11 @@ const ContingencyLists = () => {
                         const index = data.findIndex((element) => {
                             if (
                                 element.name === newName &&
-                                element.type === scriptTypes.SCRIPT
+                                element.type === ScriptTypes.SCRIPT
                             ) {
                                 setCurrentItem({
                                     name: newName,
-                                    type: scriptTypes.SCRIPT,
+                                    type: ScriptTypes.SCRIPT,
                                 });
                                 return element;
                             }
@@ -470,7 +470,7 @@ const ContingencyLists = () => {
         setOpenPopupCopyToScriptList(false);
     };
 
-    const handleOpenMenu = (event, name) => {
+    const handleOpenMenu = (event) => {
         setAnchorEl(event.currentTarget);
     };
 
@@ -560,7 +560,7 @@ const ContingencyLists = () => {
             getContingencyList(currentItemType, currentItemName)
                 .then((data) => {
                     if (data) {
-                        if (currentItemType === scriptTypes.SCRIPT) {
+                        if (currentItemType === ScriptTypes.SCRIPT) {
                             setCurrentScriptContingency(data);
                             setAceEditorContent(data.script);
                         } else {
@@ -656,11 +656,11 @@ const ContingencyLists = () => {
                                                     className={classes.iconList}
                                                 >
                                                     {item.type ===
-                                                        scriptTypes.FILTERS && (
+                                                        ScriptTypes.FILTERS && (
                                                         <PanToolIcon />
                                                     )}
                                                     {item.type ===
-                                                        scriptTypes.SCRIPT && (
+                                                        ScriptTypes.SCRIPT && (
                                                         <DescriptionIcon />
                                                     )}
                                                 </div>
@@ -872,7 +872,7 @@ const ContingencyLists = () => {
                     />
                 )}
 
-                {currentItem && currentItem.type === scriptTypes.SCRIPT && (
+                {currentItem && currentItem.type === ScriptTypes.SCRIPT && (
                     <AceEditor
                         className={classes.editor}
                         mode="groovy"
