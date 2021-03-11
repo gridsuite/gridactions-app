@@ -407,7 +407,7 @@ const ContingencyLists = () => {
         setAnchorEl(null);
         replaceFiltersWithScriptContingencyList(
             currentItem.name,
-            currentFiltersContingency
+            newFiltersContingency
         )
             .then((response) => {
                 if (response.ok) {
@@ -439,7 +439,7 @@ const ContingencyLists = () => {
      * @param newName
      */
     const copyToScriptList = (name, newName) => {
-        newScriptFromFiltersContingencyList(newName, currentFiltersContingency)
+        newScriptFromFiltersContingencyList(newName, newFiltersContingency)
             .then((response) => {
                 if (response.ok) {
                     getContingencyLists().then((data) => {
