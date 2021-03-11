@@ -137,10 +137,7 @@ export function addScriptContingencyList(name, script) {
  * Replace filters contingency list with script contingency list
  * @returns {Promise<Response>}
  */
-export function replaceFiltersWithScriptContingencyList(
-    name,
-    filtersContingency
-) {
+export function replaceFiltersWithScriptContingencyList(name) {
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/filters-contingency-lists/' +
@@ -148,18 +145,6 @@ export function replaceFiltersWithScriptContingencyList(
         '/replace-with-script';
     return backendFetch(url, {
         method: 'put',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            equipmentID: filtersContingency.equipmentID,
-            equipmentName: filtersContingency.equipmentName,
-            equipmentType: filtersContingency.equipmentType,
-            nominalVoltage:
-                filtersContingency.nominalVoltage === ''
-                    ? -1
-                    : filtersContingency.nominalVoltage,
-            nominalVoltageOperator: filtersContingency.nominalVoltageOperator,
-            countries: filtersContingency.countries,
-        }),
     });
 }
 
@@ -167,26 +152,16 @@ export function replaceFiltersWithScriptContingencyList(
  * Save new script contingency list from filters contingency list
  * @returns {Promise<Response>}
  */
-export function newScriptFromFiltersContingencyList(name, filtersContingency) {
+export function newScriptFromFiltersContingencyList(name, newName) {
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/filters-contingency-lists/' +
         encodeURIComponent(name) +
-        '/new-script';
+        '/new-script/' +
+        encodeURIComponent(newName);
+
     return backendFetch(url, {
         method: 'put',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            equipmentID: filtersContingency.equipmentID,
-            equipmentName: filtersContingency.equipmentName,
-            equipmentType: filtersContingency.equipmentType,
-            nominalVoltage:
-                filtersContingency.nominalVoltage === ''
-                    ? -1
-                    : filtersContingency.nominalVoltage,
-            nominalVoltageOperator: filtersContingency.nominalVoltageOperator,
-            countries: filtersContingency.countries,
-        }),
     });
 }
 
