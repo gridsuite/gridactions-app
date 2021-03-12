@@ -134,6 +134,38 @@ export function addScriptContingencyList(name, script) {
 }
 
 /**
+ * Replace filters contingency list with script contingency list
+ * @returns {Promise<Response>}
+ */
+export function replaceFiltersWithScriptContingencyList(name) {
+    const url =
+        PREFIX_ACTIONS_QUERIES +
+        '/v1/filters-contingency-lists/' +
+        encodeURIComponent(name) +
+        '/replace-with-script';
+    return backendFetch(url, {
+        method: 'put',
+    });
+}
+
+/**
+ * Save new script contingency list from filters contingency list
+ * @returns {Promise<Response>}
+ */
+export function newScriptFromFiltersContingencyList(name, newName) {
+    const url =
+        PREFIX_ACTIONS_QUERIES +
+        '/v1/filters-contingency-lists/' +
+        encodeURIComponent(name) +
+        '/new-script/' +
+        encodeURIComponent(newName);
+
+    return backendFetch(url, {
+        method: 'put',
+    });
+}
+
+/**
  * Delete contingency list by name
  * @param name
  * @returns {Promise<Response>}

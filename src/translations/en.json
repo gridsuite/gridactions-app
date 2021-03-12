@@ -35,5 +35,11 @@
     "HVDC_LINE": "HVDC LINE",
     "BUSBAR_SECTION": "BUSBAR SECTION",
     "Countries": "Countries",
-    "nameAlreadyExist": "There is already a contingency list with the same name"
+    "nameAlreadyExist": "There is already a contingency list with the same name",
+    "replaceWithScript": "Replace with script",
+    "copyToScript": "Copy to script",
+    "replaceList": "Replace list",
+    "alertBeforeReplaceWithScript": "Do you really want to replace this list with a Groovy script ?{br}{br}This action cannot be reversed",
+    "remplacer": "Replace",
+    "copy": "Copy"
 }

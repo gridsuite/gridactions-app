@@ -90,6 +90,7 @@ const PopupWithInput = ({
     customTextCancelBtn,
     handleSaveNewList,
     handleRenameExistList,
+    handleCopyToScriptList,
     selectedListName,
     newList,
 }) => {
@@ -133,7 +134,11 @@ const PopupWithInput = ({
         if (newList) {
             handleSaveNewList(newNameList, newListType, true);
         } else {
-            handleRenameExistList(selectedListName, newNameList);
+            if (handleRenameExistList) {
+                handleRenameExistList(selectedListName, newNameList);
+            } else if (handleCopyToScriptList) {
+                handleCopyToScriptList(selectedListName, newNameList);
+            }
         }
     };
 
@@ -223,6 +228,7 @@ PopupWithInput.propTypes = {
     customTextCancelBtn: PropTypes.object.isRequired,
     handleSaveNewList: PropTypes.func,
     handleRenameExistList: PropTypes.func,
+    handleCopyToScriptList: PropTypes.func,
     selectedListName: PropTypes.string,
     newList: PropTypes.bool.isRequired,
 };

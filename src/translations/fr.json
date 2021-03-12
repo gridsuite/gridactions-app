@@ -35,5 +35,11 @@
     "HVDC_LINE": "HVDC",
     "BUSBAR_SECTION": "SJB",
     "Countries": "Pays",
-    "nameAlreadyExist": "Il existe déjà une liste de contingences avec ce nom"
+    "nameAlreadyExist": "Il existe déjà une liste de contingences avec ce nom",
+    "replaceWithScript": "Remplacer par un script",
+    "copyToScript": "Copier dans un script",
+    "replaceList": "Remplacer la liste",
+    "alertBeforeReplaceWithScript": "Voulez-vous vraiment remplacer cette liste par un script Groovy ?{br}{br}Cette action est irréversible",
+    "remplacer": "Remplacer",
+    "copy": "Copier"
 }

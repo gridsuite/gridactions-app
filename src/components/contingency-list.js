@@ -24,6 +24,8 @@ import IconButton from '@material-ui/core/IconButton';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import AddIcon from '@material-ui/icons/Add';
@@ -48,6 +50,8 @@ import {
     renameListByName,
     addFiltersContingencyList,
     getContingencyList,
+    replaceFiltersWithScriptContingencyList,
+    newScriptFromFiltersContingencyList,
 } from '../utils/rest-api';
 import { ScriptTypes } from '../utils/script-types';
 import { EquipmentTypes } from '../utils/equipment-types';
@@ -222,6 +226,14 @@ const ContingencyLists = () => {
 
     const [newFiltersContingency, setNewFiltersContingency] = useState(
         emptyFiltersContingency
+    );
+
+    const [
+        openPopupReplaceWithScriptList,
+        setOpenPopupReplaceWithScriptList,
+    ] = useState(false);
+    const [openPopupCopyToScriptList, setOpenPopupCopyToScriptList] = useState(
+        false
     );
 
     const [showContainerList, setShowContainerList] = useState(true);
@@ -407,6 +419,73 @@ const ContingencyLists = () => {
         }
     };
 
+    /**
+     * Replace list with groovy script
+     */
+    const confirmReplaceWithScriptList = () => {
+        setAnchorEl(null);
+        replaceFiltersWithScriptContingencyList(currentItem.name)
+            .then((response) => {
+                if (response.ok) {
+                    getContingencyLists().then((data) => {
+                        setCurrentItem({
+                            name: currentItem.name,
+                            type: ScriptTypes.SCRIPT,
+                        });
+                        setBtnSaveListDisabled(true);
+                        dispatch(updateContingencyList(data));
+                    });
+                } else {
+                    showSnackBarNotification(response.statusText);
+                }
+            })
+            .catch((error) => {
+                showSnackBarNotification(error.message);
+            });
+        setOpenPopupReplaceWithScriptList(false);
+    };
+
+    const cancelReplaceWithScriptList = () => {
+        setOpenPopupReplaceWithScriptList(false);
+    };
+
+    /**
+     * Copy to script list
+     * @param name
+     * @param newName
+     */
+    const copyToScriptList = (name, newName) => {
+        newScriptFromFiltersContingencyList(name, newName)
+            .then((response) => {
+                if (response.ok) {
+                    getContingencyLists().then((data) => {
+                        const index = data.findIndex((element) => {
+                            if (
+                                element.name === newName &&
+                                element.type === ScriptTypes.SCRIPT
+                            ) {
+                                setCurrentItem({
+                                    name: newName,
+                                    type: ScriptTypes.SCRIPT,
+                                });
+                                return element;
+                            }
+                            return null;
+                        });
+                        setSelectedIndex(index);
+                        setBtnSaveListDisabled(true);
+                        dispatch(updateContingencyList(data));
+                    });
+                } else {
+                    showSnackBarNotification(response.statusText);
+                }
+            })
+            .catch((error) => {
+                showSnackBarNotification(error.message);
+            });
+        setOpenPopupCopyToScriptList(false);
+    };
+
     const handleOpenMenu = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -422,6 +501,16 @@ const ContingencyLists = () => {
 
     const cancelDeleteList = () => {
         setOpenPopupConfirmDelete(false);
+    };
+
+    const handleReplaceWithScriptList = () => {
+        setAnchorEl(null);
+        setOpenPopupReplaceWithScriptList(true);
+    };
+
+    const handleCopyToScriptList = () => {
+        setAnchorEl(null);
+        setOpenPopupCopyToScriptList(true);
     };
 
     /**
@@ -655,6 +744,41 @@ const ContingencyLists = () => {
                                                         }
                                                     />
                                                 </MenuItem>
+                                                {currentItem !== null &&
+                                                    currentItem.type ===
+                                                        ScriptTypes.FILTERS && (
+                                                        <div>
+                                                            <MenuItem
+                                                                onClick={() =>
+                                                                    handleReplaceWithScriptList()
+                                                                }
+                                                            >
+                                                                <ListItemIcon>
+                                                                    <InsertDriveFileIcon fontSize="small" />
+                                                                </ListItemIcon>
+                                                                <ListItemText
+                                                                    primary={
+                                                                        <FormattedMessage id="replaceWithScript" />
+                                                                    }
+                                                                />
+                                                            </MenuItem>
+
+                                                            <MenuItem
+                                                                onClick={() =>
+                                                                    handleCopyToScriptList()
+                                                                }
+                                                            >
+                                                                <ListItemIcon>
+                                                                    <FileCopyIcon fontSize="small" />
+                                                                </ListItemIcon>
+                                                                <ListItemText
+                                                                    primary={
+                                                                        <FormattedMessage id="copyToScript" />
+                                                                    }
+                                                                />
+                                                            </MenuItem>
+                                                        </div>
+                                                    )}
                                             </StyledMenu>
                                         </div>
                                     ))}
@@ -737,6 +861,35 @@ const ContingencyLists = () => {
                         }
                         handleBtnSave={confirmDeleteList}
                         handleBtnCancel={cancelDeleteList}
+                    />
+                    {/* Alert to confirm replacing filters list to script list */}
+                    <PopupInfo
+                        open={openPopupReplaceWithScriptList}
+                        onClose={() => setOpenPopupReplaceWithScriptList(false)}
+                        title={<FormattedMessage id="replaceList" />}
+                        customAlertMessage={
+                            <FormattedMessage
+                                id="alertBeforeReplaceWithScript"
+                                values={{ br: <br /> }}
+                            />
+                        }
+                        customTextValidationBtn={
+                            <FormattedMessage id="remplacer" />
+                        }
+                        handleBtnSave={confirmReplaceWithScriptList}
+                        handleBtnCancel={cancelReplaceWithScriptList}
+                    />
+                    {/* Popup for copy filters list to script list */}
+                    <PopupWithInput
+                        open={openPopupCopyToScriptList}
+                        onClose={() => setOpenPopupCopyToScriptList(false)}
+                        title={<FormattedMessage id="copyToScript" />}
+                        inputLabelText={<FormattedMessage id="newNameList" />}
+                        customTextValidationBtn={<FormattedMessage id="copy" />}
+                        customTextCancelBtn={<FormattedMessage id="cancel" />}
+                        handleCopyToScriptList={copyToScriptList}
+                        selectedListName={currentItem ? currentItem.name : ''}
+                        newList={false}
                     />
                 </div>
             </div>
