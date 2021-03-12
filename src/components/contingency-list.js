@@ -18,6 +18,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Alert from '@material-ui/lab/Alert';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import IconButton from '@material-ui/core/IconButton';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
@@ -56,7 +57,7 @@ import { ScriptTypes } from '../utils/script-types';
 import { EquipmentTypes } from '../utils/equipment-types';
 import { useSnackbar } from 'notistack';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     root: {
         padding: '0',
     },
@@ -130,6 +131,12 @@ const useStyles = makeStyles((theme) => ({
         padding: '15px 25px 15px',
         margin: '0',
         overflow: 'hidden',
+        '& span': {
+            width: 220,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+        },
     },
     contingencyLists: {
         overflowY: 'auto',
@@ -139,10 +146,6 @@ const useStyles = makeStyles((theme) => ({
     chevronLeft: {
         float: 'right',
         margin: '8px 3px 0',
-        color: theme.palette.type === 'light' ? '#000' : '#fff',
-    },
-    chevronRight: {
-        color: theme.palette.type === 'light' ? '#000' : '#fff',
     },
     iconList: {
         margin: '0 15px 0 10px',
@@ -177,6 +180,20 @@ const emptyFiltersContingency = {
     nominalVoltageOperator: '=',
     nominalVoltage: '',
     countries: [],
+};
+
+const useStylesCustomTooltip = makeStyles((theme) => ({
+    tooltip: {
+        boxShadow: theme.shadows[1],
+        fontSize: '20px',
+        textTransform: 'capitalize',
+    },
+}));
+
+const CustomTooltip = (props) => {
+    const classes = useStylesCustomTooltip();
+
+    return <Tooltip arrow classes={classes} {...props} />;
 };
 
 const ContingencyLists = () => {
@@ -220,6 +237,8 @@ const ContingencyLists = () => {
     );
 
     const [showContainerList, setShowContainerList] = useState(true);
+
+    const maxLengthListName = 21; // Max length of list name
 
     /**
      * Show snackbar notification
@@ -661,12 +680,26 @@ const ContingencyLists = () => {
                                                         <DescriptionIcon />
                                                     )}
                                                 </div>
-                                                <ListItemText
-                                                    className={
-                                                        classes.listItemText
-                                                    }
-                                                    primary={item.name}
-                                                />
+                                                {item.name.length >
+                                                maxLengthListName ? (
+                                                    <CustomTooltip
+                                                        title={item.name}
+                                                    >
+                                                        <ListItemText
+                                                            className={
+                                                                classes.listItemText
+                                                            }
+                                                            primary={item.name}
+                                                        />
+                                                    </CustomTooltip>
+                                                ) : (
+                                                    <ListItemText
+                                                        className={
+                                                            classes.listItemText
+                                                        }
+                                                        primary={item.name}
+                                                    />
+                                                )}
                                                 <IconButton
                                                     aria-label="settings"
                                                     aria-controls="list-menu"
