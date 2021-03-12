@@ -42,10 +42,15 @@ import { ReactComponent as GridActionsLogoLight } from '../images/GridActions_lo
 import {
     connectNotificationsWsUpdateConfig,
     fetchAppsAndUrls,
+    fetchConfigParameter,
     fetchConfigParameters,
-    updateConfigParameters,
+    updateConfigParameter,
 } from '../utils/rest-api';
-import { PARAMS_THEME_KEY } from '../utils/config-params';
+import {
+    APP_NAME,
+    COMMON_APP_NAME,
+    PARAMS_THEME_KEY,
+} from '../utils/config-params';
 
 const lightTheme = createMuiTheme({
     palette: {
@@ -151,41 +156,54 @@ const App = () => {
         }
     }, [user]);
 
+    const updateParams = useCallback(
+        (params) => {
+            console.debug('received UI parameters : ', params);
+            params.forEach((param) => {
+                switch (param.name) {
+                    case PARAMS_THEME_KEY:
+                        dispatch(selectTheme(param.value));
+                        break;
+                    default:
+                }
+            });
+        },
+        [dispatch]
+    );
+
     const connectNotificationsUpdateConfig = useCallback(() => {
         const ws = connectNotificationsWsUpdateConfig();
 
         ws.onmessage = function (event) {
-            fetchConfigParameters().then((params) => {
-                params.forEach((param) => {
-                    if (param.name === PARAMS_THEME_KEY) {
-                        dispatch(selectTheme(param.value));
+            let eventData = JSON.parse(event.data);
+            if (eventData.headers && eventData.headers['parameterName']) {
+                fetchConfigParameter(eventData.headers['parameterName']).then(
+                    (param) => {
+                        updateParams([param]);
                     }
-                });
-            });
+                );
+            }
         };
         ws.onerror = function (event) {
             console.error('Unexpected Notification WebSocket error', event);
         };
         return ws;
-    }, [dispatch]);
+    }, [updateParams]);
 
     useEffect(() => {
         if (user !== null) {
-            fetchConfigParameters().then((params) => {
-                console.debug('received UI parameters :');
-                console.debug(params);
-                params.forEach((param) => {
-                    if (param.key === PARAMS_THEME_KEY) {
-                        dispatch(selectTheme(param.value));
-                    }
-                });
+            fetchConfigParameters(COMMON_APP_NAME).then((params) => {
+                updateParams(params);
+            });
+            fetchConfigParameters(APP_NAME).then((params) => {
+                updateParams(params);
             });
             const ws = connectNotificationsUpdateConfig();
             return function () {
                 ws.close();
             };
         }
-    }, [user, dispatch, connectNotificationsUpdateConfig]);
+    }, [user, dispatch, updateParams, connectNotificationsUpdateConfig]);
 
     function onLogoClicked() {
         history.replace('/');
@@ -200,7 +218,7 @@ const App = () => {
     }
 
     const handleThemeClick = (theme) => {
-        updateConfigParameters(PARAMS_THEME_KEY, theme);
+        updateConfigParameter(PARAMS_THEME_KEY, theme);
     };
 
     return (
