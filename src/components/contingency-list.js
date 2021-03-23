@@ -217,7 +217,6 @@ const ContingencyLists = () => {
 
     const [aceEditorContent, setAceEditorContent] = useState('');
 
-    const [alertEmptyList, setAlertEmptyList] = useState(false);
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [openPopupNewList, setOpenPopupNewList] = useState(false);
@@ -401,12 +400,10 @@ const ContingencyLists = () => {
                         .then((data) => {
                             dispatch(updateContingencyList(data));
                             if (data.length > 0) {
-                                dispatch(updateContingencyList(data));
                                 setSelectedIndex(0);
                                 setCurrentItem(data[0]);
                             } else {
                                 setCurrentItem(null);
-                                setAlertEmptyList(true);
                             }
                         })
                         .catch((error) => {
@@ -562,9 +559,7 @@ const ContingencyLists = () => {
     const getAllContingencyLists = useCallback(() => {
         getContingencyLists()
             .then((data) => {
-                if (data) {
-                    dispatch(updateContingencyList(data));
-                }
+                dispatch(updateContingencyList(data));
             })
             .catch((error) => {
                 showSnackBarNotification(error.message);
@@ -650,150 +645,158 @@ const ContingencyLists = () => {
                         <h3 className={classes.contingencyTitle}>
                             <FormattedMessage id="contingencyTitle" />
                         </h3>
-                        <div className={classes.contingencyLists}>
-                            {contingencyLists.length > 0 ? (
-                                <List className={classes.root}>
-                                    {contingencyLists.map((item, index) => (
-                                        <div key={item.name + 'div'}>
-                                            <CustomListItem
-                                                button
-                                                key={item.name}
-                                                selected={
-                                                    selectedIndex === index
-                                                }
-                                                onClick={() =>
-                                                    handleContingencyListItemClicked(
-                                                        item,
-                                                        index
-                                                    )
-                                                }
-                                            >
-                                                <div
-                                                    className={classes.iconList}
+                        {contingencyLists && (
+                            <div className={classes.contingencyLists}>
+                                {contingencyLists.length > 0 ? (
+                                    <List className={classes.root}>
+                                        {contingencyLists.map((item, index) => (
+                                            <div key={item.name + 'div'}>
+                                                <CustomListItem
+                                                    button
+                                                    key={item.name}
+                                                    selected={
+                                                        selectedIndex === index
+                                                    }
+                                                    onClick={() =>
+                                                        handleContingencyListItemClicked(
+                                                            item,
+                                                            index
+                                                        )
+                                                    }
                                                 >
-                                                    {item.type ===
-                                                        ScriptTypes.FILTERS && (
-                                                        <PanToolIcon />
-                                                    )}
-                                                    {item.type ===
-                                                        ScriptTypes.SCRIPT && (
-                                                        <DescriptionIcon />
-                                                    )}
-                                                </div>
-                                                {item.name.length >
-                                                maxLengthListName ? (
-                                                    <CustomTooltip
-                                                        title={item.name}
+                                                    <div
+                                                        className={
+                                                            classes.iconList
+                                                        }
                                                     >
+                                                        {item.type ===
+                                                            ScriptTypes.FILTERS && (
+                                                            <PanToolIcon />
+                                                        )}
+                                                        {item.type ===
+                                                            ScriptTypes.SCRIPT && (
+                                                            <DescriptionIcon />
+                                                        )}
+                                                    </div>
+                                                    {item.name.length >
+                                                    maxLengthListName ? (
+                                                        <CustomTooltip
+                                                            title={item.name}
+                                                        >
+                                                            <ListItemText
+                                                                className={
+                                                                    classes.listItemText
+                                                                }
+                                                                primary={
+                                                                    item.name
+                                                                }
+                                                            />
+                                                        </CustomTooltip>
+                                                    ) : (
                                                         <ListItemText
                                                             className={
                                                                 classes.listItemText
                                                             }
                                                             primary={item.name}
                                                         />
-                                                    </CustomTooltip>
-                                                ) : (
-                                                    <ListItemText
-                                                        className={
-                                                            classes.listItemText
-                                                        }
-                                                        primary={item.name}
-                                                    />
-                                                )}
-                                                <IconButton
-                                                    aria-label="settings"
-                                                    aria-controls="list-menu"
-                                                    aria-haspopup="true"
-                                                    variant="contained"
-                                                    onClick={(event) =>
-                                                        handleOpenMenu(event)
-                                                    }
-                                                >
-                                                    <MoreVertIcon />
-                                                </IconButton>
-                                            </CustomListItem>
-                                            <StyledMenu
-                                                id="list-menu"
-                                                anchorEl={anchorEl}
-                                                open={Boolean(anchorEl)}
-                                                onClose={handleCloseMenu}
-                                            >
-                                                <MenuItem
-                                                    onClick={() =>
-                                                        handleRenameList()
-                                                    }
-                                                >
-                                                    <ListItemIcon>
-                                                        <EditIcon fontSize="small" />
-                                                    </ListItemIcon>
-                                                    <ListItemText
-                                                        primary={
-                                                            <FormattedMessage id="rename" />
-                                                        }
-                                                    />
-                                                </MenuItem>
-                                                <MenuItem
-                                                    onClick={handleDeleteList}
-                                                >
-                                                    <ListItemIcon>
-                                                        <DeleteIcon fontSize="small" />
-                                                    </ListItemIcon>
-                                                    <ListItemText
-                                                        primary={
-                                                            <FormattedMessage id="delete" />
-                                                        }
-                                                    />
-                                                </MenuItem>
-                                                {currentItem !== null &&
-                                                    currentItem.type ===
-                                                        ScriptTypes.FILTERS && (
-                                                        <div>
-                                                            <MenuItem
-                                                                onClick={() =>
-                                                                    handleReplaceWithScriptList()
-                                                                }
-                                                            >
-                                                                <ListItemIcon>
-                                                                    <InsertDriveFileIcon fontSize="small" />
-                                                                </ListItemIcon>
-                                                                <ListItemText
-                                                                    primary={
-                                                                        <FormattedMessage id="replaceWithScript" />
-                                                                    }
-                                                                />
-                                                            </MenuItem>
-
-                                                            <MenuItem
-                                                                onClick={() =>
-                                                                    handleCopyToScriptList()
-                                                                }
-                                                            >
-                                                                <ListItemIcon>
-                                                                    <FileCopyIcon fontSize="small" />
-                                                                </ListItemIcon>
-                                                                <ListItemText
-                                                                    primary={
-                                                                        <FormattedMessage id="copyToScript" />
-                                                                    }
-                                                                />
-                                                            </MenuItem>
-                                                        </div>
                                                     )}
-                                            </StyledMenu>
-                                        </div>
-                                    ))}
-                                </List>
-                            ) : (
-                                alertEmptyList && (
+                                                    <IconButton
+                                                        aria-label="settings"
+                                                        aria-controls="list-menu"
+                                                        aria-haspopup="true"
+                                                        variant="contained"
+                                                        onClick={(event) =>
+                                                            handleOpenMenu(
+                                                                event
+                                                            )
+                                                        }
+                                                    >
+                                                        <MoreVertIcon />
+                                                    </IconButton>
+                                                </CustomListItem>
+                                                <StyledMenu
+                                                    id="list-menu"
+                                                    anchorEl={anchorEl}
+                                                    open={Boolean(anchorEl)}
+                                                    onClose={handleCloseMenu}
+                                                >
+                                                    <MenuItem
+                                                        onClick={() =>
+                                                            handleRenameList()
+                                                        }
+                                                    >
+                                                        <ListItemIcon>
+                                                            <EditIcon fontSize="small" />
+                                                        </ListItemIcon>
+                                                        <ListItemText
+                                                            primary={
+                                                                <FormattedMessage id="rename" />
+                                                            }
+                                                        />
+                                                    </MenuItem>
+                                                    <MenuItem
+                                                        onClick={
+                                                            handleDeleteList
+                                                        }
+                                                    >
+                                                        <ListItemIcon>
+                                                            <DeleteIcon fontSize="small" />
+                                                        </ListItemIcon>
+                                                        <ListItemText
+                                                            primary={
+                                                                <FormattedMessage id="delete" />
+                                                            }
+                                                        />
+                                                    </MenuItem>
+                                                    {currentItem !== null &&
+                                                        currentItem.type ===
+                                                            ScriptTypes.FILTERS && (
+                                                            <div>
+                                                                <MenuItem
+                                                                    onClick={() =>
+                                                                        handleReplaceWithScriptList()
+                                                                    }
+                                                                >
+                                                                    <ListItemIcon>
+                                                                        <InsertDriveFileIcon fontSize="small" />
+                                                                    </ListItemIcon>
+                                                                    <ListItemText
+                                                                        primary={
+                                                                            <FormattedMessage id="replaceWithScript" />
+                                                                        }
+                                                                    />
+                                                                </MenuItem>
+
+                                                                <MenuItem
+                                                                    onClick={() =>
+                                                                        handleCopyToScriptList()
+                                                                    }
+                                                                >
+                                                                    <ListItemIcon>
+                                                                        <FileCopyIcon fontSize="small" />
+                                                                    </ListItemIcon>
+                                                                    <ListItemText
+                                                                        primary={
+                                                                            <FormattedMessage id="copyToScript" />
+                                                                        }
+                                                                    />
+                                                                </MenuItem>
+                                                            </div>
+                                                        )}
+                                                </StyledMenu>
+                                            </div>
+                                        ))}
+                                    </List>
+                                ) : (
                                     <Alert
                                         severity="error"
                                         className={classes.alert}
                                     >
                                         <FormattedMessage id="contingencyListIsEmpty" />
                                     </Alert>
-                                )
-                            )}
-                        </div>
+                                )}
+                            </div>
+                        )}
                         <div className={classes.containerButtons}>
                             <Button
                                 style={{ marginRight: '15px' }}
