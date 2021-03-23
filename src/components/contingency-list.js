@@ -217,7 +217,7 @@ const ContingencyLists = () => {
 
     const [aceEditorContent, setAceEditorContent] = useState('');
 
-    const [alertEmptyList, setAlertEmptyList] = useState(true);
+    const [alertEmptyList, setAlertEmptyList] = useState(false);
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const [openPopupNewList, setOpenPopupNewList] = useState(false);
@@ -783,15 +783,15 @@ const ContingencyLists = () => {
                                         </div>
                                     ))}
                                 </List>
-                            ) : alertEmptyList ? (
-                                <Alert
-                                    severity="error"
-                                    className={classes.alert}
-                                >
-                                    <FormattedMessage id="contingencyListIsEmpty" />
-                                </Alert>
                             ) : (
-                                ''
+                                alertEmptyList && (
+                                    <Alert
+                                        severity="error"
+                                        className={classes.alert}
+                                    >
+                                        <FormattedMessage id="contingencyListIsEmpty" />
+                                    </Alert>
+                                )
                             )}
                         </div>
                         <div className={classes.containerButtons}>
