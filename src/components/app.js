@@ -43,6 +43,7 @@ import {
     connectNotificationsWsUpdateConfig,
     fetchAppsAndUrls,
     fetchConfigParameters,
+    updateConfigParameters,
 } from '../utils/rest-api';
 import { PARAMS_THEME_KEY } from '../utils/config-params';
 
@@ -198,6 +199,10 @@ const App = () => {
         setShowParameters(false);
     }
 
+    const handleThemeClick = (theme) => {
+        updateConfigParameters(PARAMS_THEME_KEY, theme);
+    };
+
     return (
         <ThemeProvider theme={getMuiTheme(theme)}>
             <SnackbarProvider hideIconVariant={false}>
@@ -220,6 +225,9 @@ const App = () => {
                         onLogoClick={() => onLogoClicked()}
                         user={user}
                         appsAndUrls={appsAndUrls}
+                        onThemeClick={handleThemeClick}
+                        theme={theme}
+                        onAboutClick={() => console.debug('about')}
                     />
                     <Parameters
                         showParameters={showParameters}
