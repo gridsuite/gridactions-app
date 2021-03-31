@@ -16,7 +16,7 @@ const initialState = {
     theme: getLocalStorageTheme(),
     user: null,
     signInCallbackError: null,
-    contingencyLists: [],
+    contingencyLists: null,
 };
 
 export const reducer = createReducer(initialState, {
