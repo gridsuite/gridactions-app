@@ -27,7 +27,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
 
 import { DARK_THEME, LIGHT_THEME } from '../redux/actions';
-import { updateConfigParameters } from '../utils/rest-api';
+import { updateConfigParameter } from '../utils/rest-api';
 import { PARAMS_THEME_KEY } from '../utils/config-params';
 
 const useStyles = makeStyles((theme) => ({
@@ -48,7 +48,7 @@ const Parameters = ({ showParameters, hideParameters }) => {
 
     const handleChangeTheme = (event) => {
         const theme = event.target.value;
-        updateConfigParameters(PARAMS_THEME_KEY, theme);
+        updateConfigParameter(PARAMS_THEME_KEY, theme);
     };
 
     function TabPanel(props) {
