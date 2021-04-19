@@ -15,6 +15,7 @@ import {
     Switch,
     useHistory,
     useLocation,
+    useRouteMatch,
 } from 'react-router-dom';
 
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -22,19 +23,16 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { LIGHT_THEME, selectTheme } from '../redux/actions';
 
 import {
-    TopBar,
     AuthenticationRouter,
-    logout,
     getPreLoginPath,
     initializeAuthenticationProd,
+    logout,
     SnackbarProvider,
+    TopBar,
 } from '@gridsuite/commons-ui';
-
-import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import ContingencyLists from './contingency-list';
+import DataTabs from './data-tabs';
 
-import Box from '@material-ui/core/Box';
 import Parameters from './parameters';
 
 import { ReactComponent as GridActionsLogoDark } from '../images/GridActions_logo_dark.svg';
@@ -254,9 +252,7 @@ const App = () => {
                     {user !== null ? (
                         <Switch>
                             <Route exact path="/">
-                                <Box mt={20}>
-                                    <ContingencyLists />
-                                </Box>
+                                <DataTabs />
                             </Route>
                             <Route exact path="/sign-in-callback">
                                 <Redirect to={getPreLoginPath() || '/'} />

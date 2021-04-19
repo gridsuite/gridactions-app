@@ -64,9 +64,7 @@ const useStyles = makeStyles(() => ({
     container: {
         display: 'flex',
         margin: '0',
-        position: 'absolute',
         width: '100%',
-        top: '70px',
         height: 'calc(100vh - 70px)',
     },
     containerLists: {
@@ -196,7 +194,7 @@ const CustomTooltip = (props) => {
     return <Tooltip arrow classes={classes} {...props} />;
 };
 
-const ContingencyLists = () => {
+const ContingencyLists = ({ listType, FilterRenderer }) => {
     const classes = useStyles();
     const { enqueueSnackbar } = useSnackbar();
     const dispatch = useDispatch();
@@ -277,7 +275,7 @@ const ContingencyLists = () => {
      * @param newName
      */
     const renameList = (oldName, newName) => {
-        renameListByName(oldName, newName)
+        renameListByName(oldName, newName, listType)
             .then((response) => {
                 if (response.ok) {
                     getAllContingencyLists();
@@ -325,7 +323,7 @@ const ContingencyLists = () => {
      * @param isNewList
      */
     const saveList = (name, type, isNewList) => {
-        saveListResponse(name, type, isNewList).then(() => {
+        saveListResponse(name, type, isNewList, listType).then(() => {
             getContingencyLists()
                 .then((data) => {
                     const index = data.findIndex((element) => {
@@ -394,9 +392,9 @@ const ContingencyLists = () => {
         setAnchorEl(null);
         if (currentItem) {
             setOpenPopupConfirmDelete(false);
-            deleteListByName(currentItem.name)
+            deleteListByName(currentItem.name, listType)
                 .then(() => {
-                    getContingencyLists()
+                    getContingencyLists(listType)
                         .then((data) => {
                             dispatch(updateContingencyList(data));
                             if (data.length > 0) {
@@ -421,10 +419,10 @@ const ContingencyLists = () => {
      */
     const confirmReplaceWithScriptList = () => {
         setAnchorEl(null);
-        replaceFiltersWithScriptContingencyList(currentItem.name)
+        replaceFiltersWithScriptContingencyList(currentItem.name, listType)
             .then((response) => {
                 if (response.ok) {
-                    getContingencyLists().then((data) => {
+                    getContingencyLists(listType).then((data) => {
                         setCurrentItem({
                             name: currentItem.name,
                             type: ScriptTypes.SCRIPT,
@@ -452,10 +450,10 @@ const ContingencyLists = () => {
      * @param newName
      */
     const copyToScriptList = (name, newName) => {
-        newScriptFromFiltersContingencyList(name, newName)
+        newScriptFromFiltersContingencyList(name, newName, listType)
             .then((response) => {
                 if (response.ok) {
-                    getContingencyLists().then((data) => {
+                    getContingencyLists(listType).then((data) => {
                         const index = data.findIndex((element) => {
                             if (
                                 element.name === newName &&
@@ -557,7 +555,7 @@ const ContingencyLists = () => {
      * Get all contingency lists on load page
      **/
     const getAllContingencyLists = useCallback(() => {
-        getContingencyLists()
+        getContingencyLists(listType)
             .then((data) => {
                 dispatch(updateContingencyList(data));
             })
@@ -568,7 +566,7 @@ const ContingencyLists = () => {
 
     const getCurrentContingencyList = useCallback(
         (currentItemType, currentItemName) => {
-            getContingencyList(currentItemType, currentItemName)
+            getContingencyList(currentItemType, currentItemName, listType)
                 .then((data) => {
                     if (data) {
                         if (currentItemType === ScriptTypes.SCRIPT) {
@@ -899,12 +897,12 @@ const ContingencyLists = () => {
 
             <div className={classes.aceEditor}>
                 {currentItem && currentItem.type === ScriptTypes.FILTERS && (
-                    <FiltersEditor
-                        filtersContingency={newFiltersContingency}
+                    <FilterRenderer
+                        filters={newFiltersContingency}
                         onChange={onChangeFiltersContingency}
+                        equipmentType={listType}
                     />
                 )}
-
                 {currentItem && currentItem.type === ScriptTypes.SCRIPT && (
                     <AceEditor
                         className={classes.editor}
