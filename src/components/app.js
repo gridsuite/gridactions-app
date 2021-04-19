@@ -227,7 +227,7 @@ const App = () => {
                 <React.Fragment>
                     <CssBaseline />
                     <TopBar
-                        appName="Actions"
+                        appName="Data"
                         appColor="#DA0063"
                         appLogo={
                             theme === LIGHT_THEME ? (
