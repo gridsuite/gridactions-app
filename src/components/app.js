@@ -209,11 +209,6 @@ const App = () => {
         history.replace('/');
     }
 
-    //To uncomment when parameters are added to gridactions
-    // function showParametersClicked() {
-    //     setShowParameters(true);
-    // }
-
     function hideParameters() {
         setShowParameters(false);
     }
@@ -237,8 +232,6 @@ const App = () => {
                                 <GridActionsLogoDark />
                             )
                         }
-                        //To uncomment when parameters are added to gridactions
-                        // onParametersClick={() => showParametersClicked()}
                         onLogoutClick={() =>
                             logout(dispatch, userManager.instance)
                         }
