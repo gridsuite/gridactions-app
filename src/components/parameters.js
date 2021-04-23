@@ -9,26 +9,16 @@ import React from 'react';
 
 import { FormattedMessage } from 'react-intl';
 
-import { useSelector } from 'react-redux';
-
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
-
-import { DARK_THEME, LIGHT_THEME } from '../redux/actions';
-import { updateConfigParameter } from '../utils/rest-api';
-import { PARAMS_THEME_KEY } from '../utils/config-params';
 
 const useStyles = makeStyles((theme) => ({
     controlItem: {
@@ -44,13 +34,6 @@ const Parameters = ({ showParameters, hideParameters }) => {
 
     const [tabIndex, setTabIndex] = React.useState(0);
 
-    const theme = useSelector((state) => state.theme);
-
-    const handleChangeTheme = (event) => {
-        const theme = event.target.value;
-        updateConfigParameter(PARAMS_THEME_KEY, theme);
-    };
-
     function TabPanel(props) {
         const { children, value, index, ...other } = props;
 
@@ -65,34 +48,6 @@ const Parameters = ({ showParameters, hideParameters }) => {
             >
                 {value === index && <Box p={3}>{children}</Box>}
             </Typography>
-        );
-    }
-
-    function GeneralTab() {
-        return (
-            <Grid container spacing={2} className={classes.grid}>
-                <Grid item xs={8}>
-                    <Typography component="span" variant="body1">
-                        <Box fontWeight="fontWeightBold" m={1}>
-                            <FormattedMessage id="theme" />
-                        </Box>
-                    </Typography>
-                </Grid>
-                <Grid item container xs={4} className={classes.controlItem}>
-                    <RadioGroup row value={theme} onChange={handleChangeTheme}>
-                        <FormControlLabel
-                            value={DARK_THEME}
-                            control={<Radio color="primary" />}
-                            label={DARK_THEME}
-                        />
-                        <FormControlLabel
-                            value={LIGHT_THEME}
-                            control={<Radio color="primary" />}
-                            label={LIGHT_THEME}
-                        />
-                    </RadioGroup>
-                </Grid>
-            </Grid>
         );
     }
 
@@ -122,13 +77,8 @@ const Parameters = ({ showParameters, hideParameters }) => {
                         scrollButtons="auto"
                         onChange={(event, newValue) => setTabIndex(newValue)}
                         aria-label="parameters"
-                    >
-                        <Tab label={<FormattedMessage id="General" />} />
-                    </Tabs>
-
-                    <TabPanel value={tabIndex} index={0}>
-                        <GeneralTab />
-                    </TabPanel>
+                    ></Tabs>
+                    <TabPanel value={tabIndex} index={0}></TabPanel>
 
                     <Grid item xs={12}>
                         <Button

@@ -226,10 +226,6 @@ const App = () => {
         history.replace('/');
     }
 
-    function showParametersClicked() {
-        setShowParameters(true);
-    }
-
     function hideParameters() {
         setShowParameters(false);
     }
@@ -257,7 +253,6 @@ const App = () => {
                                 <GridActionsLogoDark />
                             )
                         }
-                        onParametersClick={() => showParametersClicked()}
                         onLogoutClick={() =>
                             logout(dispatch, userManager.instance)
                         }
