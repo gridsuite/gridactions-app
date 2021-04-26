@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { FormattedMessage } from 'react-intl';
 
@@ -19,6 +19,8 @@ import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
+import { useSelector } from 'react-redux';
+import { updateConfigParameter } from '../utils/rest-api';
 
 const useStyles = makeStyles((theme) => ({
     controlItem: {
@@ -29,10 +31,28 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+export function useParameterState(paramName) {
+    const paramGlobalState = useSelector((state) => state[paramName]);
+    const [paramLocalState, setParamLocalState] = useState();
+
+    useEffect(() => {
+        setParamLocalState(paramGlobalState);
+    }, [paramGlobalState]);
+
+    const handleChangeParamLocalState = useCallback(
+        (value) => {
+            setParamLocalState(value);
+            updateConfigParameter(paramName, value);
+        },
+        [paramName, setParamLocalState]
+    );
+    return [paramLocalState, handleChangeParamLocalState];
+}
+
 const Parameters = ({ showParameters, hideParameters }) => {
     const classes = useStyles();
 
-    const [tabIndex, setTabIndex] = React.useState(0);
+    const [tabIndex, setTabIndex] = useState(0);
 
     function TabPanel(props) {
         const { children, value, index, ...other } = props;

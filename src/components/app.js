@@ -35,7 +35,7 @@ import { FormattedMessage } from 'react-intl';
 import ContingencyLists from './contingency-list';
 
 import Box from '@material-ui/core/Box';
-import Parameters from './parameters';
+import Parameters, { useParameterState } from './parameters';
 
 import { ReactComponent as GridActionsLogoDark } from '../images/GridActions_logo_dark.svg';
 import { ReactComponent as GridActionsLogoLight } from '../images/GridActions_logo_light.svg';
@@ -44,13 +44,8 @@ import {
     fetchAppsAndUrls,
     fetchConfigParameter,
     fetchConfigParameters,
-    updateConfigParameter,
 } from '../utils/rest-api';
-import {
-    APP_NAME,
-    COMMON_APP_NAME,
-    PARAMS_THEME_KEY,
-} from '../utils/config-params';
+import { APP_NAME, COMMON_APP_NAME, PARAM_THEME } from '../utils/config-params';
 
 const lightTheme = createMuiTheme({
     palette: {
@@ -77,11 +72,11 @@ const getMuiTheme = (theme) => {
 const noUserManager = { instance: null, error: null };
 
 const App = () => {
-    const theme = useSelector((state) => state.theme);
-
     const user = useSelector((state) => state.user);
 
-    const [appsAndUrls, setAppsAndUrls] = React.useState([]);
+    const [themeLocal, handleChangeTheme] = useParameterState(PARAM_THEME);
+
+    const [appsAndUrls, setAppsAndUrls] = useState([]);
 
     const signInCallbackError = useSelector(
         (state) => state.signInCallbackError
@@ -161,7 +156,7 @@ const App = () => {
             console.debug('received UI parameters : ', params);
             params.forEach((param) => {
                 switch (param.name) {
-                    case PARAMS_THEME_KEY:
+                    case PARAM_THEME:
                         dispatch(selectTheme(param.value));
                         break;
                     default:
@@ -213,12 +208,8 @@ const App = () => {
         setShowParameters(false);
     }
 
-    const handleThemeClick = (theme) => {
-        updateConfigParameter(PARAMS_THEME_KEY, theme);
-    };
-
     return (
-        <ThemeProvider theme={getMuiTheme(theme)}>
+        <ThemeProvider theme={getMuiTheme(themeLocal)}>
             <SnackbarProvider hideIconVariant={false}>
                 <React.Fragment>
                     <CssBaseline />
@@ -226,7 +217,7 @@ const App = () => {
                         appName="Actions"
                         appColor="#DA0063"
                         appLogo={
-                            theme === LIGHT_THEME ? (
+                            themeLocal === LIGHT_THEME ? (
                                 <GridActionsLogoLight />
                             ) : (
                                 <GridActionsLogoDark />
@@ -238,8 +229,8 @@ const App = () => {
                         onLogoClick={() => onLogoClicked()}
                         user={user}
                         appsAndUrls={appsAndUrls}
-                        onThemeClick={handleThemeClick}
-                        theme={theme}
+                        onThemeClick={handleChangeTheme}
+                        theme={themeLocal}
                         onAboutClick={() => console.debug('about')}
                     />
                     <Parameters

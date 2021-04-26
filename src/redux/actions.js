@@ -5,12 +5,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { PARAM_THEME } from '../utils/config-params';
+
 export const SELECT_THEME = 'SELECT_THEME';
 export const DARK_THEME = 'Dark';
 export const LIGHT_THEME = 'Light';
 
 export function selectTheme(theme) {
-    return { type: SELECT_THEME, theme: theme };
+    return { type: SELECT_THEME, [PARAM_THEME]: theme };
 }
 
 export const UPDATE_CONTINGENCY_LIST = 'UPDATE_CONTINGENCY_LIST';

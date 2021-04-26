@@ -11,18 +11,23 @@ import { SELECT_THEME, UPDATE_CONTINGENCY_LIST } from './actions';
 
 import { USER, SIGNIN_CALLBACK_ERROR } from '@gridsuite/commons-ui';
 import { getLocalStorageTheme, saveLocalStorageTheme } from './local-storage';
+import { PARAM_THEME } from '../utils/config-params';
+
+const paramsInitialState = {
+    [PARAM_THEME]: getLocalStorageTheme(),
+};
 
 const initialState = {
-    theme: getLocalStorageTheme(),
     user: null,
     signInCallbackError: null,
     contingencyLists: null,
+    ...paramsInitialState,
 };
 
 export const reducer = createReducer(initialState, {
     [SELECT_THEME]: (state, action) => {
-        state.theme = action.theme;
-        saveLocalStorageTheme(state.theme);
+        state[PARAM_THEME] = action[PARAM_THEME];
+        saveLocalStorageTheme(state[PARAM_THEME]);
     },
 
     [USER]: (state, action) => {
