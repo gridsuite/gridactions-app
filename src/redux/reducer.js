@@ -7,7 +7,11 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { SELECT_THEME, UPDATE_CONTINGENCY_LIST } from './actions';
+import {
+    SELECT_THEME,
+    UPDATE_CONTINGENCY_LIST,
+    UPDATE_FILTER_LIST,
+} from './actions';
 
 import { USER, SIGNIN_CALLBACK_ERROR } from '@gridsuite/commons-ui';
 import { getLocalStorageTheme, saveLocalStorageTheme } from './local-storage';
@@ -17,6 +21,7 @@ const initialState = {
     user: null,
     signInCallbackError: null,
     contingencyLists: null,
+    filterList: null,
 };
 
 export const reducer = createReducer(initialState, {
@@ -35,5 +40,9 @@ export const reducer = createReducer(initialState, {
 
     [UPDATE_CONTINGENCY_LIST]: (state, action) => {
         state.contingencyLists = action.contingencyLists;
+    },
+
+    [UPDATE_FILTER_LIST]: (state, action) => {
+        state.filterList = action.filterList;
     },
 });

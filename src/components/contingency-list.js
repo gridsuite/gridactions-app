@@ -36,7 +36,6 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import FiltersEditor from './filters-editor';
 import { updateContingencyList } from '../redux/actions';
 import { PopupWithInput, PopupInfo } from './popup';
 
@@ -65,7 +64,7 @@ const useStyles = makeStyles(() => ({
         display: 'flex',
         margin: '0',
         width: '100%',
-        height: 'calc(100vh - 70px)',
+        height: 'calc(100vh - 114px)',
     },
     containerLists: {
         width: '350px',
@@ -74,13 +73,6 @@ const useStyles = makeStyles(() => ({
         minWidth: '80px',
         textAlign: 'center',
         marginTop: '10px',
-    },
-    contingencyTitle: {
-        padding: '15px 10px 10px 15px',
-        margin: '0 0 16px 0',
-        textAlign: 'left',
-        fontSize: '24px',
-        fontWeight: 'bold',
     },
     addNewList: {
         textAlign: 'center',
@@ -138,7 +130,6 @@ const useStyles = makeStyles(() => ({
     },
     contingencyLists: {
         overflowY: 'auto',
-        height: 'calc(100vh - 310px)',
         width: '350px',
     },
     chevronLeft: {
@@ -275,7 +266,7 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
      * @param newName
      */
     const renameList = (oldName, newName) => {
-        renameListByName(oldName, newName, listType)
+        renameListByName(oldName, newName)
             .then((response) => {
                 if (response.ok) {
                     getAllContingencyLists();
@@ -323,7 +314,7 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
      * @param isNewList
      */
     const saveList = (name, type, isNewList) => {
-        saveListResponse(name, type, isNewList, listType).then(() => {
+        saveListResponse(name, type, isNewList).then(() => {
             getContingencyLists()
                 .then((data) => {
                     const index = data.findIndex((element) => {
@@ -392,9 +383,9 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
         setAnchorEl(null);
         if (currentItem) {
             setOpenPopupConfirmDelete(false);
-            deleteListByName(currentItem.name, listType)
+            deleteListByName(currentItem.name)
                 .then(() => {
-                    getContingencyLists(listType)
+                    getContingencyLists()
                         .then((data) => {
                             dispatch(updateContingencyList(data));
                             if (data.length > 0) {
@@ -419,7 +410,7 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
      */
     const confirmReplaceWithScriptList = () => {
         setAnchorEl(null);
-        replaceFiltersWithScriptContingencyList(currentItem.name, listType)
+        replaceFiltersWithScriptContingencyList(currentItem.name)
             .then((response) => {
                 if (response.ok) {
                     getContingencyLists(listType).then((data) => {
@@ -450,10 +441,10 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
      * @param newName
      */
     const copyToScriptList = (name, newName) => {
-        newScriptFromFiltersContingencyList(name, newName, listType)
+        newScriptFromFiltersContingencyList(name, newName)
             .then((response) => {
                 if (response.ok) {
-                    getContingencyLists(listType).then((data) => {
+                    getContingencyLists().then((data) => {
                         const index = data.findIndex((element) => {
                             if (
                                 element.name === newName &&
@@ -555,7 +546,7 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
      * Get all contingency lists on load page
      **/
     const getAllContingencyLists = useCallback(() => {
-        getContingencyLists(listType)
+        getContingencyLists()
             .then((data) => {
                 dispatch(updateContingencyList(data));
             })
@@ -566,7 +557,7 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
 
     const getCurrentContingencyList = useCallback(
         (currentItemType, currentItemName) => {
-            getContingencyList(currentItemType, currentItemName, listType)
+            getContingencyList(currentItemType, currentItemName)
                 .then((data) => {
                     if (data) {
                         if (currentItemType === ScriptTypes.SCRIPT) {
@@ -640,160 +631,138 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
                                 </span>
                             </div>
                         </div>
-                        <h3 className={classes.contingencyTitle}>
-                            <FormattedMessage id="contingencyTitle" />
-                        </h3>
-                        {contingencyLists && (
-                            <div className={classes.contingencyLists}>
-                                {contingencyLists.length > 0 ? (
-                                    <List className={classes.root}>
-                                        {contingencyLists.map((item, index) => (
-                                            <div key={item.name + 'div'}>
-                                                <CustomListItem
-                                                    button
-                                                    key={item.name}
-                                                    selected={
-                                                        selectedIndex === index
-                                                    }
-                                                    onClick={() =>
-                                                        handleContingencyListItemClicked(
-                                                            item,
-                                                            index
-                                                        )
-                                                    }
+                        {contingencyLists && contingencyLists.length > 0 ? (
+                            <List className={classes.root}>
+                                {contingencyLists.map((item, index) => (
+                                    <div key={item.name + 'div'}>
+                                        <CustomListItem
+                                            button
+                                            key={item.name}
+                                            selected={selectedIndex === index}
+                                            onClick={() =>
+                                                handleContingencyListItemClicked(
+                                                    item,
+                                                    index
+                                                )
+                                            }
+                                        >
+                                            <div className={classes.iconList}>
+                                                {item.type ===
+                                                    ScriptTypes.FILTERS && (
+                                                    <PanToolIcon />
+                                                )}
+                                                {item.type ===
+                                                    ScriptTypes.SCRIPT && (
+                                                    <DescriptionIcon />
+                                                )}
+                                            </div>
+                                            {item.name.length >
+                                            maxLengthListName ? (
+                                                <CustomTooltip
+                                                    title={item.name}
                                                 >
-                                                    <div
+                                                    <ListItemText
                                                         className={
-                                                            classes.iconList
+                                                            classes.listItemText
                                                         }
-                                                    >
-                                                        {item.type ===
-                                                            ScriptTypes.FILTERS && (
-                                                            <PanToolIcon />
-                                                        )}
-                                                        {item.type ===
-                                                            ScriptTypes.SCRIPT && (
-                                                            <DescriptionIcon />
-                                                        )}
-                                                    </div>
-                                                    {item.name.length >
-                                                    maxLengthListName ? (
-                                                        <CustomTooltip
-                                                            title={item.name}
+                                                        primary={item.name}
+                                                    />
+                                                </CustomTooltip>
+                                            ) : (
+                                                <ListItemText
+                                                    className={
+                                                        classes.listItemText
+                                                    }
+                                                    primary={item.name}
+                                                />
+                                            )}
+                                            <IconButton
+                                                aria-label="settings"
+                                                aria-controls="list-menu"
+                                                aria-haspopup="true"
+                                                variant="contained"
+                                                onClick={(event) =>
+                                                    handleOpenMenu(event)
+                                                }
+                                            >
+                                                <MoreVertIcon />
+                                            </IconButton>
+                                        </CustomListItem>
+                                        <StyledMenu
+                                            id="list-menu"
+                                            anchorEl={anchorEl}
+                                            open={Boolean(anchorEl)}
+                                            onClose={handleCloseMenu}
+                                        >
+                                            <MenuItem
+                                                onClick={() =>
+                                                    handleRenameList()
+                                                }
+                                            >
+                                                <ListItemIcon>
+                                                    <EditIcon fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText
+                                                    primary={
+                                                        <FormattedMessage id="rename" />
+                                                    }
+                                                />
+                                            </MenuItem>
+                                            <MenuItem
+                                                onClick={handleDeleteList}
+                                            >
+                                                <ListItemIcon>
+                                                    <DeleteIcon fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText
+                                                    primary={
+                                                        <FormattedMessage id="delete" />
+                                                    }
+                                                />
+                                            </MenuItem>
+                                            {currentItem !== null &&
+                                                currentItem.type ===
+                                                    ScriptTypes.FILTERS && (
+                                                    <div>
+                                                        <MenuItem
+                                                            onClick={() =>
+                                                                handleReplaceWithScriptList()
+                                                            }
                                                         >
+                                                            <ListItemIcon>
+                                                                <InsertDriveFileIcon fontSize="small" />
+                                                            </ListItemIcon>
                                                             <ListItemText
-                                                                className={
-                                                                    classes.listItemText
-                                                                }
                                                                 primary={
-                                                                    item.name
+                                                                    <FormattedMessage id="replaceWithScript" />
                                                                 }
                                                             />
-                                                        </CustomTooltip>
-                                                    ) : (
-                                                        <ListItemText
-                                                            className={
-                                                                classes.listItemText
-                                                            }
-                                                            primary={item.name}
-                                                        />
-                                                    )}
-                                                    <IconButton
-                                                        aria-label="settings"
-                                                        aria-controls="list-menu"
-                                                        aria-haspopup="true"
-                                                        variant="contained"
-                                                        onClick={(event) =>
-                                                            handleOpenMenu(
-                                                                event
-                                                            )
-                                                        }
-                                                    >
-                                                        <MoreVertIcon />
-                                                    </IconButton>
-                                                </CustomListItem>
-                                                <StyledMenu
-                                                    id="list-menu"
-                                                    anchorEl={anchorEl}
-                                                    open={Boolean(anchorEl)}
-                                                    onClose={handleCloseMenu}
-                                                >
-                                                    <MenuItem
-                                                        onClick={() =>
-                                                            handleRenameList()
-                                                        }
-                                                    >
-                                                        <ListItemIcon>
-                                                            <EditIcon fontSize="small" />
-                                                        </ListItemIcon>
-                                                        <ListItemText
-                                                            primary={
-                                                                <FormattedMessage id="rename" />
-                                                            }
-                                                        />
-                                                    </MenuItem>
-                                                    <MenuItem
-                                                        onClick={
-                                                            handleDeleteList
-                                                        }
-                                                    >
-                                                        <ListItemIcon>
-                                                            <DeleteIcon fontSize="small" />
-                                                        </ListItemIcon>
-                                                        <ListItemText
-                                                            primary={
-                                                                <FormattedMessage id="delete" />
-                                                            }
-                                                        />
-                                                    </MenuItem>
-                                                    {currentItem !== null &&
-                                                        currentItem.type ===
-                                                            ScriptTypes.FILTERS && (
-                                                            <div>
-                                                                <MenuItem
-                                                                    onClick={() =>
-                                                                        handleReplaceWithScriptList()
-                                                                    }
-                                                                >
-                                                                    <ListItemIcon>
-                                                                        <InsertDriveFileIcon fontSize="small" />
-                                                                    </ListItemIcon>
-                                                                    <ListItemText
-                                                                        primary={
-                                                                            <FormattedMessage id="replaceWithScript" />
-                                                                        }
-                                                                    />
-                                                                </MenuItem>
+                                                        </MenuItem>
 
-                                                                <MenuItem
-                                                                    onClick={() =>
-                                                                        handleCopyToScriptList()
-                                                                    }
-                                                                >
-                                                                    <ListItemIcon>
-                                                                        <FileCopyIcon fontSize="small" />
-                                                                    </ListItemIcon>
-                                                                    <ListItemText
-                                                                        primary={
-                                                                            <FormattedMessage id="copyToScript" />
-                                                                        }
-                                                                    />
-                                                                </MenuItem>
-                                                            </div>
-                                                        )}
-                                                </StyledMenu>
-                                            </div>
-                                        ))}
-                                    </List>
-                                ) : (
-                                    <Alert
-                                        severity="error"
-                                        className={classes.alert}
-                                    >
-                                        <FormattedMessage id="contingencyListIsEmpty" />
-                                    </Alert>
-                                )}
-                            </div>
+                                                        <MenuItem
+                                                            onClick={() =>
+                                                                handleCopyToScriptList()
+                                                            }
+                                                        >
+                                                            <ListItemIcon>
+                                                                <FileCopyIcon fontSize="small" />
+                                                            </ListItemIcon>
+                                                            <ListItemText
+                                                                primary={
+                                                                    <FormattedMessage id="copyToScript" />
+                                                                }
+                                                            />
+                                                        </MenuItem>
+                                                    </div>
+                                                )}
+                                        </StyledMenu>
+                                    </div>
+                                ))}
+                            </List>
+                        ) : (
+                            <Alert severity="error" className={classes.alert}>
+                                <FormattedMessage id="contingencyListIsEmpty" />
+                            </Alert>
                         )}
                         <div className={classes.containerButtons}>
                             <Button
@@ -834,6 +803,7 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
                         customTextCancelBtn={<FormattedMessage id="cancel" />}
                         handleSaveNewList={saveList}
                         newList={true}
+                        existingList={contingencyLists}
                     />
                     {/* Popup for rename exist list */}
                     <PopupWithInput
@@ -848,6 +818,7 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
                         handleRenameExistList={renameList}
                         selectedListName={currentItem ? currentItem.name : ''}
                         newList={false}
+                        existingList={contingencyLists}
                     />
                     {/* Alert to confirm delete list */}
                     <PopupInfo
@@ -860,8 +831,9 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
                         customTextValidationBtn={
                             <FormattedMessage id="delete" />
                         }
-                        handleBtnSave={confirmDeleteList}
+                        handleBtnOk={confirmDeleteList}
                         handleBtnCancel={cancelDeleteList}
+                        existingList={contingencyLists}
                     />
                     {/* Alert to confirm replacing filters list to script list */}
                     <PopupInfo
@@ -877,8 +849,9 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
                         customTextValidationBtn={
                             <FormattedMessage id="remplacer" />
                         }
-                        handleBtnSave={confirmReplaceWithScriptList}
+                        handleBtnOk={confirmReplaceWithScriptList}
                         handleBtnCancel={cancelReplaceWithScriptList}
+                        existingList={contingencyLists}
                     />
                     {/* Popup for copy filters list to script list */}
                     <PopupWithInput
@@ -891,6 +864,7 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
                         handleCopyToScriptList={copyToScriptList}
                         selectedListName={currentItem ? currentItem.name : ''}
                         newList={false}
+                        existingList={contingencyLists}
                     />
                 </div>
             </div>

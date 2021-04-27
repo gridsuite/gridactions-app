@@ -19,22 +19,22 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const genericFields = {
-    id: {
-        name: 'ID',
+    equipmentID: {
+        name: 'equipmentID',
         type: filteredTypes.string,
     },
-    name: {
-        name: 'Name',
+    equipmentName: {
+        name: 'equipmentName',
         type: filteredTypes.string,
     },
 };
 
 const equipmentsDefinition = {
-    line: {
+    LINE: {
         label: 'Lines',
         fields: {
             countries: {
-                name: 'Country',
+                name: 'Countries',
                 type: filteredTypes.countries,
                 occurs: 2,
             },
@@ -45,14 +45,18 @@ const equipmentsDefinition = {
             },
         },
     },
-    generator: {
+    GENERATOR: {
         label: 'Generators',
         fields: {},
     },
 };
 
-function generateDefaultValue(val) {
-    return { enabled: false, value: val.defaultValue || val.type.defaultValue };
+function generateDefaultValue(val, originalValue) {
+    if (originalValue != null) return { enabled: true, value: originalValue };
+    return {
+        enabled: val == null,
+        value: val.defaultValue || val.type.defaultValue,
+    };
 }
 
 const SingleFilter = ({ filter, definition, onChange }) => {
@@ -71,7 +75,7 @@ const SingleFilter = ({ filter, definition, onChange }) => {
     };
 
     return (
-        <Grid container direction="row" key={definition.name}>
+        <Grid container item direction="row" key={definition.name + '-cont'}>
             <Grid
                 item
                 className={classes.controlItem}
@@ -112,10 +116,10 @@ export const FilterTypeSelection = ({ type, onChange, disabled }) => {
     const classes = useStyles();
 
     return (
-        <Grid container>
+        <Grid container item>
             <Grid
-                style={{ visibility: 'hidden' }}
                 item
+                style={{ visibility: 'hidden' }}
                 className={classes.controlItem}
             >
                 <Switch />
@@ -145,28 +149,37 @@ export const FilterTypeSelection = ({ type, onChange, disabled }) => {
     );
 };
 
-export const GenericFilter = ({ equipmentType, filters, onChange }) => {
-    const [filterType, setFilterType] = useState('line');
+export const GenericFilter = ({ initialFilter, onChange }) => {
+    const [filterType, setFilterType] = useState(initialFilter.type);
+    const currentEdit = useRef({ type: { enabled: true, value: filterType } });
 
-    const tmp = useRef({
-        id: {
-            enabled: true,
-            value: ['azz', 'tek'],
-        },
-    });
-
-    const onChangeFilter = () => {
-        console.info('new Value : ');
-        console.info(tmp.current);
+    const editDone = () => {
+        console.info('genFil before', currentEdit.current);
+        let res = {};
+        Object.entries(currentEdit.current).forEach(([key, value]) => {
+            if (value.enabled) res[key] = value.value;
+        });
+        console.info('genFil after', res);
+        onChange(res);
     };
+
+    const changeFilterType = (newType) => {
+        currentEdit.current.type = newType;
+        setFilterType(newType);
+    };
+
     const renderFilter = (key, definition) => {
-        if (tmp.current[key] === undefined)
-            tmp.current[key] = generateDefaultValue(definition);
+        if (currentEdit.current[key] === undefined)
+            currentEdit.current[key] = generateDefaultValue(
+                definition,
+                initialFilter[key]
+            );
         return (
             <SingleFilter
-                filter={tmp.current[key]}
+                key={key}
+                filter={currentEdit.current[key]}
                 definition={definition}
-                onChange={onChangeFilter}
+                onChange={editDone}
             />
         );
     };
@@ -182,7 +195,7 @@ export const GenericFilter = ({ equipmentType, filters, onChange }) => {
             ([key, definition]) => {
                 if (definition.occurs)
                     return (
-                        <Grid container direction={'row'}>
+                        <Grid container direction={'row'} key={key}>
                             {[
                                 ...Array.from(Array(definition.occurs).keys()),
                             ].map((n) => {
@@ -208,15 +221,15 @@ export const GenericFilter = ({ equipmentType, filters, onChange }) => {
     };
 
     return (
-        <Grid container direction="row" spacing={2}>
+        <Grid container direction="row" spacing={1} style={{ width: '100%' }}>
             {FilterTypeSelection({
                 type: filterType,
-                onChange: setFilterType,
+                onChange: changeFilterType,
                 disabled: false,
             })}
             {RenderGeneric()}
             <Grid item xs={12}>
-                <Divider variant={'middle'} />
+                <Divider variant={'middle'} style={{ margin: 20 }} />
             </Grid>
             {renderSpecific()}
         </Grid>

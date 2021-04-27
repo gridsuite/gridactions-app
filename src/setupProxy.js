@@ -1,6 +1,11 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 module.exports = function (app) {
     app.use(
+        createProxyMiddleware('http://localhost:5027/api/filter-server', {
+            pathRewrite: { '^/api/filter-server/': '/' },
+        })
+    );
+    app.use(
         createProxyMiddleware('http://localhost:5022/api/actions-server', {
             pathRewrite: { '^/api/actions-server/': '/' },
         })

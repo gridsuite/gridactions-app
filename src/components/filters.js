@@ -6,37 +6,19 @@ import TextField from '@material-ui/core/TextField';
 import { en_countries } from './filters-editor';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
-export const MultipleStringInput = ({
-                                        initialValue,
-                                        onChange,
-                                        disabled,
-                                        defaultList
-                                    }) => {
+export const StringInput = ({
+    initialValue,
+    onChange,
+    disabled,
+}) => {
     return (
-        <Autocomplete
-            multiple
-            id='tags-filled'
-            defaultValue={initialValue}
+        <TextField
+            onChange={(e) => {
+                onChange(e.target.value);
+            }}
             disabled={disabled}
-            options={defaultList ? defaultList : []}
-            freeSolo
-            onChange={(oldVal, newVal) => onChange(newVal)}
-            renderTags={(value, getTagProps) =>
-                value.map((option, index) => (
-                    <Chip
-                        variant='outlined'
-                        label={option}
-                        {...getTagProps({ index })}
-                    />
-                ))
-            }
-            renderInput={(params) => (
-                <TextField
-                    {...params}
-                    variant='outlined'
-                    style={{ paddingRight: 30 }} // TODO
-                />
-            )}
+            defaultValue={initialValue}
+            variant={'outlined'}
         />
     );
 };
@@ -54,14 +36,19 @@ export const CountriesSelection = ({ initialValue, onChange, disabled }) => {
     }
     return (
         <Autocomplete
-            id='select_countries'
+            id="select_countries"
             defaultValue={initialValue}
             multiple={true}
             disabled={disabled}
             onChange={(oldVal, newVal) => onChange(newVal)}
             options={Object.keys(countriesList.object())}
             getOptionLabel={(code) => countriesList.get(code)}
-            renderInput={(props) => <TextField {...props} variant='outlined' />}
+            renderInput={(props) => (
+                <TextField
+                    {...props}
+                    variant="outlined"
+                />
+            )}
             renderTags={(val, getTagsProps) =>
                 val.map((code, index) => (
                     <Chip
@@ -79,7 +66,7 @@ export const CountriesSelection = ({ initialValue, onChange, disabled }) => {
 export const RangeType = {
     EQUALITY: 'equality',
     RANGE: 'range',
-    APPROX: 'approx'
+    APPROX: 'approx',
 };
 
 export const RangeSelection = ({ initialValue, onChange, disabled }) => {
@@ -95,7 +82,7 @@ export const RangeSelection = ({ initialValue, onChange, disabled }) => {
 
     function onSetNumber(index, value) {
         console.info(value);
-        range.current.value[index] = value;
+        range.current['value'+index+1] = value;
         onChange(range.current);
     }
 
@@ -110,9 +97,9 @@ export const RangeSelection = ({ initialValue, onChange, disabled }) => {
                     disabled={disabled}
                     variant={'filled'}
                 >
-                    {Object.values(RangeType).map((key) => (
+                    {Object.entries(RangeType).map(([key, value]) => (
                         <MenuItem key={key} value={key}>
-                            <FormattedMessage id={key} />
+                            <FormattedMessage id={value} />
                         </MenuItem>
                     ))}
                 </Select>
@@ -123,9 +110,9 @@ export const RangeSelection = ({ initialValue, onChange, disabled }) => {
                         onSetNumber(0, e.target.value);
                     }}
                     disabled={disabled}
-                    defaultValue={range.current.value[0]}
+                    defaultValue={range.current.value1}
                     inputMode={'numeric'}
-                    type='number'
+                    type="number"
                     variant={'outlined'}
                     placeholder={
                         equalityType === RangeType.RANGE
@@ -143,18 +130,18 @@ export const RangeSelection = ({ initialValue, onChange, disabled }) => {
                         InputProps={
                             equalityType === RangeType.APPROX
                                 ? {
-                                    endAdornment: (
-                                        <InputAdornment position='end'>
-                                            %
-                                        </InputAdornment>
-                                    )
-                                }
+                                      endAdornment: (
+                                          <InputAdornment position="end">
+                                              %
+                                          </InputAdornment>
+                                      ),
+                                  }
                                 : {}
                         }
                         disabled={disabled}
-                        defaultValue={range.current.value}
+                        defaultValue={range.current.value2}
                         inputMode={'numeric'}
-                        type='number'
+                        type="number"
                         variant={'outlined'}
                         placeholder={
                             equalityType === RangeType.RANGE
@@ -170,18 +157,18 @@ export const RangeSelection = ({ initialValue, onChange, disabled }) => {
 
 export const filteredTypes = {
     string: {
-        defaultValue: [],
-        renderer: MultipleStringInput
+        defaultValue: '',
+        renderer: StringInput,
     },
     countries: {
         defaultValue: [],
-        renderer: CountriesSelection
+        renderer: CountriesSelection,
     },
     range: {
         renderer: RangeSelection,
         defaultValue: {
-            type: RangeType.EQUALITY,
-            value: [undefined, undefined]
-        }
-    }
+            type: 'EQUALITY',
+            value: [undefined, undefined],
+        },
+    },
 };

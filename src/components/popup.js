@@ -19,7 +19,6 @@ import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import { FormattedMessage, useIntl } from 'react-intl';
 import TextField from '@material-ui/core/TextField';
-import { useSelector } from 'react-redux';
 import FormControl from '@material-ui/core/FormControl';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -83,6 +82,7 @@ const DialogContainer = withStyles(() => ({
 
 const PopupWithInput = ({
     open,
+    existingList,
     onClose,
     inputLabelText,
     title,
@@ -93,9 +93,9 @@ const PopupWithInput = ({
     handleCopyToScriptList,
     selectedListName,
     newList,
+    action,
 }) => {
     const intl = useIntl();
-    const contingencyLists = useSelector((state) => state.contingencyLists);
     const [disableBtnSave, setDisableBtnSave] = useState(true);
     const [showError, setShowError] = useState(false);
     const [newNameList, setNewListName] = useState(false);
@@ -109,9 +109,9 @@ const PopupWithInput = ({
         if (name.length === 0) {
             setDisableBtnSave(true);
         } else {
-            if (contingencyLists.length > 0) {
+            if (existingList.length > 0) {
                 if (
-                    contingencyLists.some(
+                    existingList.some(
                         (list) => list.name.toLowerCase() === name.toLowerCase()
                     )
                 ) {
@@ -131,7 +131,10 @@ const PopupWithInput = ({
     };
 
     const handleSave = () => {
-        if (newList) {
+        if (action) {
+            action({ name: newNameList, type: newListType });
+            onClose();
+        } else if (newList) {
             handleSaveNewList(newNameList, newListType, true);
         } else {
             if (handleRenameExistList) {
@@ -239,15 +242,15 @@ const PopupInfo = ({
     title,
     customAlertMessage,
     customTextValidationBtn,
-    handleBtnSave,
+    handleBtnOk,
     handleBtnCancel,
 }) => {
     const handleClose = () => {
         onClose();
     };
 
-    const handleSaveList = () => {
-        handleBtnSave();
+    const handleOk = () => {
+        handleBtnOk();
     };
 
     const handleCancel = () => {
@@ -264,11 +267,7 @@ const PopupInfo = ({
                 <Button autoFocus size="small" onClick={handleCancel}>
                     <FormattedMessage id="cancel" />
                 </Button>
-                <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={handleSaveList}
-                >
+                <Button variant="outlined" size="small" onClick={handleOk}>
                     {customTextValidationBtn}
                 </Button>
             </CustomDialogActions>
@@ -282,7 +281,7 @@ PopupInfo.propTypes = {
     title: PropTypes.object.isRequired,
     customAlertMessage: PropTypes.object.isRequired,
     customTextValidationBtn: PropTypes.object.isRequired,
-    handleBtnSave: PropTypes.func.isRequired,
+    handleBtnOk: PropTypes.func.isRequired,
     handleBtnCancel: PropTypes.func.isRequired,
 };
 

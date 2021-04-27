@@ -9,6 +9,8 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 import { APP_NAME, getAppName } from './config-params';
 
 const PREFIX_ACTIONS_QUERIES = process.env.REACT_APP_API_GATEWAY + '/actions';
+const PREFIX_FILTERS_QUERIES =
+    process.env.REACT_APP_API_GATEWAY + '/filter/v1/filters/';
 
 const PREFIX_CONFIG_NOTIFICATION_WS =
     process.env.REACT_APP_WS_GATEWAY + '/config-notification';
@@ -244,5 +246,67 @@ export function addFiltersContingencyList(name, newFiltersContingency) {
                 newFiltersContingency.nominalVoltageOperator,
             countries: newFiltersContingency.countries,
         }),
+    });
+}
+
+/**
+ * Add Filter
+ * @returns {Promise<Response>}
+ */
+export function saveFilter(newFilter) {
+    console.log(newFilter);
+    return backendFetch(PREFIX_FILTERS_QUERIES, {
+        method: 'put',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newFilter),
+    });
+}
+
+/**
+ * Get all contingency lists
+ * @returns {Promise<Response>}
+ */
+export function getFilters() {
+    return backendFetch(PREFIX_FILTERS_QUERIES)
+        .then((response) => response.json())
+        .then((res) => res.sort((a, b) => a.name.localeCompare(b.name)));
+}
+
+/**
+ * Delete contingency list by name
+ * @param name
+ * @returns {Promise<Response>}
+ */
+export function deleteFilterByName(name) {
+    const url = PREFIX_FILTERS_QUERIES + encodeURIComponent(name);
+    return backendFetch(url, {
+        method: 'delete',
+    });
+}
+
+/**
+ * Get contingency list by type
+ * @returns {Promise<Response>}
+ */
+export function getFilterByName(name) {
+    const url = PREFIX_FILTERS_QUERIES + name;
+    return backendFetch(url).then((response) => response.json());
+}
+
+/**
+ * Rename list by name
+ * @param oldName
+ * @param newName
+ * @returns {Promise<Response>}
+ */
+export function renameFilterByName(oldName, newName) {
+    const url = PREFIX_FILTERS_QUERIES + oldName + '/rename';
+    return backendFetch(url, {
+        method: 'post',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: newName,
     });
 }

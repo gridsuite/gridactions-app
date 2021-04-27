@@ -6,7 +6,7 @@
     "General": "General",
     "theme": "Theme: ",
     "close": "Close",
-    "CONTINGENCY":"CONTINGENCY",
+    "CONTINGENCY": "CONTINGENCY",
     "CountrySideA": "Country side A",
     "CountrySideB": "Country side B",
     "equality": "equality",
@@ -38,7 +38,6 @@
     "FILTERS": "Filters",
     "TWO_WINDINGS_TRANSFORMER": "2W TRANSFORMER",
     "DANGLING_LINE": "DANGLING LINE",
-    "LINE": "LINE",
     "GENERATOR": "GENERATOR",
     "STATIC_VAR_COMPENSATOR": "STATIC VAR COMPENSATOR",
     "SHUNT_COMPENSATOR": "SHUNT COMPENSATOR",
@@ -51,5 +50,8 @@
     "replaceList": "Replace list",
     "alertBeforeReplaceWithScript": "Do you really want to replace this list with a Groovy script ?{br}{br}This action cannot be reversed",
     "remplacer": "Replace",
-    "copy": "Copy"
+    "copy": "Copy",
+    "newFilter": "New filter",
+    "FilterName": "Filter Name",
+    "addNewFilter": "Add a new Filter"
 }

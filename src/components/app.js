@@ -224,60 +224,62 @@ const App = () => {
             <SnackbarProvider hideIconVariant={false}>
                 <React.Fragment>
                     <CssBaseline />
-                    <TopBar
-                        appName="Actions"
-                        appColor="#DA0063"
-                        appLogo={
-                            theme === LIGHT_THEME ? (
-                                <GridActionsLogoLight />
-                            ) : (
-                                <GridActionsLogoDark />
-                            )
-                        }
-                        onParametersClick={() => showParametersClicked()}
-                        onLogoutClick={() =>
-                            logout(dispatch, userManager.instance)
-                        }
-                        onLogoClick={() => onLogoClicked()}
-                        user={user}
-                        appsAndUrls={appsAndUrls}
-                        onThemeClick={handleThemeClick}
-                        theme={theme}
-                        onAboutClick={() => console.debug('about')}
-                    />
-                    <Parameters
-                        showParameters={showParameters}
-                        hideParameters={hideParameters}
-                    />
-                    {user !== null ? (
-                        <Switch>
-                            <Route exact path="/">
-                                <DataTabs />
-                            </Route>
-                            <Route exact path="/sign-in-callback">
-                                <Redirect to={getPreLoginPath() || '/'} />
-                            </Route>
-                            <Route exact path="/logout-callback">
-                                <h1>
-                                    Error: logout failed; you are still logged
-                                    in.
-                                </h1>
-                            </Route>
-                            <Route>
-                                <h1>
-                                    <FormattedMessage id="PageNotFound" />
-                                </h1>
-                            </Route>
-                        </Switch>
-                    ) : (
-                        <AuthenticationRouter
-                            userManager={userManager}
-                            signInCallbackError={signInCallbackError}
-                            dispatch={dispatch}
-                            history={history}
-                            location={location}
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <TopBar
+                            appName="Actions"
+                            appColor="#DA0063"
+                            appLogo={
+                                theme === LIGHT_THEME ? (
+                                    <GridActionsLogoLight />
+                                ) : (
+                                    <GridActionsLogoDark />
+                                )
+                            }
+                            onParametersClick={() => showParametersClicked()}
+                            onLogoutClick={() =>
+                                logout(dispatch, userManager.instance)
+                            }
+                            onLogoClick={() => onLogoClicked()}
+                            user={user}
+                            appsAndUrls={appsAndUrls}
+                            onThemeClick={handleThemeClick}
+                            theme={theme}
+                            onAboutClick={() => console.debug('about')}
                         />
-                    )}
+                        <Parameters
+                            showParameters={showParameters}
+                            hideParameters={hideParameters}
+                        />
+                        {user !== null ? (
+                            <Switch>
+                                <Route exact path="/">
+                                    <DataTabs />
+                                </Route>
+                                <Route exact path="/sign-in-callback">
+                                    <Redirect to={getPreLoginPath() || '/'} />
+                                </Route>
+                                <Route exact path="/logout-callback">
+                                    <h1>
+                                        Error: logout failed; you are still
+                                        logged in.
+                                    </h1>
+                                </Route>
+                                <Route>
+                                    <h1>
+                                        <FormattedMessage id="PageNotFound" />
+                                    </h1>
+                                </Route>
+                            </Switch>
+                        ) : (
+                            <AuthenticationRouter
+                                userManager={userManager}
+                                signInCallbackError={signInCallbackError}
+                                dispatch={dispatch}
+                                history={history}
+                                location={location}
+                            />
+                        )}
+                    </div>
                 </React.Fragment>
             </SnackbarProvider>
         </ThemeProvider>
