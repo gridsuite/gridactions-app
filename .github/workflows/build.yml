@@ -30,4 +30,4 @@ jobs:
               uses: gridsuite/broadcast-event@master
               with:
                   token: ${{ secrets.REPO_ACCESS_TOKEN }}
-                  event-type: griddatas_app_updated
+                  event-type: griddata_app_updated
