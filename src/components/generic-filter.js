@@ -47,10 +47,6 @@ const equipmentsDefinition = {
             },
         },
     },
-    GENERATOR: {
-        label: 'Generators',
-        fields: {},
-    },
 };
 
 function generateDefaultValue(val, originalValue) {
