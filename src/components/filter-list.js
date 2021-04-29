@@ -314,7 +314,7 @@ const FilterList = () => {
     );
 
     const actions = {
-        renameList: ({ ...props }) => (
+        renameFilter: ({ ...props }) => (
             <PopupWithInput
                 title={<FormattedMessage id="renameFilter" />}
                 inputLabelText={<FormattedMessage id="newFilterName" />}
@@ -326,7 +326,7 @@ const FilterList = () => {
                 {...props}
             />
         ),
-        deleteList: ({ ...props }) => (
+        deleteFilter: ({ ...props }) => (
             <PopupInfo
                 title={<FormattedMessage id="deleteFilter" />}
                 customAlertMessage={
@@ -354,7 +354,7 @@ const FilterList = () => {
                     <FormattedMessage id="newFilter" />
                 </Button>
                 {filterList == null ? (
-                    <CircularProgress />
+                    <CircularProgress  />
                 ) : (
                     <List className={classes.list}>
                         {filterList.map((item) => (

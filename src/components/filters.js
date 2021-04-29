@@ -6,11 +6,7 @@ import TextField from '@material-ui/core/TextField';
 import { en_countries } from './filters-editor';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
-export const StringInput = ({
-    initialValue,
-    onChange,
-    disabled,
-}) => {
+export const StringInput = ({ initialValue, onChange, disabled }) => {
     return (
         <TextField
             onChange={(e) => {
@@ -43,12 +39,7 @@ export const CountriesSelection = ({ initialValue, onChange, disabled }) => {
             onChange={(oldVal, newVal) => onChange(newVal)}
             options={Object.keys(countriesList.object())}
             getOptionLabel={(code) => countriesList.get(code)}
-            renderInput={(props) => (
-                <TextField
-                    {...props}
-                    variant="outlined"
-                />
-            )}
+            renderInput={(props) => <TextField {...props} variant="outlined" />}
             renderTags={(val, getTagsProps) =>
                 val.map((code, index) => (
                     <Chip
@@ -64,9 +55,9 @@ export const CountriesSelection = ({ initialValue, onChange, disabled }) => {
 };
 
 export const RangeType = {
-    EQUALITY: 'equality',
-    RANGE: 'range',
-    APPROX: 'approx',
+    equality: 'EQUALITY',
+    range: 'RANGE',
+    approx: 'APPROX',
 };
 
 export const RangeSelection = ({ initialValue, onChange, disabled }) => {
@@ -82,7 +73,7 @@ export const RangeSelection = ({ initialValue, onChange, disabled }) => {
 
     function onSetNumber(index, value) {
         console.info(value);
-        range.current['value'+index+1] = value;
+        range.current['value' + (index + 1)] = value;
         onChange(range.current);
     }
 
@@ -98,8 +89,8 @@ export const RangeSelection = ({ initialValue, onChange, disabled }) => {
                     variant={'filled'}
                 >
                     {Object.entries(RangeType).map(([key, value]) => (
-                        <MenuItem key={key} value={key}>
-                            <FormattedMessage id={value} />
+                        <MenuItem key={key} value={value}>
+                            <FormattedMessage id={key} />
                         </MenuItem>
                     ))}
                 </Select>
@@ -115,20 +106,20 @@ export const RangeSelection = ({ initialValue, onChange, disabled }) => {
                     type="number"
                     variant={'outlined'}
                     placeholder={
-                        equalityType === RangeType.RANGE
+                        equalityType === RangeType.range
                             ? intl.formatMessage({ id: 'Min' })
                             : ''
                     }
                 />
             </Grid>
-            {equalityType !== RangeType.EQUALITY && (
+            {equalityType !== RangeType.equality && (
                 <Grid item xs>
                     <TextField
                         onChange={(e) => {
-                            onSetNumber(1, e.target.value[1]);
+                            onSetNumber(1, e.target.value);
                         }}
                         InputProps={
-                            equalityType === RangeType.APPROX
+                            equalityType === RangeType.approx
                                 ? {
                                       endAdornment: (
                                           <InputAdornment position="end">
@@ -144,7 +135,7 @@ export const RangeSelection = ({ initialValue, onChange, disabled }) => {
                         type="number"
                         variant={'outlined'}
                         placeholder={
-                            equalityType === RangeType.RANGE
+                            equalityType === RangeType.range
                                 ? intl.formatMessage({ id: 'Max' })
                                 : ''
                         }
@@ -167,7 +158,7 @@ export const filteredTypes = {
     range: {
         renderer: RangeSelection,
         defaultValue: {
-            type: 'EQUALITY',
+            type: RangeType.equality,
             value: [undefined, undefined],
         },
     },

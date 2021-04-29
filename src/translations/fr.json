@@ -46,5 +46,11 @@
     "replaceList": "Remplacer la liste",
     "alertBeforeReplaceWithScript": "Voulez-vous vraiment remplacer cette liste par un script Groovy ?{br}{br}Cette action est irréversible",
     "remplacer": "Remplacer",
-    "copy": "Copier"
+    "copy": "Copier",
+    "addNewFilter": "Créer un filtre",
+    "substationName": "Nom Poste",
+    "renameFilter": "Renommer le filtre",
+    "newFilterName": "nouveau nom",
+    "deleteFilter": "supprimer un filtre"
+
 }

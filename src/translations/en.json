@@ -53,5 +53,9 @@
     "copy": "Copy",
     "newFilter": "New filter",
     "FilterName": "Filter Name",
-    "addNewFilter": "Add a new Filter"
+    "addNewFilter": "Add a new filter",
+    "substationName": "Substation Name",
+    "renameFilter": "Rename filter",
+    "newFilterName": "new filter name",
+    "deleteFilter": "Delete filter"
 }

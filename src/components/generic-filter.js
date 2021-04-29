@@ -43,6 +43,11 @@ const equipmentsDefinition = {
                 type: filteredTypes.range,
                 occurs: 2,
             },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+                occurs: 2,
+            },
         },
     },
     GENERATOR: {
@@ -195,7 +200,13 @@ export const GenericFilter = ({ initialFilter, onChange }) => {
             ([key, definition]) => {
                 if (definition.occurs)
                     return (
-                        <Grid container direction={'row'} key={key}>
+                        <Grid
+                            container
+                            item
+                            direction={'row'}
+                            key={key}
+                            spacing={1}
+                        >
                             {[
                                 ...Array.from(Array(definition.occurs).keys()),
                             ].map((n) => {
@@ -221,7 +232,12 @@ export const GenericFilter = ({ initialFilter, onChange }) => {
     };
 
     return (
-        <Grid container direction="row" spacing={1} style={{ width: '100%' }}>
+        <Grid
+            container
+            direction="row"
+            spacing={1}
+            style={{ width: '100%', padding: 10, paddingRight: 20 }}
+        >
             {FilterTypeSelection({
                 type: filterType,
                 onChange: changeFilterType,
