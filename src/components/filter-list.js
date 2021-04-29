@@ -50,26 +50,8 @@ const useStyles = makeStyles(() => ({
         flexGrow: '0',
         fontSize: '12px',
     },
-    svgLabel: {
-        fontSize: '12px',
-        position: 'fixed',
-        bottom: '3px',
-    },
-    root: {
-        padding: '0',
-        display: 'flex',
-        flexGrow: '1',
-        flexDirection: 'column',
-        flex: '1 1',
-    },
-    alert: {
-        color: 'rgb(97, 26, 21)',
-        backgroundColor: 'rgb(253, 236, 234)',
-        maxWidth: '325px',
-        margin: '0 auto',
-    },
     containerButtons: {
-        display: 'inline-flex',
+        display: 'inline',
         position: 'fixed',
         bottom: '0',
         textAlign: 'center',
@@ -82,7 +64,7 @@ const useStyles = makeStyles(() => ({
         height: '100% !important',
         margin: '0',
     },
-    container: {
+    root: {
         margin: '0',
         width: '100%',
         height: 'calc(100vh - 118px)', // TODO change for more elegant solution
@@ -114,7 +96,7 @@ const useStyles = makeStyles(() => ({
         margin: '8px 3px 0',
         position: 'fixed',
     },
-    editor: {
+    editors: {
         display: 'block',
         position: 'relative',
         width: '100% !important',
@@ -155,7 +137,9 @@ const FilterList = () => {
         [enqueueSnackbar]
     );
 
-    useEffect(() => setBtnSaveListDisabled(true), [originalFilter]);
+    useEffect(() => setBtnSaveListDisabled(originalFilter.transient !== true), [
+        originalFilter,
+    ]);
 
     /*
      * Add new list handler
@@ -192,7 +176,6 @@ const FilterList = () => {
     };
 
     function setCurrentEdit(remoteFilter) {
-        console.info('current :', remoteFilter);
         currentEdit.current = { ...remoteFilter };
         setOriginalFilter(remoteFilter);
     }
@@ -221,9 +204,9 @@ const FilterList = () => {
         const newFilter = {
             name: name,
             type: type === ScriptTypes.SCRIPT ? type : 'LINE',
+            transient: true,
         };
         newFilterList.push(newFilter);
-        console.info('newList', newFilterList);
         dispatch(updateFilterList(newFilterList));
         setCurrentEdit(newFilter);
     };
@@ -265,10 +248,8 @@ const FilterList = () => {
     };
 
     function onChange(newVal) {
-        console.info(currentEdit.current);
         currentEdit.current = newVal;
         currentEdit.current.name = currentItemName;
-        console.info('genFil rootnew Value : ', currentEdit.current);
         setBtnSaveListDisabled(false);
     }
 
@@ -338,8 +319,6 @@ const FilterList = () => {
             />
         ),
     };
-
-    console.info('filter ', filterList);
 
     function renderList() {
         return (
@@ -412,7 +391,7 @@ const FilterList = () => {
     }
 
     return (
-        <div className={classes.container}>
+        <div className={classes.root}>
             <div
                 className={
                     showContainerList
@@ -437,7 +416,7 @@ const FilterList = () => {
                 {showContainerList && renderList()}
                 <div />
             </div>
-            <div className={classes.editor}>
+            <div className={classes.editors}>
                 {renderEditor()}
                 {renderAddNewListPopup()}
             </div>

@@ -13,9 +13,6 @@ const useStyles = makeStyles((theme) => ({
     idText: {
         padding: 8,
     },
-    button: {
-        //marginBottom: '30px',
-    },
 }));
 
 const genericFields = {

@@ -254,7 +254,6 @@ export function addFiltersContingencyList(name, newFiltersContingency) {
  * @returns {Promise<Response>}
  */
 export function saveFilter(newFilter) {
-    console.log(newFilter);
     return backendFetch(PREFIX_FILTERS_QUERIES, {
         method: 'put',
         headers: { 'Content-Type': 'application/json' },

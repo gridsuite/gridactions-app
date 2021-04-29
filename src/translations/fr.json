@@ -51,5 +51,10 @@
     "substationName": "Nom Poste",
     "renameFilter": "Renommer le filtre",
     "newFilterName": "nouveau nom",
-    "deleteFilter": "supprimer le filtre"
+    "deleteFilter": "supprimer le filtre",
+    "Lines": "Lignes",
+    "equality": "egalité",
+    "approx": "approximation",
+    "range": "interval"
+
 }

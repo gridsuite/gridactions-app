@@ -65,14 +65,12 @@ export const RangeSelection = ({ initialValue, onChange, disabled }) => {
     const range = useRef(initialValue);
 
     function onSetEqualityType(e) {
-        console.info(e.target.value);
         range.current.type = e.target.value;
         onChange(range.current);
         setEqualityType(e.target.value);
     }
 
     function onSetNumber(index, value) {
-        console.info(value);
         range.current['value' + (index + 1)] = value;
         onChange(range.current);
     }

@@ -29,6 +29,10 @@ const useStyles = makeStyles(() => ({
             whiteSpace: 'nowrap',
         },
     },
+    listItem: {
+        margin: '0',
+        padding: '0',
+    },
 }));
 
 const maxLengthListName = 21; // Max length of list name
@@ -89,47 +93,50 @@ export const CustomListItem = ({
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = React.useState(null);
 
-    console.info('new item', item);
+    const IconItem = ({ type }) => {
+        return type === ScriptTypes.SCRIPT ? (
+            <DescriptionIcon className={classes.iconList} />
+        ) : (
+            <PanToolIcon className={classes.iconList} />
+        );
+    };
+
     return (
-        <>
-            <ListItem
-                button
-                key={item.name}
-                selected={selected}
-                onClick={() => handleItemClicked(item)}
-            >
-                <div className={classes.iconList}>
-                    {item.type === ScriptTypes.FILTERS && <PanToolIcon />}
-                    {item.type === ScriptTypes.SCRIPT && <DescriptionIcon />}
-                </div>
-                {item.name.length > maxLengthListName ? (
-                    <CustomTooltip title={item.name}>
-                        <ListItemText
-                            className={classes.listItemText}
-                            primary={item.name}
-                        />
-                    </CustomTooltip>
-                ) : (
+        <ListItem
+            className={classes.listItem}
+            button
+            key={item.name}
+            selected={selected}
+            onClick={() => handleItemClicked(item)}
+        >
+            <IconItem type={item.type}/>
+            {item.name.length > maxLengthListName ? (
+                <CustomTooltip title={item.name}>
                     <ListItemText
                         className={classes.listItemText}
                         primary={item.name}
                     />
-                )}
-                <IconButton
-                    aria-label="settings"
-                    aria-controls="list-menu"
-                    aria-haspopup="true"
-                    variant="contained"
-                    onClick={(event) => setAnchorEl(event.currentTarget)}
-                >
-                    <MoreVertIcon />
-                </IconButton>
-            </ListItem>
+                </CustomTooltip>
+            ) : (
+                <ListItemText
+                    className={classes.listItemText}
+                    primary={item.name}
+                />
+            )}
+            <IconButton
+                aria-label="settings"
+                aria-controls="list-menu"
+                aria-haspopup="true"
+                variant="contained"
+                onClick={(event) => setAnchorEl(event.currentTarget)}
+            >
+                <MoreVertIcon />
+            </IconButton>
             <ListAction
                 anchorEl={anchorEl}
                 setAnchorEl={setAnchorEl}
                 actions={actions}
             />
-        </>
+        </ListItem>
     );
 };
