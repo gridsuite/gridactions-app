@@ -109,7 +109,7 @@ export const CustomListItem = ({
             selected={selected}
             onClick={() => handleItemClicked(item)}
         >
-            <IconItem type={item.type}/>
+            <IconItem type={item.type} />
             {item.name.length > maxLengthListName ? (
                 <CustomTooltip title={item.name}>
                     <ListItemText
