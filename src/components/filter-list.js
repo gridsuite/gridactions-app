@@ -14,7 +14,6 @@ import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/theme-clouds_midnight';
 
 import List from '@material-ui/core/List';
-import Alert from '@material-ui/lab/Alert';
 
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
@@ -354,7 +353,7 @@ const FilterList = () => {
                     <FormattedMessage id="newFilter" />
                 </Button>
                 {filterList == null ? (
-                    <CircularProgress  />
+                    <CircularProgress />
                 ) : (
                     <List className={classes.list}>
                         {filterList.map((item) => (

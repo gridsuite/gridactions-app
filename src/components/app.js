@@ -15,24 +15,31 @@ import {
     Switch,
     useHistory,
     useLocation,
-    useRouteMatch,
 } from 'react-router-dom';
 
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { LIGHT_THEME, selectTheme } from '../redux/actions';
+import {
+    LIGHT_THEME,
+    selectTheme,
+    selectLanguage,
+    selectComputedLanguage,
+} from '../redux/actions';
 
 import {
+    TopBar,
     AuthenticationRouter,
+    logout,
     getPreLoginPath,
     initializeAuthenticationProd,
-    logout,
     SnackbarProvider,
-    TopBar,
 } from '@gridsuite/commons-ui';
+
+import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import DataTabs from './data-tabs';
 
+import Box from '@material-ui/core/Box';
 import Parameters from './parameters';
 
 import { ReactComponent as GridActionsLogoDark } from '../images/GridActions_logo_dark.svg';
@@ -48,7 +55,9 @@ import {
     APP_NAME,
     COMMON_APP_NAME,
     PARAMS_THEME_KEY,
+    PARAMS_LANGUAGE_KEY,
 } from '../utils/config-params';
+import { getComputedLanguage } from '../utils/language';
 
 const lightTheme = createMuiTheme({
     palette: {
@@ -76,6 +85,8 @@ const noUserManager = { instance: null, error: null };
 
 const App = () => {
     const theme = useSelector((state) => state.theme);
+
+    const language = useSelector((state) => state.language);
 
     const user = useSelector((state) => state.user);
 
@@ -162,6 +173,14 @@ const App = () => {
                     case PARAMS_THEME_KEY:
                         dispatch(selectTheme(param.value));
                         break;
+                    case PARAMS_LANGUAGE_KEY:
+                        dispatch(selectLanguage(param.value));
+                        dispatch(
+                            selectComputedLanguage(
+                                getComputedLanguage(param.value)
+                            )
+                        );
+                        break;
                     default:
                 }
             });
@@ -207,10 +226,6 @@ const App = () => {
         history.replace('/');
     }
 
-    function showParametersClicked() {
-        setShowParameters(true);
-    }
-
     function hideParameters() {
         setShowParameters(false);
     }
@@ -219,67 +234,70 @@ const App = () => {
         updateConfigParameter(PARAMS_THEME_KEY, theme);
     };
 
+    const handleLanguageClick = (language) => {
+        updateConfigParameter(PARAMS_LANGUAGE_KEY, language);
+    };
+
     return (
         <ThemeProvider theme={getMuiTheme(theme)}>
             <SnackbarProvider hideIconVariant={false}>
                 <React.Fragment>
                     <CssBaseline />
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <TopBar
-                            appName="Actions"
-                            appColor="#DA0063"
-                            appLogo={
-                                theme === LIGHT_THEME ? (
-                                    <GridActionsLogoLight />
-                                ) : (
-                                    <GridActionsLogoDark />
-                                )
-                            }
-                            onParametersClick={() => showParametersClicked()}
-                            onLogoutClick={() =>
-                                logout(dispatch, userManager.instance)
-                            }
-                            onLogoClick={() => onLogoClicked()}
-                            user={user}
-                            appsAndUrls={appsAndUrls}
-                            onThemeClick={handleThemeClick}
-                            theme={theme}
-                            onAboutClick={() => console.debug('about')}
+                    <TopBar
+                        appName="Actions"
+                        appColor="#DA0063"
+                        appLogo={
+                            theme === LIGHT_THEME ? (
+                                <GridActionsLogoLight />
+                            ) : (
+                                <GridActionsLogoDark />
+                            )
+                        }
+                        onLogoutClick={() =>
+                            logout(dispatch, userManager.instance)
+                        }
+                        onLogoClick={() => onLogoClicked()}
+                        user={user}
+                        appsAndUrls={appsAndUrls}
+                        onThemeClick={handleThemeClick}
+                        theme={theme}
+                        onLanguageClick={handleLanguageClick}
+                        language={language}
+                        onAboutClick={() => console.debug('about')}
+                    />
+                    <Parameters
+                        showParameters={showParameters}
+                        hideParameters={hideParameters}
+                    />
+                    {user !== null ? (
+                        <Switch>
+                            <Route exact path="/">
+                                <DataTabs />
+                            </Route>
+                            <Route exact path="/sign-in-callback">
+                                <Redirect to={getPreLoginPath() || '/'} />
+                            </Route>
+                            <Route exact path="/logout-callback">
+                                <h1>
+                                    Error: logout failed; you are still logged
+                                    in.
+                                </h1>
+                            </Route>
+                            <Route>
+                                <h1>
+                                    <FormattedMessage id="PageNotFound" />
+                                </h1>
+                            </Route>
+                        </Switch>
+                    ) : (
+                        <AuthenticationRouter
+                            userManager={userManager}
+                            signInCallbackError={signInCallbackError}
+                            dispatch={dispatch}
+                            history={history}
+                            location={location}
                         />
-                        <Parameters
-                            showParameters={showParameters}
-                            hideParameters={hideParameters}
-                        />
-                        {user !== null ? (
-                            <Switch>
-                                <Route exact path="/">
-                                    <DataTabs />
-                                </Route>
-                                <Route exact path="/sign-in-callback">
-                                    <Redirect to={getPreLoginPath() || '/'} />
-                                </Route>
-                                <Route exact path="/logout-callback">
-                                    <h1>
-                                        Error: logout failed; you are still
-                                        logged in.
-                                    </h1>
-                                </Route>
-                                <Route>
-                                    <h1>
-                                        <FormattedMessage id="PageNotFound" />
-                                    </h1>
-                                </Route>
-                            </Switch>
-                        ) : (
-                            <AuthenticationRouter
-                                userManager={userManager}
-                                signInCallbackError={signInCallbackError}
-                                dispatch={dispatch}
-                                history={history}
-                                location={location}
-                            />
-                        )}
-                    </div>
+                    )}
                 </React.Fragment>
             </SnackbarProvider>
         </ThemeProvider>

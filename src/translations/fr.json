@@ -3,8 +3,6 @@
     "contingencyListIsEmpty": "Aucune liste de contingences n'a encore été définie",
     "addNewContencyFile": "Nom de la nouvelle liste",
     "parameters": "Paramètres",
-    "General": "Général",
-    "theme": "Thème : ",
     "close": "Fermer",
     "CONTINGENCY":"CONTINGENCES",
     "MinNominalVoltage": "Min nominal voltage",
@@ -47,10 +45,11 @@
     "alertBeforeReplaceWithScript": "Voulez-vous vraiment remplacer cette liste par un script Groovy ?{br}{br}Cette action est irréversible",
     "remplacer": "Remplacer",
     "copy": "Copier",
+    "newFilter": "Nouveau filtre",
+    "FilterName": "Nom",
     "addNewFilter": "Créer un filtre",
     "substationName": "Nom Poste",
     "renameFilter": "Renommer le filtre",
     "newFilterName": "nouveau nom",
-    "deleteFilter": "supprimer un filtre"
-
+    "deleteFilter": "supprimer le filtre"
 }
