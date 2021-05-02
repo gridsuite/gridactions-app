@@ -7,10 +7,21 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { SELECT_THEME, UPDATE_CONTINGENCY_LIST } from './actions';
+import {
+    SELECT_THEME,
+    UPDATE_CONTINGENCY_LIST,
+    SELECT_LANGUAGE,
+    SELECT_COMPUTED_LANGUAGE,
+} from './actions';
 
 import { USER, SIGNIN_CALLBACK_ERROR } from '@gridsuite/commons-ui';
-import { getLocalStorageTheme, saveLocalStorageTheme } from './local-storage';
+import {
+    getLocalStorageTheme,
+    saveLocalStorageTheme,
+    getLocalStorageLanguage,
+    saveLocalStorageLanguage,
+    getLocalStorageComputedLanguage,
+} from './local-storage';
 import { PARAM_THEME } from '../utils/config-params';
 
 const paramsInitialState = {
@@ -18,6 +29,8 @@ const paramsInitialState = {
 };
 
 const initialState = {
+    language: getLocalStorageLanguage(),
+    computedLanguage: getLocalStorageComputedLanguage(),
     user: null,
     signInCallbackError: null,
     contingencyLists: null,
@@ -28,6 +41,15 @@ export const reducer = createReducer(initialState, {
     [SELECT_THEME]: (state, action) => {
         state[PARAM_THEME] = action[PARAM_THEME];
         saveLocalStorageTheme(state[PARAM_THEME]);
+    },
+
+    [SELECT_LANGUAGE]: (state, action) => {
+        state.language = action.language;
+        saveLocalStorageLanguage(state.language);
+    },
+
+    [SELECT_COMPUTED_LANGUAGE]: (state, action) => {
+        state.computedLanguage = action.computedLanguage;
     },
 
     [USER]: (state, action) => {

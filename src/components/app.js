@@ -19,7 +19,12 @@ import {
 
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { LIGHT_THEME, selectTheme } from '../redux/actions';
+import {
+    LIGHT_THEME,
+    selectTheme,
+    selectLanguage,
+    selectComputedLanguage,
+} from '../redux/actions';
 
 import {
     TopBar,
@@ -44,8 +49,15 @@ import {
     fetchAppsAndUrls,
     fetchConfigParameter,
     fetchConfigParameters,
+    updateConfigParameter,
 } from '../utils/rest-api';
-import { APP_NAME, COMMON_APP_NAME, PARAM_THEME } from '../utils/config-params';
+import {
+    APP_NAME,
+    COMMON_APP_NAME,
+    PARAM_THEME,
+    PARAMS_LANGUAGE_KEY,
+} from '../utils/config-params';
+import { getComputedLanguage } from '../utils/language';
 
 const lightTheme = createMuiTheme({
     palette: {
@@ -72,6 +84,8 @@ const getMuiTheme = (theme) => {
 const noUserManager = { instance: null, error: null };
 
 const App = () => {
+    const language = useSelector((state) => state.language);
+
     const user = useSelector((state) => state.user);
 
     const [themeLocal, handleChangeTheme] = useParameterState(PARAM_THEME);
@@ -159,6 +173,14 @@ const App = () => {
                     case PARAM_THEME:
                         dispatch(selectTheme(param.value));
                         break;
+                    case PARAMS_LANGUAGE_KEY:
+                        dispatch(selectLanguage(param.value));
+                        dispatch(
+                            selectComputedLanguage(
+                                getComputedLanguage(param.value)
+                            )
+                        );
+                        break;
                     default:
                 }
             });
@@ -208,6 +230,10 @@ const App = () => {
         setShowParameters(false);
     }
 
+    const handleLanguageClick = (language) => {
+        updateConfigParameter(PARAMS_LANGUAGE_KEY, language);
+    };
+
     return (
         <ThemeProvider theme={getMuiTheme(themeLocal)}>
             <SnackbarProvider hideIconVariant={false}>
@@ -231,6 +257,8 @@ const App = () => {
                         appsAndUrls={appsAndUrls}
                         onThemeClick={handleChangeTheme}
                         theme={themeLocal}
+                        onLanguageClick={handleLanguageClick}
+                        language={language}
                         onAboutClick={() => console.debug('about')}
                     />
                     <Parameters

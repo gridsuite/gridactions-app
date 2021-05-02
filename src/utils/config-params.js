@@ -8,8 +8,9 @@ export const COMMON_APP_NAME = 'common';
 export const APP_NAME = 'actions';
 
 export const PARAM_THEME = 'theme';
+export const PARAMS_LANGUAGE_KEY = 'language';
 
-const COMMON_CONFIG_PARAMS_NAMES = new Set([PARAM_THEME]);
+const COMMON_CONFIG_PARAMS_NAMES = new Set([PARAM_THEME, PARAMS_LANGUAGE_KEY]);
 
 export function getAppName(paramName) {
     return COMMON_CONFIG_PARAMS_NAMES.has(paramName)
