@@ -32,7 +32,6 @@ import {
     logout,
     getPreLoginPath,
     initializeAuthenticationProd,
-    SnackbarProvider,
 } from '@gridsuite/commons-ui';
 
 import { useRouteMatch } from 'react-router-dom';
@@ -49,13 +48,12 @@ import {
     fetchAppsAndUrls,
     fetchConfigParameter,
     fetchConfigParameters,
-    updateConfigParameter,
 } from '../utils/rest-api';
 import {
     APP_NAME,
     COMMON_APP_NAME,
     PARAM_THEME,
-    PARAMS_LANGUAGE_KEY,
+    PARAM_LANGUAGE,
 } from '../utils/config-params';
 import { getComputedLanguage } from '../utils/language';
 
@@ -84,9 +82,11 @@ const getMuiTheme = (theme) => {
 const noUserManager = { instance: null, error: null };
 
 const App = () => {
-    const language = useSelector((state) => state.language);
-
     const user = useSelector((state) => state.user);
+
+    const [languageLocal, handleChangeLanguage] = useParameterState(
+        PARAM_LANGUAGE
+    );
 
     const [themeLocal, handleChangeTheme] = useParameterState(PARAM_THEME);
 
@@ -173,7 +173,7 @@ const App = () => {
                     case PARAM_THEME:
                         dispatch(selectTheme(param.value));
                         break;
-                    case PARAMS_LANGUAGE_KEY:
+                    case PARAM_LANGUAGE:
                         dispatch(selectLanguage(param.value));
                         dispatch(
                             selectComputedLanguage(
@@ -230,74 +230,65 @@ const App = () => {
         setShowParameters(false);
     }
 
-    const handleLanguageClick = (language) => {
-        updateConfigParameter(PARAMS_LANGUAGE_KEY, language);
-    };
-
     return (
         <ThemeProvider theme={getMuiTheme(themeLocal)}>
-            <SnackbarProvider hideIconVariant={false}>
-                <React.Fragment>
-                    <CssBaseline />
-                    <TopBar
-                        appName="Actions"
-                        appColor="#DA0063"
-                        appLogo={
-                            themeLocal === LIGHT_THEME ? (
-                                <GridActionsLogoLight />
-                            ) : (
-                                <GridActionsLogoDark />
-                            )
-                        }
-                        onLogoutClick={() =>
-                            logout(dispatch, userManager.instance)
-                        }
-                        onLogoClick={() => onLogoClicked()}
-                        user={user}
-                        appsAndUrls={appsAndUrls}
-                        onThemeClick={handleChangeTheme}
-                        theme={themeLocal}
-                        onLanguageClick={handleLanguageClick}
-                        language={language}
-                        onAboutClick={() => console.debug('about')}
+            <React.Fragment>
+                <CssBaseline />
+                <TopBar
+                    appName="Actions"
+                    appColor="#DA0063"
+                    appLogo={
+                        themeLocal === LIGHT_THEME ? (
+                            <GridActionsLogoLight />
+                        ) : (
+                            <GridActionsLogoDark />
+                        )
+                    }
+                    onLogoutClick={() => logout(dispatch, userManager.instance)}
+                    onLogoClick={() => onLogoClicked()}
+                    user={user}
+                    appsAndUrls={appsAndUrls}
+                    onThemeClick={handleChangeTheme}
+                    theme={themeLocal}
+                    onLanguageClick={handleChangeLanguage}
+                    language={languageLocal}
+                    onAboutClick={() => console.debug('about')}
+                />
+                <Parameters
+                    showParameters={showParameters}
+                    hideParameters={hideParameters}
+                />
+                {user !== null ? (
+                    <Switch>
+                        <Route exact path="/">
+                            <Box mt={20}>
+                                <ContingencyLists />
+                            </Box>
+                        </Route>
+                        <Route exact path="/sign-in-callback">
+                            <Redirect to={getPreLoginPath() || '/'} />
+                        </Route>
+                        <Route exact path="/logout-callback">
+                            <h1>
+                                Error: logout failed; you are still logged in.
+                            </h1>
+                        </Route>
+                        <Route>
+                            <h1>
+                                <FormattedMessage id="PageNotFound" />
+                            </h1>
+                        </Route>
+                    </Switch>
+                ) : (
+                    <AuthenticationRouter
+                        userManager={userManager}
+                        signInCallbackError={signInCallbackError}
+                        dispatch={dispatch}
+                        history={history}
+                        location={location}
                     />
-                    <Parameters
-                        showParameters={showParameters}
-                        hideParameters={hideParameters}
-                    />
-                    {user !== null ? (
-                        <Switch>
-                            <Route exact path="/">
-                                <Box mt={20}>
-                                    <ContingencyLists />
-                                </Box>
-                            </Route>
-                            <Route exact path="/sign-in-callback">
-                                <Redirect to={getPreLoginPath() || '/'} />
-                            </Route>
-                            <Route exact path="/logout-callback">
-                                <h1>
-                                    Error: logout failed; you are still logged
-                                    in.
-                                </h1>
-                            </Route>
-                            <Route>
-                                <h1>
-                                    <FormattedMessage id="PageNotFound" />
-                                </h1>
-                            </Route>
-                        </Switch>
-                    ) : (
-                        <AuthenticationRouter
-                            userManager={userManager}
-                            signInCallbackError={signInCallbackError}
-                            dispatch={dispatch}
-                            history={history}
-                            location={location}
-                        />
-                    )}
-                </React.Fragment>
-            </SnackbarProvider>
+                )}
+            </React.Fragment>
         </ThemeProvider>
     );
 };

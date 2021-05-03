@@ -20,7 +20,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
 import { useSelector } from 'react-redux';
-import { updateConfigParameter } from '../utils/rest-api';
+import { handleServerError, updateConfigParameter } from '../utils/rest-api';
+import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles((theme) => ({
     controlItem: {
@@ -33,7 +34,9 @@ const useStyles = makeStyles((theme) => ({
 
 export function useParameterState(paramName) {
     const paramGlobalState = useSelector((state) => state[paramName]);
-    const [paramLocalState, setParamLocalState] = useState();
+    const [paramLocalState, setParamLocalState] = useState(paramGlobalState);
+
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
         setParamLocalState(paramGlobalState);
@@ -42,10 +45,18 @@ export function useParameterState(paramName) {
     const handleChangeParamLocalState = useCallback(
         (value) => {
             setParamLocalState(value);
-            updateConfigParameter(paramName, value);
+            updateConfigParameter(paramName, value).then((response) => {
+                if (!response.ok) {
+                    console.error(response);
+                    // revert parameter
+                    setParamLocalState(paramGlobalState);
+                    handleServerError(response, enqueueSnackbar);
+                }
+            });
         },
-        [paramName, setParamLocalState]
+        [paramName, enqueueSnackbar, setParamLocalState, paramGlobalState]
     );
+
     return [paramLocalState, handleChangeParamLocalState];
 }
 

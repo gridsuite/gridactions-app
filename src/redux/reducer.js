@@ -22,14 +22,14 @@ import {
     saveLocalStorageLanguage,
     getLocalStorageComputedLanguage,
 } from './local-storage';
-import { PARAM_THEME } from '../utils/config-params';
+import { PARAM_LANGUAGE, PARAM_THEME } from '../utils/config-params';
 
 const paramsInitialState = {
     [PARAM_THEME]: getLocalStorageTheme(),
+    [PARAM_LANGUAGE]: getLocalStorageLanguage(),
 };
 
 const initialState = {
-    language: getLocalStorageLanguage(),
     computedLanguage: getLocalStorageComputedLanguage(),
     user: null,
     signInCallbackError: null,
@@ -44,8 +44,8 @@ export const reducer = createReducer(initialState, {
     },
 
     [SELECT_LANGUAGE]: (state, action) => {
-        state.language = action.language;
-        saveLocalStorageLanguage(state.language);
+        state[PARAM_LANGUAGE] = action[PARAM_LANGUAGE];
+        saveLocalStorageLanguage(state[PARAM_LANGUAGE]);
     },
 
     [SELECT_COMPUTED_LANGUAGE]: (state, action) => {
