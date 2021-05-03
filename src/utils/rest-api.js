@@ -262,7 +262,7 @@ export function saveFilter(newFilter) {
 }
 
 /**
- * Get all contingency lists
+ * Get all filters (name & type)
  * @returns {Promise<Response>}
  */
 export function getFilters() {
@@ -272,7 +272,7 @@ export function getFilters() {
 }
 
 /**
- * Delete contingency list by name
+ * Delete filter by name
  * @param name
  * @returns {Promise<Response>}
  */
@@ -284,7 +284,7 @@ export function deleteFilterByName(name) {
 }
 
 /**
- * Get contingency list by type
+ * Get filter by name
  * @returns {Promise<Response>}
  */
 export function getFilterByName(name) {
@@ -293,7 +293,7 @@ export function getFilterByName(name) {
 }
 
 /**
- * Rename list by name
+ * Rename filter by name
  * @param oldName
  * @param newName
  * @returns {Promise<Response>}
