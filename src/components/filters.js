@@ -73,6 +73,7 @@ export const RangeSelection = ({ initialValue, onChange, disabled }) => {
 
     function onSetEqualityType(e) {
         range.current.type = e.target.value;
+        range.current.value2 = null;
         onChange(range.current);
         setEqualityType(e.target.value);
     }
@@ -91,7 +92,7 @@ export const RangeSelection = ({ initialValue, onChange, disabled }) => {
                     value={equalityType}
                     onChange={onSetEqualityType}
                     disabled={disabled}
-                    variant={'filled'}
+                    variant={'outlined'}
                 >
                     {Object.entries(RangeType).map(([key, value]) => (
                         <MenuItem key={key} value={value}>

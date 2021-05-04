@@ -159,12 +159,10 @@ export const GenericFilter = ({ initialFilter, onChange }) => {
     const currentEdit = useRef({ type: { enabled: true, value: filterType } });
 
     const editDone = () => {
-        console.info('genFil before', currentEdit.current);
         let res = {};
         Object.entries(currentEdit.current).forEach(([key, value]) => {
             if (value.enabled) res[key] = value.value;
         });
-        console.info('genFil after', res);
         onChange(res);
     };
 
