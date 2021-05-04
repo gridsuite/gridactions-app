@@ -19,7 +19,12 @@ import {
 
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { LIGHT_THEME, selectTheme } from '../redux/actions';
+import {
+    LIGHT_THEME,
+    selectTheme,
+    selectLanguage,
+    selectComputedLanguage,
+} from '../redux/actions';
 
 import {
     TopBar,
@@ -50,7 +55,9 @@ import {
     APP_NAME,
     COMMON_APP_NAME,
     PARAMS_THEME_KEY,
+    PARAMS_LANGUAGE_KEY,
 } from '../utils/config-params';
+import { getComputedLanguage } from '../utils/language';
 
 const lightTheme = createMuiTheme({
     palette: {
@@ -78,6 +85,8 @@ const noUserManager = { instance: null, error: null };
 
 const App = () => {
     const theme = useSelector((state) => state.theme);
+
+    const language = useSelector((state) => state.language);
 
     const user = useSelector((state) => state.user);
 
@@ -164,6 +173,14 @@ const App = () => {
                     case PARAMS_THEME_KEY:
                         dispatch(selectTheme(param.value));
                         break;
+                    case PARAMS_LANGUAGE_KEY:
+                        dispatch(selectLanguage(param.value));
+                        dispatch(
+                            selectComputedLanguage(
+                                getComputedLanguage(param.value)
+                            )
+                        );
+                        break;
                     default:
                 }
             });
@@ -209,16 +226,16 @@ const App = () => {
         history.replace('/');
     }
 
-    function showParametersClicked() {
-        setShowParameters(true);
-    }
-
     function hideParameters() {
         setShowParameters(false);
     }
 
     const handleThemeClick = (theme) => {
         updateConfigParameter(PARAMS_THEME_KEY, theme);
+    };
+
+    const handleLanguageClick = (language) => {
+        updateConfigParameter(PARAMS_LANGUAGE_KEY, language);
     };
 
     return (
@@ -236,7 +253,6 @@ const App = () => {
                                 <GridDataLogoDark />
                             )
                         }
-                        onParametersClick={() => showParametersClicked()}
                         onLogoutClick={() =>
                             logout(dispatch, userManager.instance)
                         }
@@ -245,6 +261,8 @@ const App = () => {
                         appsAndUrls={appsAndUrls}
                         onThemeClick={handleThemeClick}
                         theme={theme}
+                        onLanguageClick={handleLanguageClick}
+                        language={language}
                         onAboutClick={() => console.debug('about')}
                     />
                     <Parameters
