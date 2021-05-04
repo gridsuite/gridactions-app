@@ -55,6 +55,7 @@ import {
 import { ScriptTypes } from '../utils/script-types';
 import { EquipmentTypes } from '../utils/equipment-types';
 import { useSnackbar } from 'notistack';
+import FiltersEditor from './filters-editor';
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -185,7 +186,7 @@ const CustomTooltip = (props) => {
     return <Tooltip arrow classes={classes} {...props} />;
 };
 
-const ContingencyLists = ({ listType, FilterRenderer }) => {
+const ContingencyLists = () => {
     const classes = useStyles();
     const { enqueueSnackbar } = useSnackbar();
     const dispatch = useDispatch();
@@ -413,7 +414,7 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
         replaceFiltersWithScriptContingencyList(currentItem.name)
             .then((response) => {
                 if (response.ok) {
-                    getContingencyLists(listType).then((data) => {
+                    getContingencyLists().then((data) => {
                         setCurrentItem({
                             name: currentItem.name,
                             type: ScriptTypes.SCRIPT,
@@ -871,10 +872,9 @@ const ContingencyLists = ({ listType, FilterRenderer }) => {
 
             <div className={classes.aceEditor}>
                 {currentItem && currentItem.type === ScriptTypes.FILTERS && (
-                    <FilterRenderer
+                    <FiltersEditor
                         filters={newFiltersContingency}
                         onChange={onChangeFiltersContingency}
-                        equipmentType={listType}
                     />
                 )}
                 {currentItem && currentItem.type === ScriptTypes.SCRIPT && (

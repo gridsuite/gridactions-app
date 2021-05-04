@@ -14,7 +14,6 @@ import Grid from '@material-ui/core/Grid';
 import * as PropTypes from 'prop-types';
 import { GenericFilter } from './generic-filter';
 import FilterList from './filter-list';
-import FiltersEditor from './filters-editor';
 
 GenericFilter.propTypes = { equipmentType: PropTypes.string };
 
@@ -24,18 +23,11 @@ const DataTabs = () => {
     const tabs = [
         {
             name: 'CONTINGENCY',
-            render: () => (
-                <ContingencyLists
-                    FilterRenderer={FiltersEditor}
-                    listType={'contingencies'}
-                />
-            ),
+            render: () => <ContingencyLists listType={'contingencies'} />,
         },
         {
             name: 'FILTERS',
-            render: () => (
-                <FilterList FilterRenderer={GenericFilter} listType={'line'} />
-            ),
+            render: () => <FilterList listType={'line'} />,
         },
     ];
 
