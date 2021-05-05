@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
@@ -20,7 +20,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
 import { useSelector } from 'react-redux';
-import { handleServerError, updateConfigParameter } from '../utils/rest-api';
+import { updateConfigParameter } from '../utils/rest-api';
 import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles((theme) => ({
@@ -33,10 +33,13 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export function useParameterState(paramName) {
-    const paramGlobalState = useSelector((state) => state[paramName]);
-    const [paramLocalState, setParamLocalState] = useState(paramGlobalState);
+    const intl = useIntl();
 
     const { enqueueSnackbar } = useSnackbar();
+
+    const paramGlobalState = useSelector((state) => state[paramName]);
+
+    const [paramLocalState, setParamLocalState] = useState(paramGlobalState);
 
     useEffect(() => {
         setParamLocalState(paramGlobalState);
@@ -45,19 +48,24 @@ export function useParameterState(paramName) {
     const handleChangeParamLocalState = useCallback(
         (value) => {
             setParamLocalState(value);
-            updateConfigParameter(paramName, value).then((response) => {
-                if (!response.ok) {
-                    console.error(response);
-                    // revert parameter
-                    setParamLocalState(paramGlobalState);
-                    handleServerError(response, enqueueSnackbar);
-                }
-            });
+            updateConfigParameter(
+                paramName,
+                value,
+                enqueueSnackbar,
+                intl.formatMessage({
+                    id: 'paramsChangingError',
+                })
+            ).then(null, () => setParamLocalState(paramGlobalState));
         },
-        [paramName, enqueueSnackbar, setParamLocalState, paramGlobalState]
+        [paramName, setParamLocalState, paramGlobalState, enqueueSnackbar, intl]
     );
 
-    return [paramLocalState, handleChangeParamLocalState];
+    return [
+        paramLocalState,
+        handleChangeParamLocalState,
+        enqueueSnackbar,
+        intl,
+    ];
 }
 
 const Parameters = ({ showParameters, hideParameters }) => {

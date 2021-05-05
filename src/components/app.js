@@ -17,8 +17,6 @@ import {
     useLocation,
 } from 'react-router-dom';
 
-import CssBaseline from '@material-ui/core/CssBaseline';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import {
     LIGHT_THEME,
     selectTheme,
@@ -35,7 +33,7 @@ import {
 } from '@gridsuite/commons-ui';
 
 import { useRouteMatch } from 'react-router-dom';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import ContingencyLists from './contingency-list';
 
 import Box from '@material-ui/core/Box';
@@ -56,32 +54,15 @@ import {
     PARAM_LANGUAGE,
 } from '../utils/config-params';
 import { getComputedLanguage } from '../utils/language';
-
-const lightTheme = createMuiTheme({
-    palette: {
-        type: 'light',
-    },
-    mapboxStyle: 'mapbox://styles/mapbox/light-v9',
-});
-
-const darkTheme = createMuiTheme({
-    palette: {
-        type: 'dark',
-    },
-    mapboxStyle: 'mapbox://styles/mapbox/dark-v9',
-});
-
-const getMuiTheme = (theme) => {
-    if (theme === LIGHT_THEME) {
-        return lightTheme;
-    } else {
-        return darkTheme;
-    }
-};
+import { useSnackbar } from 'notistack';
 
 const noUserManager = { instance: null, error: null };
 
-const App = () => {
+const App = ({ onChangeTheme }) => {
+    const intl = useIntl();
+
+    const { enqueueSnackbar } = useSnackbar();
+
     const user = useSelector((state) => state.user);
 
     const [languageLocal, handleChangeLanguage] = useParameterState(
@@ -89,6 +70,10 @@ const App = () => {
     );
 
     const [themeLocal, handleChangeTheme] = useParameterState(PARAM_THEME);
+
+    useEffect(() => {
+        onChangeTheme(themeLocal);
+    }, [onChangeTheme, themeLocal]);
 
     const [appsAndUrls, setAppsAndUrls] = useState([]);
 
@@ -194,33 +179,58 @@ const App = () => {
         ws.onmessage = function (event) {
             let eventData = JSON.parse(event.data);
             if (eventData.headers && eventData.headers['parameterName']) {
-                fetchConfigParameter(eventData.headers['parameterName']).then(
-                    (param) => {
-                        updateParams([param]);
-                    }
-                );
+                fetchConfigParameter(
+                    eventData.headers['parameterName'],
+                    enqueueSnackbar,
+                    intl.formatMessage({
+                        id: 'paramsRetrievingError',
+                    })
+                ).then((param) => {
+                    updateParams([param]);
+                });
             }
         };
         ws.onerror = function (event) {
             console.error('Unexpected Notification WebSocket error', event);
         };
         return ws;
-    }, [updateParams]);
+    }, [updateParams, enqueueSnackbar, intl]);
 
     useEffect(() => {
         if (user !== null) {
-            fetchConfigParameters(COMMON_APP_NAME).then((params) => {
+            fetchConfigParameters(
+                COMMON_APP_NAME,
+                enqueueSnackbar,
+                intl.formatMessage({
+                    id: 'paramsRetrievingError',
+                })
+            ).then((params) => {
                 updateParams(params);
             });
-            fetchConfigParameters(APP_NAME).then((params) => {
+
+            fetchConfigParameters(
+                APP_NAME,
+                enqueueSnackbar,
+                intl.formatMessage({
+                    id: 'paramsRetrievingError',
+                })
+            ).then((params) => {
                 updateParams(params);
             });
+
             const ws = connectNotificationsUpdateConfig();
             return function () {
                 ws.close();
             };
         }
-    }, [user, dispatch, updateParams, connectNotificationsUpdateConfig]);
+    }, [
+        user,
+        dispatch,
+        updateParams,
+        connectNotificationsUpdateConfig,
+        enqueueSnackbar,
+        intl,
+    ]);
 
     function onLogoClicked() {
         history.replace('/');
@@ -231,65 +241,60 @@ const App = () => {
     }
 
     return (
-        <ThemeProvider theme={getMuiTheme(themeLocal)}>
-            <React.Fragment>
-                <CssBaseline />
-                <TopBar
-                    appName="Actions"
-                    appColor="#DA0063"
-                    appLogo={
-                        themeLocal === LIGHT_THEME ? (
-                            <GridActionsLogoLight />
-                        ) : (
-                            <GridActionsLogoDark />
-                        )
-                    }
-                    onLogoutClick={() => logout(dispatch, userManager.instance)}
-                    onLogoClick={() => onLogoClicked()}
-                    user={user}
-                    appsAndUrls={appsAndUrls}
-                    onThemeClick={handleChangeTheme}
-                    theme={themeLocal}
-                    onLanguageClick={handleChangeLanguage}
-                    language={languageLocal}
-                    onAboutClick={() => console.debug('about')}
+        <>
+            <TopBar
+                appName="Actions"
+                appColor="#DA0063"
+                appLogo={
+                    themeLocal === LIGHT_THEME ? (
+                        <GridActionsLogoLight />
+                    ) : (
+                        <GridActionsLogoDark />
+                    )
+                }
+                onLogoutClick={() => logout(dispatch, userManager.instance)}
+                onLogoClick={() => onLogoClicked()}
+                user={user}
+                appsAndUrls={appsAndUrls}
+                onThemeClick={handleChangeTheme}
+                theme={themeLocal}
+                onLanguageClick={handleChangeLanguage}
+                language={languageLocal}
+                onAboutClick={() => console.debug('about')}
+            />
+            <Parameters
+                showParameters={showParameters}
+                hideParameters={hideParameters}
+            />
+            {user !== null ? (
+                <Switch>
+                    <Route exact path="/">
+                        <Box mt={20}>
+                            <ContingencyLists />
+                        </Box>
+                    </Route>
+                    <Route exact path="/sign-in-callback">
+                        <Redirect to={getPreLoginPath() || '/'} />
+                    </Route>
+                    <Route exact path="/logout-callback">
+                        <h1>Error: logout failed; you are still logged in.</h1>
+                    </Route>
+                    <Route>
+                        <h1>
+                            <FormattedMessage id="PageNotFound" />
+                        </h1>
+                    </Route>
+                </Switch>
+            ) : (
+                <AuthenticationRouter
+                    userManager={userManager}
+                    signInCallbackError={signInCallbackError}
+                    dispatch={dispatch}
+                    history={history}
+                    location={location}
                 />
-                <Parameters
-                    showParameters={showParameters}
-                    hideParameters={hideParameters}
-                />
-                {user !== null ? (
-                    <Switch>
-                        <Route exact path="/">
-                            <Box mt={20}>
-                                <ContingencyLists />
-                            </Box>
-                        </Route>
-                        <Route exact path="/sign-in-callback">
-                            <Redirect to={getPreLoginPath() || '/'} />
-                        </Route>
-                        <Route exact path="/logout-callback">
-                            <h1>
-                                Error: logout failed; you are still logged in.
-                            </h1>
-                        </Route>
-                        <Route>
-                            <h1>
-                                <FormattedMessage id="PageNotFound" />
-                            </h1>
-                        </Route>
-                    </Switch>
-                ) : (
-                    <AuthenticationRouter
-                        userManager={userManager}
-                        signInCallbackError={signInCallbackError}
-                        dispatch={dispatch}
-                        history={history}
-                        location={location}
-                    />
-                )}
-            </React.Fragment>
-        </ThemeProvider>
+            )}
+        </>
     );
 };
 

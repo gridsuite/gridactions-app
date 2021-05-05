@@ -3,6 +3,8 @@
     "contingencyListIsEmpty": "No contingency list has been defined yet",
     "addNewContencyFile": "Name of the new list",
     "parameters": "Parameters",
+    "paramsChangingError": "An error occured when changing the parameters",
+    "paramsRetrievingError": "An error occurred while retrieving the parameters",
     "close": "Close",
     "newList": "New list",
     "save": "Save",
