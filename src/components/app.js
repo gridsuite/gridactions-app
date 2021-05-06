@@ -42,8 +42,8 @@ import ContingencyLists from './contingency-list';
 import Box from '@material-ui/core/Box';
 import Parameters from './parameters';
 
-import { ReactComponent as GridActionsLogoDark } from '../images/GridActions_logo_dark.svg';
-import { ReactComponent as GridActionsLogoLight } from '../images/GridActions_logo_light.svg';
+import { ReactComponent as GridDataLogoDark } from '../images/GridData_logo_dark.svg';
+import { ReactComponent as GridDataLogoLight } from '../images/GridData_logo_light.svg';
 import {
     connectNotificationsWsUpdateConfig,
     fetchAppsAndUrls,
@@ -244,13 +244,13 @@ const App = () => {
                 <React.Fragment>
                     <CssBaseline />
                     <TopBar
-                        appName="Actions"
+                        appName="Data"
                         appColor="#DA0063"
                         appLogo={
                             theme === LIGHT_THEME ? (
-                                <GridActionsLogoLight />
+                                <GridDataLogoLight />
                             ) : (
-                                <GridActionsLogoDark />
+                                <GridDataLogoDark />
                             )
                         }
                         onLogoutClick={() =>
