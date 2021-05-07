@@ -22,6 +22,7 @@ import Typography from '@material-ui/core/Typography';
 import { useSelector } from 'react-redux';
 import { updateConfigParameter } from '../utils/rest-api';
 import { useSnackbar } from 'notistack';
+import { displayErrorMessageWithSnackbar } from '../utils/messages';
 
 const useStyles = makeStyles((theme) => ({
     controlItem: {
@@ -48,14 +49,15 @@ export function useParameterState(paramName) {
     const handleChangeParamLocalState = useCallback(
         (value) => {
             setParamLocalState(value);
-            updateConfigParameter(
-                paramName,
-                value,
-                enqueueSnackbar,
-                intl.formatMessage({
-                    id: 'paramsChangingError',
-                })
-            ).then(null, () => setParamLocalState(paramGlobalState));
+            updateConfigParameter(paramName, value).catch((errorMessage) => {
+                setParamLocalState(paramGlobalState);
+                displayErrorMessageWithSnackbar(
+                    errorMessage,
+                    'paramsChangingError',
+                    enqueueSnackbar,
+                    intl
+                );
+            });
         },
         [paramName, setParamLocalState, paramGlobalState, enqueueSnackbar, intl]
     );
