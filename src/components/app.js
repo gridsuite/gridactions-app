@@ -17,8 +17,6 @@ import {
     useLocation,
 } from 'react-router-dom';
 
-import CssBaseline from '@material-ui/core/CssBaseline';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import {
     LIGHT_THEME,
     selectTheme,
@@ -32,7 +30,6 @@ import {
     logout,
     getPreLoginPath,
     initializeAuthenticationProd,
-    SnackbarProvider,
 } from '@gridsuite/commons-ui';
 
 import { useRouteMatch } from 'react-router-dom';
@@ -40,7 +37,7 @@ import { FormattedMessage } from 'react-intl';
 import ContingencyLists from './contingency-list';
 
 import Box from '@material-ui/core/Box';
-import Parameters from './parameters';
+import Parameters, { useParameterState } from './parameters';
 
 import { ReactComponent as GridActionsLogoDark } from '../images/GridActions_logo_dark.svg';
 import { ReactComponent as GridActionsLogoLight } from '../images/GridActions_logo_light.svg';
@@ -49,48 +46,35 @@ import {
     fetchAppsAndUrls,
     fetchConfigParameter,
     fetchConfigParameters,
-    updateConfigParameter,
 } from '../utils/rest-api';
 import {
     APP_NAME,
     COMMON_APP_NAME,
-    PARAMS_THEME_KEY,
-    PARAMS_LANGUAGE_KEY,
+    PARAM_THEME,
+    PARAM_LANGUAGE,
 } from '../utils/config-params';
 import { getComputedLanguage } from '../utils/language';
-
-const lightTheme = createMuiTheme({
-    palette: {
-        type: 'light',
-    },
-    mapboxStyle: 'mapbox://styles/mapbox/light-v9',
-});
-
-const darkTheme = createMuiTheme({
-    palette: {
-        type: 'dark',
-    },
-    mapboxStyle: 'mapbox://styles/mapbox/dark-v9',
-});
-
-const getMuiTheme = (theme) => {
-    if (theme === LIGHT_THEME) {
-        return lightTheme;
-    } else {
-        return darkTheme;
-    }
-};
+import { useSnackbar } from 'notistack';
+import { displayErrorMessageWithSnackbar, useIntlRef } from '../utils/messages';
 
 const noUserManager = { instance: null, error: null };
 
 const App = () => {
-    const theme = useSelector((state) => state.theme);
+    const intlRef = useIntlRef();
 
-    const language = useSelector((state) => state.language);
+    const { enqueueSnackbar } = useSnackbar();
 
     const user = useSelector((state) => state.user);
 
-    const [appsAndUrls, setAppsAndUrls] = React.useState([]);
+    const [languageLocal, handleChangeLanguage] = useParameterState(
+        PARAM_LANGUAGE
+    );
+
+    const theme = useSelector((state) => state[PARAM_THEME]);
+
+    const [themeLocal, handleChangeTheme] = useParameterState(PARAM_THEME);
+
+    const [appsAndUrls, setAppsAndUrls] = useState([]);
 
     const signInCallbackError = useSelector(
         (state) => state.signInCallbackError
@@ -170,10 +154,10 @@ const App = () => {
             console.debug('received UI parameters : ', params);
             params.forEach((param) => {
                 switch (param.name) {
-                    case PARAMS_THEME_KEY:
+                    case PARAM_THEME:
                         dispatch(selectTheme(param.value));
                         break;
-                    case PARAMS_LANGUAGE_KEY:
+                    case PARAM_LANGUAGE:
                         dispatch(selectLanguage(param.value));
                         dispatch(
                             selectComputedLanguage(
@@ -194,33 +178,60 @@ const App = () => {
         ws.onmessage = function (event) {
             let eventData = JSON.parse(event.data);
             if (eventData.headers && eventData.headers['parameterName']) {
-                fetchConfigParameter(eventData.headers['parameterName']).then(
-                    (param) => {
-                        updateParams([param]);
-                    }
-                );
+                fetchConfigParameter(eventData.headers['parameterName'])
+                    .then((param) => updateParams([param]))
+                    .catch((errorMessage) =>
+                        displayErrorMessageWithSnackbar(
+                            errorMessage,
+                            'paramsChangingError',
+                            enqueueSnackbar,
+                            intlRef
+                        )
+                    );
             }
         };
         ws.onerror = function (event) {
             console.error('Unexpected Notification WebSocket error', event);
         };
         return ws;
-    }, [updateParams]);
+    }, [updateParams, enqueueSnackbar, intlRef]);
 
     useEffect(() => {
         if (user !== null) {
-            fetchConfigParameters(COMMON_APP_NAME).then((params) => {
-                updateParams(params);
-            });
-            fetchConfigParameters(APP_NAME).then((params) => {
-                updateParams(params);
-            });
+            fetchConfigParameters(COMMON_APP_NAME)
+                .then((params) => updateParams(params))
+                .catch((errorMessage) =>
+                    displayErrorMessageWithSnackbar(
+                        errorMessage,
+                        'paramsChangingError',
+                        enqueueSnackbar,
+                        intlRef
+                    )
+                );
+
+            fetchConfigParameters(APP_NAME)
+                .then((params) => updateParams(params))
+                .catch((errorMessage) =>
+                    displayErrorMessageWithSnackbar(
+                        errorMessage,
+                        'paramsChangingError',
+                        enqueueSnackbar,
+                        intlRef
+                    )
+                );
             const ws = connectNotificationsUpdateConfig();
             return function () {
                 ws.close();
             };
         }
-    }, [user, dispatch, updateParams, connectNotificationsUpdateConfig]);
+    }, [
+        user,
+        dispatch,
+        updateParams,
+        connectNotificationsUpdateConfig,
+        enqueueSnackbar,
+        intlRef,
+    ]);
 
     function onLogoClicked() {
         history.replace('/');
@@ -230,79 +241,61 @@ const App = () => {
         setShowParameters(false);
     }
 
-    const handleThemeClick = (theme) => {
-        updateConfigParameter(PARAMS_THEME_KEY, theme);
-    };
-
-    const handleLanguageClick = (language) => {
-        updateConfigParameter(PARAMS_LANGUAGE_KEY, language);
-    };
-
     return (
-        <ThemeProvider theme={getMuiTheme(theme)}>
-            <SnackbarProvider hideIconVariant={false}>
-                <React.Fragment>
-                    <CssBaseline />
-                    <TopBar
-                        appName="Actions"
-                        appColor="#DA0063"
-                        appLogo={
-                            theme === LIGHT_THEME ? (
-                                <GridActionsLogoLight />
-                            ) : (
-                                <GridActionsLogoDark />
-                            )
-                        }
-                        onLogoutClick={() =>
-                            logout(dispatch, userManager.instance)
-                        }
-                        onLogoClick={() => onLogoClicked()}
-                        user={user}
-                        appsAndUrls={appsAndUrls}
-                        onThemeClick={handleThemeClick}
-                        theme={theme}
-                        onLanguageClick={handleLanguageClick}
-                        language={language}
-                        onAboutClick={() => console.debug('about')}
-                    />
-                    <Parameters
-                        showParameters={showParameters}
-                        hideParameters={hideParameters}
-                    />
-                    {user !== null ? (
-                        <Switch>
-                            <Route exact path="/">
-                                <Box mt={20}>
-                                    <ContingencyLists />
-                                </Box>
-                            </Route>
-                            <Route exact path="/sign-in-callback">
-                                <Redirect to={getPreLoginPath() || '/'} />
-                            </Route>
-                            <Route exact path="/logout-callback">
-                                <h1>
-                                    Error: logout failed; you are still logged
-                                    in.
-                                </h1>
-                            </Route>
-                            <Route>
-                                <h1>
-                                    <FormattedMessage id="PageNotFound" />
-                                </h1>
-                            </Route>
-                        </Switch>
+        <>
+            <TopBar
+                appName="Actions"
+                appColor="#DA0063"
+                appLogo={
+                    theme === LIGHT_THEME ? (
+                        <GridActionsLogoLight />
                     ) : (
-                        <AuthenticationRouter
-                            userManager={userManager}
-                            signInCallbackError={signInCallbackError}
-                            dispatch={dispatch}
-                            history={history}
-                            location={location}
-                        />
-                    )}
-                </React.Fragment>
-            </SnackbarProvider>
-        </ThemeProvider>
+                        <GridActionsLogoDark />
+                    )
+                }
+                onLogoutClick={() => logout(dispatch, userManager.instance)}
+                onLogoClick={() => onLogoClicked()}
+                user={user}
+                appsAndUrls={appsAndUrls}
+                onThemeClick={handleChangeTheme}
+                theme={themeLocal}
+                onLanguageClick={handleChangeLanguage}
+                language={languageLocal}
+                onAboutClick={() => console.debug('about')}
+            />
+            <Parameters
+                showParameters={showParameters}
+                hideParameters={hideParameters}
+            />
+            {user !== null ? (
+                <Switch>
+                    <Route exact path="/">
+                        <Box mt={20}>
+                            <ContingencyLists />
+                        </Box>
+                    </Route>
+                    <Route exact path="/sign-in-callback">
+                        <Redirect to={getPreLoginPath() || '/'} />
+                    </Route>
+                    <Route exact path="/logout-callback">
+                        <h1>Error: logout failed; you are still logged in.</h1>
+                    </Route>
+                    <Route>
+                        <h1>
+                            <FormattedMessage id="PageNotFound" />
+                        </h1>
+                    </Route>
+                </Switch>
+            ) : (
+                <AuthenticationRouter
+                    userManager={userManager}
+                    signInCallbackError={signInCallbackError}
+                    dispatch={dispatch}
+                    history={history}
+                    location={location}
+                />
+            )}
+        </>
     );
 };
 

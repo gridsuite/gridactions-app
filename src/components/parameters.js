@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { FormattedMessage } from 'react-intl';
 
@@ -19,6 +19,10 @@ import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
+import { useSelector } from 'react-redux';
+import { updateConfigParameter } from '../utils/rest-api';
+import { useSnackbar } from 'notistack';
+import { displayErrorMessageWithSnackbar, useIntlRef } from '../utils/messages';
 
 const useStyles = makeStyles((theme) => ({
     controlItem: {
@@ -29,10 +33,53 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+export function useParameterState(paramName) {
+    const intlRef = useIntlRef();
+
+    const { enqueueSnackbar } = useSnackbar();
+
+    const paramGlobalState = useSelector((state) => state[paramName]);
+
+    const [paramLocalState, setParamLocalState] = useState(paramGlobalState);
+
+    useEffect(() => {
+        setParamLocalState(paramGlobalState);
+    }, [paramGlobalState]);
+
+    const handleChangeParamLocalState = useCallback(
+        (value) => {
+            setParamLocalState(value);
+            updateConfigParameter(paramName, value).catch((errorMessage) => {
+                setParamLocalState(paramGlobalState);
+                displayErrorMessageWithSnackbar(
+                    errorMessage,
+                    'paramsChangingError',
+                    enqueueSnackbar,
+                    intlRef
+                );
+            });
+        },
+        [
+            paramName,
+            setParamLocalState,
+            paramGlobalState,
+            enqueueSnackbar,
+            intlRef,
+        ]
+    );
+
+    return [
+        paramLocalState,
+        handleChangeParamLocalState,
+        enqueueSnackbar,
+        intlRef,
+    ];
+}
+
 const Parameters = ({ showParameters, hideParameters }) => {
     const classes = useStyles();
 
-    const [tabIndex, setTabIndex] = React.useState(0);
+    const [tabIndex, setTabIndex] = useState(0);
 
     function TabPanel(props) {
         const { children, value, index, ...other } = props;
