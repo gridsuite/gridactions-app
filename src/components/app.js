@@ -33,7 +33,7 @@ import {
 } from '@gridsuite/commons-ui';
 
 import { useRouteMatch } from 'react-router-dom';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import ContingencyLists from './contingency-list';
 
 import Box from '@material-ui/core/Box';
@@ -55,12 +55,12 @@ import {
 } from '../utils/config-params';
 import { getComputedLanguage } from '../utils/language';
 import { useSnackbar } from 'notistack';
-import { displayErrorMessageWithSnackbar } from '../utils/messages';
+import { displayErrorMessageWithSnackbar, useIntlRef } from '../utils/messages';
 
 const noUserManager = { instance: null, error: null };
 
 const App = () => {
-    const intl = useIntl();
+    const intlRef = useIntlRef();
 
     const { enqueueSnackbar } = useSnackbar();
 
@@ -69,6 +69,8 @@ const App = () => {
     const [languageLocal, handleChangeLanguage] = useParameterState(
         PARAM_LANGUAGE
     );
+
+    const theme = useSelector((state) => state[PARAM_THEME]);
 
     const [themeLocal, handleChangeTheme] = useParameterState(PARAM_THEME);
 
@@ -183,7 +185,7 @@ const App = () => {
                             errorMessage,
                             'paramsChangingError',
                             enqueueSnackbar,
-                            intl
+                            intlRef
                         )
                     );
             }
@@ -192,7 +194,7 @@ const App = () => {
             console.error('Unexpected Notification WebSocket error', event);
         };
         return ws;
-    }, [updateParams, enqueueSnackbar, intl]);
+    }, [updateParams, enqueueSnackbar, intlRef]);
 
     useEffect(() => {
         if (user !== null) {
@@ -203,7 +205,7 @@ const App = () => {
                         errorMessage,
                         'paramsChangingError',
                         enqueueSnackbar,
-                        intl
+                        intlRef
                     )
                 );
 
@@ -214,7 +216,7 @@ const App = () => {
                         errorMessage,
                         'paramsChangingError',
                         enqueueSnackbar,
-                        intl
+                        intlRef
                     )
                 );
             const ws = connectNotificationsUpdateConfig();
@@ -228,7 +230,7 @@ const App = () => {
         updateParams,
         connectNotificationsUpdateConfig,
         enqueueSnackbar,
-        intl,
+        intlRef,
     ]);
 
     function onLogoClicked() {
@@ -245,7 +247,7 @@ const App = () => {
                 appName="Actions"
                 appColor="#DA0063"
                 appLogo={
-                    themeLocal === LIGHT_THEME ? (
+                    theme === LIGHT_THEME ? (
                         <GridActionsLogoLight />
                     ) : (
                         <GridActionsLogoDark />

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
@@ -22,7 +22,7 @@ import Typography from '@material-ui/core/Typography';
 import { useSelector } from 'react-redux';
 import { updateConfigParameter } from '../utils/rest-api';
 import { useSnackbar } from 'notistack';
-import { displayErrorMessageWithSnackbar } from '../utils/messages';
+import { displayErrorMessageWithSnackbar, useIntlRef } from '../utils/messages';
 
 const useStyles = makeStyles((theme) => ({
     controlItem: {
@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export function useParameterState(paramName) {
-    const intl = useIntl();
+    const intlRef = useIntlRef();
 
     const { enqueueSnackbar } = useSnackbar();
 
@@ -55,18 +55,24 @@ export function useParameterState(paramName) {
                     errorMessage,
                     'paramsChangingError',
                     enqueueSnackbar,
-                    intl
+                    intlRef
                 );
             });
         },
-        [paramName, setParamLocalState, paramGlobalState, enqueueSnackbar, intl]
+        [
+            paramName,
+            setParamLocalState,
+            paramGlobalState,
+            enqueueSnackbar,
+            intlRef,
+        ]
     );
 
     return [
         paramLocalState,
         handleChangeParamLocalState,
         enqueueSnackbar,
-        intl,
+        intlRef,
     ];
 }
 
