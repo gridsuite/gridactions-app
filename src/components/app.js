@@ -18,16 +18,13 @@ import {
 } from 'react-router-dom';
 
 import {
-    LIGHT_THEME,
     selectTheme,
     selectLanguage,
     selectComputedLanguage,
 } from '../redux/actions';
 
 import {
-    TopBar,
     AuthenticationRouter,
-    logout,
     getPreLoginPath,
     initializeAuthenticationProd,
 } from '@gridsuite/commons-ui';
@@ -37,13 +34,9 @@ import { FormattedMessage } from 'react-intl';
 import ContingencyLists from './contingency-list';
 
 import Box from '@material-ui/core/Box';
-import Parameters, { useParameterState } from './parameters';
 
-import { ReactComponent as GridActionsLogoDark } from '../images/GridActions_logo_dark.svg';
-import { ReactComponent as GridActionsLogoLight } from '../images/GridActions_logo_light.svg';
 import {
     connectNotificationsWsUpdateConfig,
-    fetchAppsAndUrls,
     fetchConfigParameter,
     fetchConfigParameters,
 } from '../utils/rest-api';
@@ -56,6 +49,7 @@ import {
 import { getComputedLanguage } from '../utils/language';
 import { useSnackbar } from 'notistack';
 import { displayErrorMessageWithSnackbar, useIntlRef } from '../utils/messages';
+import AppTopBar from './app-top-bar';
 
 const noUserManager = { instance: null, error: null };
 
@@ -66,23 +60,11 @@ const App = () => {
 
     const user = useSelector((state) => state.user);
 
-    const [languageLocal, handleChangeLanguage] = useParameterState(
-        PARAM_LANGUAGE
-    );
-
-    const theme = useSelector((state) => state[PARAM_THEME]);
-
-    const [themeLocal, handleChangeTheme] = useParameterState(PARAM_THEME);
-
-    const [appsAndUrls, setAppsAndUrls] = useState([]);
-
     const signInCallbackError = useSelector(
         (state) => state.signInCallbackError
     );
 
     const [userManager, setUserManager] = useState(noUserManager);
-
-    const [showParameters, setShowParameters] = useState(false);
 
     const history = useHistory();
 
@@ -140,14 +122,6 @@ const App = () => {
             });
         // Note: initialMatchSilentRenewCallbackUrl and dispatch don't change
     }, [initialMatchSilentRenewCallbackUrl, dispatch]);
-
-    useEffect(() => {
-        if (user !== null) {
-            fetchAppsAndUrls().then((res) => {
-                setAppsAndUrls(res);
-            });
-        }
-    }, [user]);
 
     const updateParams = useCallback(
         (params) => {
@@ -239,40 +213,9 @@ const App = () => {
         intlRef,
     ]);
 
-    function onLogoClicked() {
-        history.replace('/');
-    }
-
-    function hideParameters() {
-        setShowParameters(false);
-    }
-
     return (
         <>
-            <TopBar
-                appName="Actions"
-                appColor="#DA0063"
-                appLogo={
-                    theme === LIGHT_THEME ? (
-                        <GridActionsLogoLight />
-                    ) : (
-                        <GridActionsLogoDark />
-                    )
-                }
-                onLogoutClick={() => logout(dispatch, userManager.instance)}
-                onLogoClick={() => onLogoClicked()}
-                user={user}
-                appsAndUrls={appsAndUrls}
-                onThemeClick={handleChangeTheme}
-                theme={themeLocal}
-                onLanguageClick={handleChangeLanguage}
-                language={languageLocal}
-                onAboutClick={() => console.debug('about')}
-            />
-            <Parameters
-                showParameters={showParameters}
-                hideParameters={hideParameters}
-            />
+            <AppTopBar user={user} userManager={userManager} />
             {user !== null ? (
                 <Switch>
                     <Route exact path="/">
