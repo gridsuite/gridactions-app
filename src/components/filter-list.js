@@ -199,16 +199,14 @@ const FilterList = () => {
     };
 
     const newFilter = (name, type) => {
-        let newFilterList = [...filterList];
         setCurrentItemName(name);
         const newFilter = {
             name: name,
             type: type === ScriptTypes.SCRIPT ? type : 'LINE',
             transient: true,
         };
-        newFilterList.push(newFilter);
-        dispatch(updateFilterList(newFilterList));
-        setCurrentEdit(newFilter);
+        currentEdit.current = newFilter;
+        save();
     };
 
     /**

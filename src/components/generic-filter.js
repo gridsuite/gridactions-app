@@ -161,7 +161,7 @@ export const GenericFilter = ({ initialFilter, onChange }) => {
     const editDone = () => {
         let res = {};
         Object.entries(currentEdit.current).forEach(([key, value]) => {
-            if (value.enabled) res[key] = value.value;
+            res[key] = value.enabled ? value.value : null;
         });
         onChange(res);
     };

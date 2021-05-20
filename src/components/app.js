@@ -33,8 +33,6 @@ import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import DataTabs from './data-tabs';
 
-import Box from '@material-ui/core/Box';
-
 import {
     connectNotificationsWsUpdateConfig,
     fetchConfigParameter,
