@@ -6,7 +6,8 @@
     "paramsChangingError": "Une erreur est survenue lors de la modification des paramètres",
     "paramsRetrievingError": "Une erreur est survenue lors de la récupération des paramètres",
     "close": "Fermer",
-    "CONTINGENCY":"CONTINGENCES",
+    "alertBeforeDeleteFilter": "Êtes-vous sûr de vouloir supprimer ce filtre?",
+    "CONTINGENCY": "CONTINGENCES",
     "CountrySideA": "Country side A",
     "CountrySideB": "Country side A",
     "newList": "Nouvelle liste",
@@ -59,5 +60,4 @@
     "equality": "egalité",
     "approx": "approximation",
     "range": "interval"
-
 }

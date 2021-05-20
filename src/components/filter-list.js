@@ -200,12 +200,11 @@ const FilterList = () => {
 
     const newFilter = (name, type) => {
         setCurrentItemName(name);
-        const newFilter = {
+        currentEdit.current = {
             name: name,
             type: type === ScriptTypes.SCRIPT ? type : 'LINE',
             transient: true,
         };
-        currentEdit.current = newFilter;
         save();
     };
 

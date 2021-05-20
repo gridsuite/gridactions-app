@@ -6,6 +6,7 @@
     "paramsChangingError": "An error occured when changing the parameters",
     "paramsRetrievingError": "An error occurred while retrieving the parameters",
     "close": "Close",
+    "alertBeforeDeleteFilter": "Are you sure you want to delete this filter",
     "CONTINGENCY": "CONTINGENCY",
     "CountrySideA": "Country side A",
     "CountrySideB": "Country side B",
