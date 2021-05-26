@@ -60,6 +60,7 @@ import FiltersEditor from './filters-editor';
 const useStyles = makeStyles(() => ({
     root: {
         padding: '0',
+        borderTop:'1px solid #ccc',
     },
     container: {
         display: 'flex',
@@ -78,9 +79,13 @@ const useStyles = makeStyles(() => ({
     addNewList: {
         textAlign: 'center',
         padding: '10px 15px',
-        borderBottom: '1px solid #ccc',
         minHeight: '80px',
+        minWidth: '100px',
         marginTop: '12px',
+        display: 'inline',
+        alignSelf: 'flex-start',
+        flexGrow: '0',
+        fontSize: '12px',
     },
     editor: {
         width: '100% !important',
@@ -616,22 +621,16 @@ const ContingencyLists = () => {
                 </IconButton>
                 {showContainerList && (
                     <>
-                        <div className={classes.addNewList}>
-                            <div
-                                className={classes.containerAddNewList}
-                                onClick={() => handleAddNewListClicked(true)}
-                            >
-                                <label className={classes.svgIcon}>
-                                    <AddIcon
-                                        aria-label="New file"
-                                        style={{ fontSize: 36 }}
-                                    />
-                                </label>
-                                <span className={classes.svgLabel}>
-                                    <FormattedMessage id="newList" />
-                                </span>
+                        <Button
+                            className={classes.addNewList}
+                            onClick={() => handleAddNewListClicked(true)}
+                            size={'large'}
+                            startIcon={<AddIcon />}
+                        >
+                            <div>
+                                <FormattedMessage id="newList" />
                             </div>
-                        </div>
+                        </Button>
                         {contingencyLists && contingencyLists.length > 0 ? (
                             <List className={classes.root}>
                                 {contingencyLists.map((item, index) => (

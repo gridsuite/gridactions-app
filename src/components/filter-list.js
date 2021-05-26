@@ -42,6 +42,7 @@ import { CircularProgress } from '@material-ui/core';
 const useStyles = makeStyles(() => ({
     addNewList: {
         textAlign: 'center',
+        minWidth: '100px',
         padding: '10px 15px',
         minHeight: '80px',
         marginTop: '12px',
