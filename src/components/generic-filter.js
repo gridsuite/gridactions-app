@@ -106,7 +106,6 @@ const SingleFilter = ({ filter, definition, onChange }) => {
                 </Typography>
             </Grid>
             <Grid item xs key={definition.name + '-value'}>
-                {/* TODO MARGIN */}
                 {definition.type.renderer({
                     initialValue: filter.value,
                     onChange: localChange,

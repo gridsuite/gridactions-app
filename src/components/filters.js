@@ -5,13 +5,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import Grid from '@material-ui/core/Grid';
 import { Chip, InputAdornment, MenuItem, Select } from '@material-ui/core';
 import TextField from '@material-ui/core/TextField';
 import { en_countries } from './filters-editor';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { PARAM_LANGUAGE } from '../utils/config-params';
+import { useParameterState } from './parameters';
 
 export const StringInput = ({ initialValue, onChange, disabled }) => {
     return (
@@ -27,16 +29,20 @@ export const StringInput = ({ initialValue, onChange, disabled }) => {
 };
 
 export const CountriesSelection = ({ initialValue, onChange, disabled }) => {
-    let countriesList;
-    try {
-        countriesList = require('localized-countries')(
-            require('localized-countries/data/' +
-                navigator.language.substr(0, 2))
-        );
-    } catch (error) {
-        // fallback to english if no localised list found
-        countriesList = en_countries;
-    }
+    const [languageLocal] = useParameterState(PARAM_LANGUAGE);
+    const countriesListCB = useCallback(() => {
+        try {
+            return require('localized-countries')(
+                require('localized-countries/data/' +
+                    languageLocal.substr(0, 2))
+            );
+        } catch (error) {
+            // fallback to english if no localised list found
+            return en_countries;
+        }
+    }, [languageLocal]);
+
+    const countriesList = countriesListCB();
     return (
         <Autocomplete
             id="select_countries"
