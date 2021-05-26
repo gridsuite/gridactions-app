@@ -60,7 +60,7 @@ import FiltersEditor from './filters-editor';
 const useStyles = makeStyles(() => ({
     root: {
         padding: '0',
-        borderTop:'1px solid #ccc',
+        borderTop: '1px solid #ccc',
     },
     container: {
         display: 'flex',
