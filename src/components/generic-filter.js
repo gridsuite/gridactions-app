@@ -231,7 +231,6 @@ export const GenericFilter = ({ initialFilter, onChange }) => {
     return (
         <Grid
             container
-            direction="row"
             spacing={1}
             style={{ width: '100%', padding: 10, paddingRight: 20 }}
         >
