@@ -106,6 +106,7 @@ const useStyles = makeStyles(() => ({
     list: {
         borderTop: '1px solid #ccc',
         height: '100%',
+        padding: '0',
     },
 }));
 

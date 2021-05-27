@@ -70,11 +70,13 @@ const useStyles = makeStyles(() => ({
     },
     containerLists: {
         width: '350px',
+        borderRight: '1px solid #ccc',
     },
     smallContainer: {
         minWidth: '80px',
         textAlign: 'center',
         marginTop: '10px',
+        borderRight: '1px solid #ccc',
     },
     addNewList: {
         textAlign: 'center',
@@ -113,7 +115,7 @@ const useStyles = makeStyles(() => ({
     },
     aceEditor: {
         marginTop: '4px',
-        borderLeft: '1px solid #ccc',
+        //borderLeft: '1px solid #ccc',
         flexGrow: 1,
     },
     containerButtons: {
