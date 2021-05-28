@@ -14,6 +14,7 @@ import { en_countries } from './filters-editor';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { PARAM_LANGUAGE } from '../utils/config-params';
 import { useParameterState } from './parameters';
+import { getComputedLanguage } from '../utils/language';
 
 export const StringInput = ({ initialValue, onChange, disabled }) => {
     return (
@@ -34,7 +35,7 @@ export const CountriesSelection = ({ initialValue, onChange, disabled }) => {
         try {
             return require('localized-countries')(
                 require('localized-countries/data/' +
-                    languageLocal.substr(0, 2))
+                    getComputedLanguage(languageLocal).substr(0, 2))
             );
         } catch (error) {
             // fallback to english if no localised list found
