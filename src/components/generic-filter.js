@@ -64,7 +64,7 @@ function generateDefaultValue(val, originalValue) {
     };
 }
 
-const SingleFilter = ({ filter, definition, onChange }) => {
+const SingleFilter = ({ filter, definition, onChange, sequence }) => {
     const classes = useStyles();
     const [enabled, setEnabled] = useState(filter.enabled);
 
@@ -102,7 +102,8 @@ const SingleFilter = ({ filter, definition, onChange }) => {
                 key={definition.name + '-label'}
             >
                 <Typography component="span" variant="body1">
-                    <FormattedMessage id={definition.name} />
+                    <FormattedMessage id={definition.name} />{' '}
+                    {sequence ? sequence : ''}
                 </Typography>
             </Grid>
             <Grid item xs key={definition.name + '-value'}>
@@ -170,7 +171,7 @@ export const GenericFilter = ({ initialFilter, onChange }) => {
         setFilterType(newType);
     };
 
-    const renderFilter = (key, definition) => {
+    const renderFilter = (key, definition, sequence) => {
         if (currentEdit.current[key] === undefined)
             currentEdit.current[key] = generateDefaultValue(
                 definition,
@@ -182,6 +183,7 @@ export const GenericFilter = ({ initialFilter, onChange }) => {
                 filter={currentEdit.current[key]}
                 definition={definition}
                 onChange={editDone}
+                sequence={sequence}
             />
         );
     };
@@ -216,7 +218,8 @@ export const GenericFilter = ({ initialFilter, onChange }) => {
                                     >
                                         {renderFilter(
                                             key + (n + 1).toString(),
-                                            definition
+                                            definition,
+                                            n + 1
                                         )}
                                     </Grid>
                                 );
