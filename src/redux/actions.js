@@ -37,3 +37,12 @@ export function updateContingencyList(contingencyLists) {
         contingencyLists: contingencyLists,
     };
 }
+
+export const UPDATE_FILTER_LIST = 'UPDATE_FILTER_LIST';
+
+export function updateFilterList(filterList) {
+    return {
+        type: UPDATE_FILTER_LIST,
+        filterList: filterList,
+    };
+}

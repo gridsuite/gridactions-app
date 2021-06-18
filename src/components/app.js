@@ -31,9 +31,7 @@ import {
 
 import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import ContingencyLists from './contingency-list';
-
-import Box from '@material-ui/core/Box';
+import DataTabs from './data-tabs';
 
 import {
     connectNotificationsWsUpdateConfig,
@@ -219,9 +217,7 @@ const App = () => {
             {user !== null ? (
                 <Switch>
                     <Route exact path="/">
-                        <Box mt={20}>
-                            <ContingencyLists />
-                        </Box>
+                        <DataTabs />
                     </Route>
                     <Route exact path="/sign-in-callback">
                         <Redirect to={getPreLoginPath() || '/'} />

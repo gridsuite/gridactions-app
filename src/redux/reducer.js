@@ -12,6 +12,7 @@ import {
     UPDATE_CONTINGENCY_LIST,
     SELECT_LANGUAGE,
     SELECT_COMPUTED_LANGUAGE,
+    UPDATE_FILTER_LIST,
 } from './actions';
 
 import { USER, SIGNIN_CALLBACK_ERROR } from '@gridsuite/commons-ui';
@@ -35,6 +36,7 @@ const initialState = {
     signInCallbackError: null,
     contingencyLists: null,
     ...paramsInitialState,
+    filterList: null,
 };
 
 export const reducer = createReducer(initialState, {
@@ -62,5 +64,9 @@ export const reducer = createReducer(initialState, {
 
     [UPDATE_CONTINGENCY_LIST]: (state, action) => {
         state.contingencyLists = action.contingencyLists;
+    },
+
+    [UPDATE_FILTER_LIST]: (state, action) => {
+        state.filterList = action.filterList;
     },
 });
