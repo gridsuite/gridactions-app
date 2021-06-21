@@ -27,10 +27,10 @@ import { PopupInfo, PopupWithInput } from './popup';
 
 import { FormattedMessage } from 'react-intl';
 import {
-    deleteFilterByName,
-    getFilterByName,
+    deleteFilterById,
+    getFilterById,
     getFilters,
-    renameFilterByName,
+    renameFilter,
     saveFilter,
 } from '../utils/rest-api';
 import { ScriptTypes } from '../utils/script-types';
@@ -38,6 +38,8 @@ import { useSnackbar } from 'notistack';
 import { CustomListItem } from './custom-list-item';
 import { GenericFilter } from './generic-filter';
 import { CircularProgress } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 
 const useStyles = makeStyles(() => ({
     addNewList: {
@@ -118,7 +120,7 @@ const FilterList = () => {
 
     const filterList = useSelector((state) => state.filterList);
     const currentEdit = useRef(null);
-    const [currentItemName, setCurrentItemName] = useState('');
+    const [currentItemId, setCurrentItemId] = useState('');
     const [originalFilter, setOriginalFilter] = useState({});
 
     const [btnSaveListDisabled, setBtnSaveListDisabled] = useState(true);
@@ -152,19 +154,20 @@ const FilterList = () => {
 
     const updateFilterListAndSelect = (selected) => {
         return getFilters().then((data) => {
-            setCurrentItemName(selected);
+            const id = data.find((f) => f.name === selected)?.id;
+            setCurrentItemId(id);
             dispatch(updateFilterList(data));
-            getFilter(selected);
+            getFilter(id);
         });
     };
 
     /**
      * Rename exist list
-     * @param oldName
+     * @param id
      * @param newName
      */
-    const renameList = (oldName, newName) => {
-        renameFilterByName(oldName, newName)
+    const renameList = (id, newName) => {
+        renameFilter(id, newName)
             .then((response) => {
                 if (response.ok) {
                     updateFilterListAndSelect(newName).then();
@@ -185,9 +188,9 @@ const FilterList = () => {
     /**
      * Save current list list
      */
-    const save = () => {
+    const save = (name) => {
         saveFilter(currentEdit.current)
-            .then(() => updateFilterListAndSelect(currentEdit.current.name))
+            .then(() => updateFilterListAndSelect(name))
             .catch((error) => {
                 showSnackBarNotification(error.message);
             });
@@ -201,13 +204,12 @@ const FilterList = () => {
     };
 
     const newFilter = (name, type) => {
-        setCurrentItemName(name);
         currentEdit.current = {
             name: name,
             type: type === ScriptTypes.SCRIPT ? type : 'LINE',
             transient: true,
         };
-        save();
+        save(name);
     };
 
     /**
@@ -226,8 +228,8 @@ const FilterList = () => {
      * Delete list by name
      */
     const confirmDeleteFilter = () => {
-        if (currentItemName) {
-            deleteFilterByName(currentItemName)
+        if (currentItemId) {
+            deleteFilterById(currentItemId)
                 .then(() => {
                     updateFilterListAndSelect('').then();
                 })
@@ -248,13 +250,13 @@ const FilterList = () => {
 
     function onChange(newVal) {
         currentEdit.current = newVal;
-        currentEdit.current.name = currentItemName;
+        currentEdit.current.id = currentItemId;
         setBtnSaveListDisabled(false);
     }
 
     const getFilter = useCallback(
-        (name) => {
-            getFilterByName(name)
+        (id) => {
+            getFilterById(id)
                 .then(setCurrentEdit)
                 .catch((error) => {
                     showSnackBarNotification(error.message);
@@ -264,8 +266,8 @@ const FilterList = () => {
     );
 
     const handleItemClicked = (item) => {
-        setCurrentItemName(item.name);
-        getFilter(item.name);
+        setCurrentItemId(item.id);
+        getFilter(item.id);
     };
 
     const collapseList = () => {
@@ -293,30 +295,36 @@ const FilterList = () => {
     );
 
     const actions = {
-        renameFilter: ({ ...props }) => (
-            <PopupWithInput
-                title={<FormattedMessage id="renameFilter" />}
-                inputLabelText={<FormattedMessage id="newFilterName" />}
-                customTextValidationBtn={<FormattedMessage id="rename" />}
-                customTextCancelBtn={<FormattedMessage id="cancel" />}
-                newList={false}
-                existingList={filterList}
-                action={({ name }) => renameList(currentItemName, name)}
-                {...props}
-            />
-        ),
-        deleteFilter: ({ ...props }) => (
-            <PopupInfo
-                title={<FormattedMessage id="deleteFilter" />}
-                customAlertMessage={
-                    <FormattedMessage id="alertBeforeDeleteFilter" />
-                }
-                existingList={filterList}
-                customTextValidationBtn={<FormattedMessage id="delete" />}
-                handleBtnOk={confirmDeleteFilter}
-                {...props}
-            />
-        ),
+        rename: {
+            icon: <EditIcon fontSize="small" />,
+            action: ({ ...props }) => (
+                <PopupWithInput
+                    title={<FormattedMessage id="renameFilter" />}
+                    inputLabelText={<FormattedMessage id="newFilterName" />}
+                    customTextValidationBtn={<FormattedMessage id="rename" />}
+                    customTextCancelBtn={<FormattedMessage id="cancel" />}
+                    newList={false}
+                    existingList={filterList}
+                    action={({ name }) => renameList(currentItemId, name)}
+                    {...props}
+                />
+            ),
+        },
+        delete: {
+            icon: <DeleteIcon fontSize="small" />,
+            action: ({ ...props }) => (
+                <PopupInfo
+                    title={<FormattedMessage id="deleteFilter" />}
+                    customAlertMessage={
+                        <FormattedMessage id="alertBeforeDeleteFilter" />
+                    }
+                    existingList={filterList}
+                    customTextValidationBtn={<FormattedMessage id="delete" />}
+                    handleBtnOk={confirmDeleteFilter}
+                    {...props}
+                />
+            ),
+        },
     };
 
     function renderList() {
@@ -336,8 +344,8 @@ const FilterList = () => {
                     <List className={classes.list}>
                         {filterList.map((item) => (
                             <CustomListItem
-                                key={'cli' + item.name}
-                                selected={item.name === currentItemName}
+                                key={'cli' + item.id}
+                                selected={item.id === currentItemId}
                                 item={item}
                                 handleItemClicked={handleItemClicked}
                                 actions={actions}
@@ -366,9 +374,9 @@ const FilterList = () => {
     }
 
     function renderEditor() {
-        if (!originalFilter.name) return;
+        if (!originalFilter.id) return;
         /* we have item selected but original is not set so we are fetching */
-        if (originalFilter.name !== currentItemName) {
+        if (originalFilter.id !== currentItemId) {
             return <CircularProgress />;
         }
         if (originalFilter.type === ScriptTypes.SCRIPT)

@@ -284,7 +284,7 @@ export function getFilters() {
  * @param name
  * @returns {Promise<Response>}
  */
-export function deleteFilterByName(name) {
+export function deleteFilterById(name) {
     const url = PREFIX_FILTERS_QUERIES + encodeURIComponent(name);
     return backendFetch(url, {
         method: 'delete',
@@ -295,7 +295,7 @@ export function deleteFilterByName(name) {
  * Get filter by name
  * @returns {Promise<Response>}
  */
-export function getFilterByName(name) {
+export function getFilterById(name) {
     const url = PREFIX_FILTERS_QUERIES + name;
     return backendFetch(url).then((response) => response.json());
 }
@@ -306,7 +306,7 @@ export function getFilterByName(name) {
  * @param newName
  * @returns {Promise<Response>}
  */
-export function renameFilterByName(oldName, newName) {
+export function renameFilter(oldName, newName) {
     const url = PREFIX_FILTERS_QUERIES + oldName + '/rename';
     return backendFetch(url, {
         method: 'post',
