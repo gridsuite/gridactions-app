@@ -13,7 +13,6 @@ import IconButton from '@material-ui/core/IconButton';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import EditIcon from '@material-ui/icons/Edit';
 import { FormattedMessage } from 'react-intl';
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
