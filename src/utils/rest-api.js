@@ -149,14 +149,12 @@ export function getContingencyList(type, name) {
  * Add new contingency list
  * @returns {Promise<Response>}
  */
-export function addScriptContingencyList(name, script) {
-    const url =
-        PREFIX_ACTIONS_QUERIES +
-        '/v1/script-contingency-lists/' +
-        encodeURIComponent(name);
+export function addScriptContingencyList(scriptContingencyList) {
+    const url = PREFIX_ACTIONS_QUERIES + '/v1/script-contingency-lists/';
     return backendFetch(url, {
         method: 'put',
-        body: script,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(scriptContingencyList),
     });
 }
 
@@ -179,11 +177,11 @@ export function replaceFiltersWithScriptContingencyList(name) {
  * Save new script contingency list from filters contingency list
  * @returns {Promise<Response>}
  */
-export function newScriptFromFiltersContingencyList(name, newName) {
+export function newScriptFromFiltersContingencyList(id, newName) {
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/filters-contingency-lists/' +
-        encodeURIComponent(name) +
+        id +
         '/new-script/' +
         encodeURIComponent(newName);
 
@@ -213,7 +211,7 @@ export function deleteListByName(name) {
  * @param newNameList
  * @returns {Promise<Response>}
  */
-export function renameListByName(oldName, newName) {
+export function renameListById(oldName, newName) {
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/contingency-lists/' +
@@ -234,25 +232,18 @@ export function renameListByName(oldName, newName) {
  * Add new Filter contingency list
  * @returns {Promise<Response>}
  */
-export function addFiltersContingencyList(name, newFiltersContingency) {
-    const url =
-        PREFIX_ACTIONS_QUERIES +
-        '/v1/filters-contingency-lists/' +
-        encodeURIComponent(name);
+export function addFiltersContingencyList(newFilter) {
+    const { nominalVoltage, ...rest } = newFilter;
+    console.info(newFilter);
+    const url = PREFIX_ACTIONS_QUERIES + '/v1/filters-contingency-lists/';
     return backendFetch(url, {
         method: 'put',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            equipmentID: newFiltersContingency.equipmentID,
-            equipmentName: newFiltersContingency.equipmentName,
-            equipmentType: newFiltersContingency.equipmentType,
-            nominalVoltage:
-                newFiltersContingency.nominalVoltage === ''
-                    ? -1
-                    : newFiltersContingency.nominalVoltage,
-            nominalVoltageOperator:
-                newFiltersContingency.nominalVoltageOperator,
-            countries: newFiltersContingency.countries,
+            ...rest,
+            ...{
+                nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage,
+            },
         }),
     });
 }

@@ -138,9 +138,9 @@ const PopupWithInput = ({
             handleSaveNewList(newNameList, newListType, true);
         } else {
             if (handleRenameExistList) {
-                handleRenameExistList(selectedListName, newNameList);
+                handleRenameExistList(newNameList);
             } else if (handleCopyToScriptList) {
-                handleCopyToScriptList(selectedListName, newNameList);
+                handleCopyToScriptList(newNameList);
             }
         }
     };
