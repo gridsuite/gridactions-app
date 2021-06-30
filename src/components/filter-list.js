@@ -251,6 +251,7 @@ const FilterList = () => {
     function onChange(newVal) {
         currentEdit.current = newVal;
         currentEdit.current.id = currentItemId;
+        currentEdit.current.name = originalFilter.name;
         setBtnSaveListDisabled(false);
     }
 
@@ -364,7 +365,7 @@ const FilterList = () => {
                     <Button
                         variant="outlined"
                         disabled={btnSaveListDisabled}
-                        onClick={() => save()}
+                        onClick={() => save(originalFilter.name)}
                     >
                         <FormattedMessage id="save" />
                     </Button>
