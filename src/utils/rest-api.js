@@ -301,7 +301,7 @@ export function getFilterById(id) {
 }
 
 /**
- * Rename filter by name
+ * Rename filter
  * @param id
  * @param newName
  * @returns {Promise<Response>}
