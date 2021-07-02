@@ -280,7 +280,7 @@ export function getFilters() {
 }
 
 /**
- * Delete filter by name
+ * Delete filter by id
  * @param id
  * @returns {Promise<Response>}
  */
@@ -292,7 +292,7 @@ export function deleteFilterById(id) {
 }
 
 /**
- * Get filter by name
+ * Get filter by id
  * @returns {Promise<Response>}
  */
 export function getFilterById(id) {
