@@ -263,10 +263,10 @@ export function addFiltersContingencyList(name, newFiltersContingency) {
  */
 export function saveFilter(newFilter) {
     return backendFetch(PREFIX_FILTERS_QUERIES, {
-        method: 'put',
+        method: 'post',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newFilter),
-    });
+    }).then((response) => response.json());
 }
 
 /**

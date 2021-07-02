@@ -152,13 +152,14 @@ const FilterList = () => {
         setOpenPopupNewList(val);
     };
 
-    const updateFilterListAndSelect = (selected) => {
-        return getFilters().then((data) => {
-            const id = data.find((f) => f.name === selected)?.id;
-            setCurrentItemId(id);
+    const updateFilterListAndSelect = (filter) => {
+        getFilters().then((data) => {
             dispatch(updateFilterList(data));
-            getFilter(id);
         });
+        if (filter !== undefined) {
+            setCurrentItemId(filter.id);
+            setCurrentEdit(filter);
+        }
     };
 
     /**
@@ -170,7 +171,8 @@ const FilterList = () => {
         renameFilter(id, newName)
             .then((response) => {
                 if (response.ok) {
-                    updateFilterListAndSelect(newName).then();
+                    currentEdit.current.name = newName;
+                    updateFilterListAndSelect(currentEdit.current);
                 } else {
                     showSnackBarNotification(response.statusText);
                 }
@@ -188,9 +190,9 @@ const FilterList = () => {
     /**
      * Save current list list
      */
-    const save = (name) => {
+    const save = () => {
         saveFilter(currentEdit.current)
-            .then(() => updateFilterListAndSelect(name))
+            .then((response) => updateFilterListAndSelect(response))
             .catch((error) => {
                 showSnackBarNotification(error.message);
             });
@@ -225,13 +227,13 @@ const FilterList = () => {
     };
 
     /**
-     * Delete list by name
+     * Delete list by id
      */
     const confirmDeleteFilter = () => {
         if (currentItemId) {
             deleteFilterById(currentItemId)
                 .then(() => {
-                    updateFilterListAndSelect('').then();
+                    updateFilterListAndSelect();
                 })
                 .catch((error) => {
                     showSnackBarNotification(error.message);
