@@ -263,10 +263,10 @@ export function addFiltersContingencyList(name, newFiltersContingency) {
  */
 export function saveFilter(newFilter) {
     return backendFetch(PREFIX_FILTERS_QUERIES, {
-        method: 'put',
+        method: 'post',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newFilter),
-    });
+    }).then((response) => response.json());
 }
 
 /**
@@ -280,34 +280,34 @@ export function getFilters() {
 }
 
 /**
- * Delete filter by name
- * @param name
+ * Delete filter by id
+ * @param id
  * @returns {Promise<Response>}
  */
-export function deleteFilterByName(name) {
-    const url = PREFIX_FILTERS_QUERIES + encodeURIComponent(name);
+export function deleteFilterById(id) {
+    const url = PREFIX_FILTERS_QUERIES + encodeURIComponent(id);
     return backendFetch(url, {
         method: 'delete',
     });
 }
 
 /**
- * Get filter by name
+ * Get filter by id
  * @returns {Promise<Response>}
  */
-export function getFilterByName(name) {
-    const url = PREFIX_FILTERS_QUERIES + name;
+export function getFilterById(id) {
+    const url = PREFIX_FILTERS_QUERIES + id;
     return backendFetch(url).then((response) => response.json());
 }
 
 /**
- * Rename filter by name
- * @param oldName
+ * Rename filter
+ * @param id
  * @param newName
  * @returns {Promise<Response>}
  */
-export function renameFilterByName(oldName, newName) {
-    const url = PREFIX_FILTERS_QUERIES + oldName + '/rename';
+export function renameFilter(id, newName) {
+    const url = PREFIX_FILTERS_QUERIES + id + '/rename';
     return backendFetch(url, {
         method: 'post',
         headers: {

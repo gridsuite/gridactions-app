@@ -13,7 +13,6 @@ import IconButton from '@material-ui/core/IconButton';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import EditIcon from '@material-ui/icons/Edit';
 import { FormattedMessage } from 'react-intl';
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
@@ -66,12 +65,10 @@ const ListAction = ({ anchorEl, setAnchorEl, actions }) => {
         setAnchorEl(null);
     };
 
-    const makeMenu = (key) => {
+    const makeMenu = ([key, value]) => {
         return (
-            <MenuItem onClick={() => setCurrentAction(key)} key={key}>
-                <ListItemIcon>
-                    <EditIcon fontSize="small" />
-                </ListItemIcon>
+            <MenuItem onClick={() => setCurrentAction(value)} key={key}>
+                <ListItemIcon>{value.icon}</ListItemIcon>
                 <ListItemText primary={<FormattedMessage id={key} />} />
             </MenuItem>
         );
@@ -84,10 +81,14 @@ const ListAction = ({ anchorEl, setAnchorEl, actions }) => {
             open={Boolean(anchorEl)}
             onClose={handleCloseMenu}
         >
-            {Object.keys(actions).map(makeMenu)}
+            {Object.entries(actions).map(makeMenu)}
         </Menu>
     ) : (
-        actions[currentAction]({ onClose: handleCloseMenu, open: true })
+        currentAction.action({
+            onClose: handleCloseMenu,
+            handleBtnCancel: handleCloseMenu,
+            open: true,
+        })
     );
 };
 

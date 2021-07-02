@@ -621,7 +621,7 @@ const ContingencyLists = () => {
                         <ChevronRightIcon style={{ fontSize: '40px' }} />
                     )}
                 </IconButton>
-                {showContainerList && (
+                {showContainerList && contingencyLists != null && (
                     <>
                         <Button
                             className={classes.addNewList}
@@ -633,7 +633,7 @@ const ContingencyLists = () => {
                                 <FormattedMessage id="newList" />
                             </div>
                         </Button>
-                        {contingencyLists && contingencyLists.length > 0 ? (
+                        {contingencyLists.length > 0 ? (
                             <List className={classes.root}>
                                 {contingencyLists.map((item, index) => (
                                     <div key={item.name + 'div'}>
