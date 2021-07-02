@@ -211,7 +211,7 @@ const FilterList = () => {
             type: type === ScriptTypes.SCRIPT ? type : 'LINE',
             transient: true,
         };
-        save(name);
+        save();
     };
 
     /**
