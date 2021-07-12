@@ -379,7 +379,10 @@ const FilterList = () => {
                     customTextValidationBtn={
                         <FormattedMessage id="remplacer" />
                     }
-                    handleBtnOk={confirmReplaceWithScript}
+                    handleBtnOk={() => {
+                        confirmReplaceWithScript();
+                        props.onClose();
+                    }}
                     {...props}
                 />
             ),
