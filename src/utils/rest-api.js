@@ -152,9 +152,9 @@ export function getContingencyList(type, name) {
 export function addScriptContingencyList(scriptContingencyList) {
     const url = PREFIX_ACTIONS_QUERIES + '/v1/script-contingency-lists/';
     return backendFetch(url, {
-        method: 'put',
+        method: 'post',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(scriptContingencyList),
+        body: JSON.stringify(scriptContingencyList)
     });
 }
 
@@ -169,7 +169,7 @@ export function replaceFiltersWithScriptContingencyList(name) {
         encodeURIComponent(name) +
         '/replace-with-script';
     return backendFetch(url, {
-        method: 'put',
+        method: 'post'
     });
 }
 
@@ -186,22 +186,22 @@ export function newScriptFromFiltersContingencyList(id, newName) {
         encodeURIComponent(newName);
 
     return backendFetch(url, {
-        method: 'put',
+        method: 'post'
     });
 }
 
 /**
  * Delete contingency list by name
- * @param name
+ * @param id
  * @returns {Promise<Response>}
  */
-export function deleteListByName(name) {
+export function deleteListByName(id) {
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/contingency-lists/' +
-        encodeURIComponent(name);
+        encodeURIComponent(id);
     return backendFetch(url, {
-        method: 'delete',
+        method: 'delete'
     });
 }
 
@@ -211,11 +211,11 @@ export function deleteListByName(name) {
  * @param newNameList
  * @returns {Promise<Response>}
  */
-export function renameListById(oldName, newName) {
+export function renameListById(id, newName) {
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/contingency-lists/' +
-        encodeURIComponent(oldName) +
+        encodeURIComponent(id) +
         '/rename';
 
     return backendFetch(url, {
@@ -237,14 +237,14 @@ export function addFiltersContingencyList(newFilter) {
     console.info(newFilter);
     const url = PREFIX_ACTIONS_QUERIES + '/v1/filters-contingency-lists/';
     return backendFetch(url, {
-        method: 'put',
+        method: 'post',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             ...rest,
             ...{
-                nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage,
-            },
-        }),
+                nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage
+            }
+        })
     });
 }
 
@@ -254,9 +254,9 @@ export function addFiltersContingencyList(newFilter) {
  */
 export function saveFilter(newFilter) {
     return backendFetch(PREFIX_FILTERS_QUERIES, {
-        method: 'put',
+        method: 'post',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newFilter),
+        body: JSON.stringify(newFilter)
     });
 }
 
