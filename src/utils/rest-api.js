@@ -326,7 +326,7 @@ export function replaceFilterWithScript(id) {
     const url = PREFIX_FILTERS_QUERIES + id + '/replace-with-script';
     return backendFetch(url, {
         method: 'put',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
     }).then((response) => response.json());
 }
 
@@ -342,6 +342,6 @@ export function newScriptFromFilter(id, newName) {
         encodeURIComponent(newName);
     return backendFetch(url, {
         method: 'put',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
     }).then((response) => response.json());
 }
