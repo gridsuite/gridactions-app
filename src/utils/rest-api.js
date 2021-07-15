@@ -154,7 +154,7 @@ export function addScriptContingencyList(scriptContingencyList) {
     return backendFetch(url, {
         method: 'post',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(scriptContingencyList)
+        body: JSON.stringify(scriptContingencyList),
     });
 }
 
@@ -169,7 +169,7 @@ export function replaceFiltersWithScriptContingencyList(name) {
         encodeURIComponent(name) +
         '/replace-with-script';
     return backendFetch(url, {
-        method: 'post'
+        method: 'post',
     });
 }
 
@@ -186,7 +186,7 @@ export function newScriptFromFiltersContingencyList(id, newName) {
         encodeURIComponent(newName);
 
     return backendFetch(url, {
-        method: 'post'
+        method: 'post',
     });
 }
 
@@ -201,7 +201,7 @@ export function deleteListByName(id) {
         '/v1/contingency-lists/' +
         encodeURIComponent(id);
     return backendFetch(url, {
-        method: 'delete'
+        method: 'delete',
     });
 }
 
@@ -242,9 +242,9 @@ export function addFiltersContingencyList(newFilter) {
         body: JSON.stringify({
             ...rest,
             ...{
-                nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage
-            }
-        })
+                nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage,
+            },
+        }),
     });
 }
 
@@ -256,7 +256,7 @@ export function saveFilter(newFilter) {
     return backendFetch(PREFIX_FILTERS_QUERIES, {
         method: 'post',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newFilter)
+        body: JSON.stringify(newFilter),
     });
 }
 
