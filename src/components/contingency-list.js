@@ -46,11 +46,12 @@ import {
     getContingencyLists,
     addScriptContingencyList,
     deleteListByName,
-    renameListById,
     addFiltersContingencyList,
     getContingencyList,
     replaceFiltersWithScriptContingencyList,
     newScriptFromFiltersContingencyList,
+    saveFiltersContingencyList,
+    saveScriptContingencyList,
 } from '../utils/rest-api';
 import { ScriptTypes } from '../utils/script-types';
 import { EquipmentTypes } from '../utils/equipment-types';
@@ -270,26 +271,13 @@ const ContingencyLists = () => {
 
     /**
      * Rename exist list
-     * @param id
      * @param newName
      */
-    const renameList = (id, newName) => {
-        renameListById(id, newName)
-            .then((response) => {
-                if (response.ok) {
-                    getAllContingencyLists();
-                    setCurrentItem({
-                        name: newName,
-                        type: currentItem.type,
-                        id: currentItem.id,
-                    });
-                } else {
-                    showSnackBarNotification(response.statusText);
-                }
-            })
-            .catch((error) => {
-                showSnackBarNotification(error.message);
-            });
+    const renameList = (newName) => {
+        saveListResponse(newName, currentItem.type, false)
+            .then(() => setCurrentItem({ ...currentItem, name: newName }))
+            .then(getAllContingencyLists)
+            .then();
         setOpenPopupRenameList(false);
     };
 
@@ -305,7 +293,7 @@ const ContingencyLists = () => {
             if (type === ScriptTypes.FILTERS) {
                 setCurrentFiltersContingency(null);
                 return addFiltersContingencyList({
-                    ...{ name: name },
+                    name: name,
                     ...emptyFiltersContingency,
                 });
             } else {
@@ -315,13 +303,14 @@ const ContingencyLists = () => {
             }
         } else {
             if (type === ScriptTypes.FILTERS) {
-                return addFiltersContingencyList({
+                return saveFiltersContingencyList({
                     ...currentFiltersContingency,
                     ...newFiltersContingency,
+                    name: name,
                 });
             } else {
-                return addScriptContingencyList({
-                    name: currentItem.name,
+                return saveScriptContingencyList({
+                    name: name,
                     id: currentItem.id,
                     script: aceEditorContent,
                 });
@@ -831,9 +820,7 @@ const ContingencyLists = () => {
                             <FormattedMessage id="rename" />
                         }
                         customTextCancelBtn={<FormattedMessage id="cancel" />}
-                        handleRenameExistList={(newName) =>
-                            renameList(currentItem.id, newName)
-                        }
+                        handleRenameExistList={(newName) => renameList(newName)}
                         selectedListName={currentItem ? currentItem.name : ''}
                         newList={false}
                         existingList={contingencyLists}
