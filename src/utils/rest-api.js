@@ -265,12 +265,11 @@ export function createFilter(newFilter) {
         method: 'post',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newFilter),
-    }).then(response => response.json());
+    }).then((response) => response.json());
 }
 
 /**
  * Save Filter
- * @returns {Promise<Response>}
  */
 export function saveFilter(filter) {
     return backendFetch(PREFIX_FILTERS_QUERIES + filter.id, {
@@ -291,22 +290,50 @@ export function getFilters() {
 }
 
 /**
- * Delete filter by name
- * @param name
+ * Delete filter by id
+ * @param id
  * @returns {Promise<Response>}
  */
-export function deleteFilterById(name) {
-    const url = PREFIX_FILTERS_QUERIES + encodeURIComponent(name);
+export function deleteFilterById(id) {
+    const url = PREFIX_FILTERS_QUERIES + encodeURIComponent(id);
     return backendFetch(url, {
         method: 'delete',
     });
 }
 
 /**
- * Get filter by name
+ * Get filter by id
  * @returns {Promise<Response>}
  */
-export function getFilterById(name) {
-    const url = PREFIX_FILTERS_QUERIES + name;
+export function getFilterById(id) {
+    const url = PREFIX_FILTERS_QUERIES + id;
     return backendFetch(url).then((response) => response.json());
+}
+
+/**
+ * Replace filter with script filter
+ * @returns {Promise<Response>}
+ */
+export function replaceFilterWithScript(id) {
+    const url = PREFIX_FILTERS_QUERIES + id + '/replace-with-script';
+    return backendFetch(url, {
+        method: 'put',
+        headers: { 'Content-Type': 'application/json' },
+    }).then((response) => response.json());
+}
+
+/**
+ * Save new script from filter
+ * @returns {Promise<Response>}
+ */
+export function newScriptFromFilter(id, newName) {
+    const url =
+        PREFIX_FILTERS_QUERIES +
+        id +
+        '/new-script/' +
+        encodeURIComponent(newName);
+    return backendFetch(url, {
+        method: 'put',
+        headers: { 'Content-Type': 'application/json' },
+    }).then((response) => response.json());
 }
