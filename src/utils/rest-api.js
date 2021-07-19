@@ -317,3 +317,31 @@ export function renameFilter(id, newName) {
         body: newName,
     });
 }
+
+/** +
+ * Replace filter with script filter
+ * @returns {Promise<Response>}
+ */
+export function replaceFilterWithScript(id) {
+    const url = PREFIX_FILTERS_QUERIES + id + '/replace-with-script';
+    return backendFetch(url, {
+        method: 'put',
+        headers: { 'Content-Type': 'application/json' },
+    }).then((response) => response.json());
+}
+
+/**
+ * Save new script from filter
+ * @returns {Promise<Response>}
+ */
+export function newScriptFromFilter(id, newName) {
+    const url =
+        PREFIX_FILTERS_QUERIES +
+        id +
+        '/new-script/' +
+        encodeURIComponent(newName);
+    return backendFetch(url, {
+        method: 'put',
+        headers: { 'Content-Type': 'application/json' },
+    }).then((response) => response.json());
+}

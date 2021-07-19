@@ -19,6 +19,8 @@ import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -30,7 +32,9 @@ import {
     deleteFilterById,
     getFilterById,
     getFilters,
+    newScriptFromFilter,
     renameFilter,
+    replaceFilterWithScript,
     saveFilter,
 } from '../utils/rest-api';
 import { ScriptTypes } from '../utils/script-types';
@@ -242,6 +246,36 @@ const FilterList = () => {
     };
 
     /**
+     * Replace list filter with script filter
+     */
+    const confirmReplaceWithScript = () => {
+        if (currentItemId) {
+            replaceFilterWithScript(currentItemId)
+                .then((response) => {
+                    updateFilterListAndSelect(response);
+                })
+                .catch((error) => {
+                    showSnackBarNotification(error.message);
+                });
+        }
+    };
+
+    /**
+     * New script filter from list filter
+     * @param id
+     * @param newName
+     */
+    const newScript = (id, newName) => {
+        newScriptFromFilter(id, newName)
+            .then((response) => {
+                updateFilterListAndSelect(response);
+            })
+            .catch((error) => {
+                showSnackBarNotification(error.message);
+            });
+    };
+
+    /**
      * On change editor, check if data is the same to disabled submit button
      * @param newScript
      */
@@ -321,9 +355,50 @@ const FilterList = () => {
                     customAlertMessage={
                         <FormattedMessage id="alertBeforeDeleteFilter" />
                     }
-                    existingList={filterList}
                     customTextValidationBtn={<FormattedMessage id="delete" />}
                     handleBtnOk={confirmDeleteFilter}
+                    {...props}
+                />
+            ),
+        },
+    };
+
+    const actionsList = {
+        ...actions,
+        replaceWithScript: {
+            icon: <InsertDriveFileIcon fontSize="small" />,
+            action: ({ ...props }) => (
+                <PopupInfo
+                    title={<FormattedMessage id="replaceWithScript" />}
+                    customAlertMessage={
+                        <FormattedMessage
+                            id="alertBeforeReplaceWithScript"
+                            values={{ br: <br /> }}
+                        />
+                    }
+                    customTextValidationBtn={
+                        <FormattedMessage id="remplacer" />
+                    }
+                    handleBtnOk={() => {
+                        confirmReplaceWithScript();
+                        props.onClose();
+                    }}
+                    {...props}
+                />
+            ),
+        },
+
+        copyToScript: {
+            icon: <FileCopyIcon fontSize="small" />,
+            action: ({ ...props }) => (
+                <PopupWithInput
+                    title={<FormattedMessage id="copyToScript" />}
+                    inputLabelText={<FormattedMessage id="newFilterName" />}
+                    customTextValidationBtn={<FormattedMessage id="copy" />}
+                    customTextCancelBtn={<FormattedMessage id="cancel" />}
+                    newList={false}
+                    existingList={filterList}
+                    action={({ name }) => newScript(currentItemId, name)}
                     {...props}
                 />
             ),
@@ -351,7 +426,11 @@ const FilterList = () => {
                                 selected={item.id === currentItemId}
                                 item={item}
                                 handleItemClicked={handleItemClicked}
-                                actions={actions}
+                                actions={
+                                    item.type === ScriptTypes.SCRIPT
+                                        ? actions
+                                        : actionsList
+                                }
                             />
                         ))}
                     </List>
