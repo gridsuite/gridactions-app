@@ -276,8 +276,7 @@ const ContingencyLists = () => {
     const renameList = (newName) => {
         saveListResponse(newName, currentItem.type, false)
             .then(() => setCurrentItem({ ...currentItem, name: newName }))
-            .then(getAllContingencyLists)
-            .then();
+            .then(getAllContingencyLists);
         setOpenPopupRenameList(false);
     };
 
