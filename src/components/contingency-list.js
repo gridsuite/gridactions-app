@@ -46,11 +46,12 @@ import {
     getContingencyLists,
     addScriptContingencyList,
     deleteListByName,
-    renameListByName,
     addFiltersContingencyList,
     getContingencyList,
     replaceFiltersWithScriptContingencyList,
     newScriptFromFiltersContingencyList,
+    saveFiltersContingencyList,
+    saveScriptContingencyList,
 } from '../utils/rest-api';
 import { ScriptTypes } from '../utils/script-types';
 import { EquipmentTypes } from '../utils/equipment-types';
@@ -270,22 +271,12 @@ const ContingencyLists = () => {
 
     /**
      * Rename exist list
-     * @param oldName
      * @param newName
      */
-    const renameList = (oldName, newName) => {
-        renameListByName(oldName, newName)
-            .then((response) => {
-                if (response.ok) {
-                    getAllContingencyLists();
-                    setCurrentItem({ name: newName, type: currentItem.type });
-                } else {
-                    showSnackBarNotification(response.statusText);
-                }
-            })
-            .catch((error) => {
-                showSnackBarNotification(error.message);
-            });
+    const renameList = (newName) => {
+        saveListResponse(newName, currentItem.type, false)
+            .then(() => setCurrentItem({ ...currentItem, name: newName }))
+            .then(getAllContingencyLists);
         setOpenPopupRenameList(false);
     };
 
@@ -300,17 +291,28 @@ const ContingencyLists = () => {
         if (isNewList) {
             if (type === ScriptTypes.FILTERS) {
                 setCurrentFiltersContingency(null);
-                return addFiltersContingencyList(name, emptyFiltersContingency);
+                return addFiltersContingencyList({
+                    name: name,
+                    ...emptyFiltersContingency,
+                });
             } else {
                 setAceEditorContent('');
                 setCurrentScriptContingency(null);
-                return addScriptContingencyList(name, '');
+                return addScriptContingencyList({ name: name, script: '' });
             }
         } else {
             if (type === ScriptTypes.FILTERS) {
-                return addFiltersContingencyList(name, newFiltersContingency);
+                return saveFiltersContingencyList({
+                    ...currentFiltersContingency,
+                    ...newFiltersContingency,
+                    name: name,
+                });
             } else {
-                return addScriptContingencyList(name, aceEditorContent);
+                return saveScriptContingencyList({
+                    name: name,
+                    id: currentItem.id,
+                    script: aceEditorContent,
+                });
             }
         }
     };
@@ -391,7 +393,7 @@ const ContingencyLists = () => {
         setAnchorEl(null);
         if (currentItem) {
             setOpenPopupConfirmDelete(false);
-            deleteListByName(currentItem.name)
+            deleteListByName(currentItem.id)
                 .then(() => {
                     getContingencyLists()
                         .then((data) => {
@@ -418,7 +420,7 @@ const ContingencyLists = () => {
      */
     const confirmReplaceWithScriptList = () => {
         setAnchorEl(null);
-        replaceFiltersWithScriptContingencyList(currentItem.name)
+        replaceFiltersWithScriptContingencyList(currentItem.id)
             .then((response) => {
                 if (response.ok) {
                     getContingencyLists().then((data) => {
@@ -445,11 +447,11 @@ const ContingencyLists = () => {
 
     /**
      * Copy to script list
-     * @param name
+     * @param id
      * @param newName
      */
-    const copyToScriptList = (name, newName) => {
-        newScriptFromFiltersContingencyList(name, newName)
+    const copyToScriptList = (newName) => {
+        newScriptFromFiltersContingencyList(currentItem.id, newName)
             .then((response) => {
                 if (response.ok) {
                     getContingencyLists().then((data) => {
@@ -594,7 +596,7 @@ const ContingencyLists = () => {
 
     useEffect(() => {
         if (currentItem !== null) {
-            getCurrentContingencyList(currentItem.type, currentItem.name);
+            getCurrentContingencyList(currentItem.type, currentItem.id);
         }
     }, [getCurrentContingencyList, currentItem]);
 
@@ -817,7 +819,7 @@ const ContingencyLists = () => {
                             <FormattedMessage id="rename" />
                         }
                         customTextCancelBtn={<FormattedMessage id="cancel" />}
-                        handleRenameExistList={renameList}
+                        handleRenameExistList={(newName) => renameList(newName)}
                         selectedListName={currentItem ? currentItem.name : ''}
                         newList={false}
                         existingList={contingencyLists}

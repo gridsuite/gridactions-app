@@ -29,11 +29,11 @@ import { PopupInfo, PopupWithInput } from './popup';
 
 import { FormattedMessage } from 'react-intl';
 import {
+    createFilter,
     deleteFilterById,
     getFilterById,
     getFilters,
     newScriptFromFilter,
-    renameFilter,
     replaceFilterWithScript,
     saveFilter,
 } from '../utils/rest-api';
@@ -156,31 +156,21 @@ const FilterList = () => {
         setOpenPopupNewList(val);
     };
 
-    const updateFilterListAndSelect = (filter) => {
-        getFilters().then((data) => {
+    const updateFilterListAndSelect = (selected) => {
+        return getFilters().then((data) => {
+            setCurrentItemId(selected);
             dispatch(updateFilterList(data));
+            getFilter(selected);
         });
-        if (filter !== undefined) {
-            setCurrentItemId(filter.id);
-            setCurrentEdit(filter);
-        }
     };
 
     /**
-     * Rename exist list
-     * @param id
-     * @param newName
+     * Rename selected list
+     * @param name
      */
-    const renameList = (id, newName) => {
-        renameFilter(id, newName)
-            .then((response) => {
-                if (response.ok) {
-                    currentEdit.current.name = newName;
-                    updateFilterListAndSelect(currentEdit.current);
-                } else {
-                    showSnackBarNotification(response.statusText);
-                }
-            })
+    const renameList = ({ name }) => {
+        saveFilter({ ...currentEdit.current, name: name })
+            .then(() => updateFilterListAndSelect(currentEdit.current.id))
             .catch((error) => {
                 showSnackBarNotification(error.message);
             });
@@ -194,9 +184,9 @@ const FilterList = () => {
     /**
      * Save current list list
      */
-    const save = () => {
+    const save = (id) => {
         saveFilter(currentEdit.current)
-            .then((response) => updateFilterListAndSelect(response))
+            .then(() => updateFilterListAndSelect(id))
             .catch((error) => {
                 showSnackBarNotification(error.message);
             });
@@ -215,7 +205,12 @@ const FilterList = () => {
             type: type === ScriptTypes.SCRIPT ? type : 'LINE',
             transient: true,
         };
-        save();
+        createFilter(currentEdit.current)
+            .then((value) => updateFilterListAndSelect(value.id))
+            .then()
+            .catch((error) => {
+                showSnackBarNotification(error.message);
+            });
     };
 
     /**
@@ -342,7 +337,7 @@ const FilterList = () => {
                     customTextCancelBtn={<FormattedMessage id="cancel" />}
                     newList={false}
                     existingList={filterList}
-                    action={({ name }) => renameList(currentItemId, name)}
+                    action={renameList}
                     {...props}
                 />
             ),
@@ -446,7 +441,7 @@ const FilterList = () => {
                     <Button
                         variant="outlined"
                         disabled={btnSaveListDisabled}
-                        onClick={() => save(originalFilter.name)}
+                        onClick={() => save(originalFilter.id)}
                     >
                         <FormattedMessage id="save" />
                     </Button>

@@ -149,14 +149,28 @@ export function getContingencyList(type, name) {
  * Add new contingency list
  * @returns {Promise<Response>}
  */
-export function addScriptContingencyList(name, script) {
+export function addScriptContingencyList(scriptContingencyList) {
+    const url = PREFIX_ACTIONS_QUERIES + '/v1/script-contingency-lists/';
+    return backendFetch(url, {
+        method: 'post',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(scriptContingencyList),
+    });
+}
+
+/**
+ * Add new contingency list
+ * @returns {Promise<Response>}
+ */
+export function saveScriptContingencyList(scriptContingencyList) {
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/script-contingency-lists/' +
-        encodeURIComponent(name);
+        scriptContingencyList.id;
     return backendFetch(url, {
         method: 'put',
-        body: script,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(scriptContingencyList),
     });
 }
 
@@ -171,7 +185,7 @@ export function replaceFiltersWithScriptContingencyList(name) {
         encodeURIComponent(name) +
         '/replace-with-script';
     return backendFetch(url, {
-        method: 'put',
+        method: 'post',
     });
 }
 
@@ -179,54 +193,31 @@ export function replaceFiltersWithScriptContingencyList(name) {
  * Save new script contingency list from filters contingency list
  * @returns {Promise<Response>}
  */
-export function newScriptFromFiltersContingencyList(name, newName) {
+export function newScriptFromFiltersContingencyList(id, newName) {
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/filters-contingency-lists/' +
-        encodeURIComponent(name) +
+        id +
         '/new-script/' +
         encodeURIComponent(newName);
 
     return backendFetch(url, {
-        method: 'put',
+        method: 'post',
     });
 }
 
 /**
  * Delete contingency list by name
- * @param name
+ * @param id
  * @returns {Promise<Response>}
  */
-export function deleteListByName(name) {
+export function deleteListByName(id) {
     const url =
         PREFIX_ACTIONS_QUERIES +
         '/v1/contingency-lists/' +
-        encodeURIComponent(name);
+        encodeURIComponent(id);
     return backendFetch(url, {
         method: 'delete',
-    });
-}
-
-/**
- * Rename list by name
- * @param oldNameList
- * @param newNameList
- * @returns {Promise<Response>}
- */
-export function renameListByName(oldName, newName) {
-    const url =
-        PREFIX_ACTIONS_QUERIES +
-        '/v1/contingency-lists/' +
-        encodeURIComponent(oldName) +
-        '/rename';
-
-    return backendFetch(url, {
-        method: 'post',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ newContingencyListName: newName }),
     });
 }
 
@@ -234,39 +225,58 @@ export function renameListByName(oldName, newName) {
  * Add new Filter contingency list
  * @returns {Promise<Response>}
  */
-export function addFiltersContingencyList(name, newFiltersContingency) {
-    const url =
-        PREFIX_ACTIONS_QUERIES +
-        '/v1/filters-contingency-lists/' +
-        encodeURIComponent(name);
+export function addFiltersContingencyList(newFilter) {
+    const { nominalVoltage, ...rest } = newFilter;
+    const url = PREFIX_ACTIONS_QUERIES + '/v1/filters-contingency-lists/';
     return backendFetch(url, {
-        method: 'put',
+        method: 'post',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            equipmentID: newFiltersContingency.equipmentID,
-            equipmentName: newFiltersContingency.equipmentName,
-            equipmentType: newFiltersContingency.equipmentType,
-            nominalVoltage:
-                newFiltersContingency.nominalVoltage === ''
-                    ? -1
-                    : newFiltersContingency.nominalVoltage,
-            nominalVoltageOperator:
-                newFiltersContingency.nominalVoltageOperator,
-            countries: newFiltersContingency.countries,
+            ...rest,
+            nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage,
         }),
     });
 }
 
 /**
- * Add Filter
+ * Add new Filter contingency list
  * @returns {Promise<Response>}
  */
-export function saveFilter(newFilter) {
+export function saveFiltersContingencyList(filter) {
+    const { nominalVoltage, ...rest } = filter;
+    const url =
+        PREFIX_ACTIONS_QUERIES + '/v1/filters-contingency-lists/' + filter.id;
+    return backendFetch(url, {
+        method: 'put',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            ...rest,
+            nominalVoltage: nominalVoltage === '' ? -1 : nominalVoltage,
+        }),
+    });
+}
+
+/**
+ * Create Filter
+ * @returns {Promise<Response>}
+ */
+export function createFilter(newFilter) {
     return backendFetch(PREFIX_FILTERS_QUERIES, {
         method: 'post',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newFilter),
     }).then((response) => response.json());
+}
+
+/**
+ * Save Filter
+ */
+export function saveFilter(filter) {
+    return backendFetch(PREFIX_FILTERS_QUERIES + filter.id, {
+        method: 'put',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(filter),
+    });
 }
 
 /**
@@ -301,24 +311,6 @@ export function getFilterById(id) {
 }
 
 /**
- * Rename filter
- * @param id
- * @param newName
- * @returns {Promise<Response>}
- */
-export function renameFilter(id, newName) {
-    const url = PREFIX_FILTERS_QUERIES + id + '/rename';
-    return backendFetch(url, {
-        method: 'post',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-        },
-        body: newName,
-    });
-}
-
-/** +
  * Replace filter with script filter
  * @returns {Promise<Response>}
  */
