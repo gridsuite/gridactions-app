@@ -115,7 +115,7 @@ export const CustomListItem = ({
             button
             key={item.name}
             selected={selected}
-            onClick={() => handleItemClicked(item)}
+            onMouseDown={() => handleItemClicked(item)}
         >
             <IconItem type={item.type} />
             {item.name.length > maxLengthListName ? (

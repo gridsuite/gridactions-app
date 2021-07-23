@@ -54,6 +54,179 @@ const equipmentsDefinition = {
             },
         },
     },
+    TWO_WINDINGS_TRANSFORMER: {
+        label: 'TwoWindingsTransformers',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+                occurs: 2,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    THREE_WINDINGS_TRANSFORMER: {
+        label: 'ThreeWindingsTransformers',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+                occurs: 3,
+                direction: 'column',
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    GENERATOR: {
+        label: 'Generators',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    LOAD: {
+        label: 'Loads',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    BATTERY: {
+        label: 'Batteries',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    SHUNT_COMPENSATOR: {
+        label: 'ShuntCompensators',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    STATIC_VAR_COMPENSATOR: {
+        label: 'StaticVarCompensators',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    DANGLING_LINE: {
+        label: 'DanglingLines',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    LCC_CONVERTER_STATION: {
+        label: 'LccConverterStations',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    VSC_CONVERTER_STATION: {
+        label: 'VscConverterStations',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
 };
 
 function generateDefaultValue(val, originalValue) {
@@ -167,8 +340,9 @@ export const GenericFilter = ({ initialFilter, onChange }) => {
     };
 
     const changeFilterType = (newType) => {
-        currentEdit.current.type = newType;
+        currentEdit.current.type = { enabled: true, value: newType };
         setFilterType(newType);
+        editDone();
     };
 
     const renderFilter = (key, definition, sequence) => {
@@ -202,7 +376,11 @@ export const GenericFilter = ({ initialFilter, onChange }) => {
                         <Grid
                             container
                             item
-                            direction={'row'}
+                            direction={
+                                definition.direction === undefined
+                                    ? 'row'
+                                    : definition.direction
+                            }
                             key={key}
                             spacing={1}
                         >
