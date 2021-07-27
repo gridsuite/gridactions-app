@@ -229,11 +229,24 @@ const equipmentsDefinition = {
     },
 };
 
+function deepCopy(aObject) {
+    if (!aObject) {
+        return aObject;
+    }
+    let v;
+    let bObject = Array.isArray(aObject) ? [] : {};
+    for (const k in aObject) {
+        v = aObject[k];
+        bObject[k] = typeof v === 'object' ? deepCopy(v) : v;
+    }
+    return bObject;
+}
+
 function generateDefaultValue(val, originalValue) {
     if (originalValue != null) return { enabled: true, value: originalValue };
     return {
         enabled: val == null,
-        value: val.defaultValue || val.type.defaultValue,
+        value: deepCopy(val.defaultValue) || deepCopy(val.type.defaultValue),
     };
 }
 
