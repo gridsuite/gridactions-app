@@ -43,6 +43,7 @@
     "DanglingLines": "Dangling lines",
     "LccConverterStations": "LCC converter stations",
     "VscConverterStations": "VSC converter stations",
+    "HvdcLines": "HVDC Lines",
     "BusBarSections": "Busbar sections",
     "Min": "Min",
     "Max": "Max",

@@ -227,6 +227,25 @@ const equipmentsDefinition = {
             },
         },
     },
+    HVDC_LINES: {
+        label: 'HvdcLines',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+                occurs: 2,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+                occurs: 2,
+            },
+        },
+    },
 };
 
 function deepCopy(aObject) {

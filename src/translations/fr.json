@@ -39,6 +39,7 @@
     "DanglingLines": "Lignes frontières",
     "LccConverterStations": "Stations de conversion LCC",
     "VscConverterStations": "Stations de conversion VSC",
+    "HvdcLines": "Lignes HVDC",
     "BusBarSections": "Sections de barre",
     "Min": "Min",
     "Max": "Max",
