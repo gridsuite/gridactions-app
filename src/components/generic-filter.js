@@ -54,13 +54,218 @@ const equipmentsDefinition = {
             },
         },
     },
+    TWO_WINDINGS_TRANSFORMER: {
+        label: 'TwoWindingsTransformers',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+                occurs: 2,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    THREE_WINDINGS_TRANSFORMER: {
+        label: 'ThreeWindingsTransformers',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+                occurs: 3,
+                direction: 'column',
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    GENERATOR: {
+        label: 'Generators',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    LOAD: {
+        label: 'Loads',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    BATTERY: {
+        label: 'Batteries',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    SHUNT_COMPENSATOR: {
+        label: 'ShuntCompensators',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    STATIC_VAR_COMPENSATOR: {
+        label: 'StaticVarCompensators',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    DANGLING_LINE: {
+        label: 'DanglingLines',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    LCC_CONVERTER_STATION: {
+        label: 'LccConverterStations',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    VSC_CONVERTER_STATION: {
+        label: 'VscConverterStations',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+            },
+        },
+    },
+    HVDC_LINE: {
+        label: 'HvdcLines',
+        fields: {
+            countries: {
+                name: 'Countries',
+                type: filteredTypes.countries,
+                occurs: 2,
+            },
+            nominalVoltage: {
+                name: 'nominalVoltage',
+                type: filteredTypes.range,
+            },
+            substationName: {
+                name: 'substationName',
+                type: filteredTypes.string,
+                occurs: 2,
+            },
+        },
+    },
 };
+
+function deepCopy(aObject) {
+    if (!aObject) {
+        return aObject;
+    }
+    let v;
+    let bObject = Array.isArray(aObject) ? [] : {};
+    for (const k in aObject) {
+        v = aObject[k];
+        bObject[k] = typeof v === 'object' ? deepCopy(v) : v;
+    }
+    return bObject;
+}
 
 function generateDefaultValue(val, originalValue) {
     if (originalValue != null) return { enabled: true, value: originalValue };
     return {
         enabled: val == null,
-        value: val.defaultValue || val.type.defaultValue,
+        value: deepCopy(val.defaultValue) || deepCopy(val.type.defaultValue),
     };
 }
 
@@ -167,8 +372,9 @@ export const GenericFilter = ({ initialFilter, onChange }) => {
     };
 
     const changeFilterType = (newType) => {
-        currentEdit.current.type = newType;
+        currentEdit.current.type = { enabled: true, value: newType };
         setFilterType(newType);
+        editDone();
     };
 
     const renderFilter = (key, definition, sequence) => {
@@ -202,7 +408,11 @@ export const GenericFilter = ({ initialFilter, onChange }) => {
                         <Grid
                             container
                             item
-                            direction={'row'}
+                            direction={
+                                definition.direction === undefined
+                                    ? 'row'
+                                    : definition.direction
+                            }
                             key={key}
                             spacing={1}
                         >

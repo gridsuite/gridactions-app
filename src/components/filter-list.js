@@ -160,7 +160,7 @@ const FilterList = () => {
         return getFilters().then((data) => {
             setCurrentItemId(selected);
             dispatch(updateFilterList(data));
-            getFilter(selected);
+            if (selected !== undefined) getFilter(selected);
         });
     };
 
@@ -182,7 +182,7 @@ const FilterList = () => {
     }
 
     /**
-     * Save current list list
+     * Save current list
      */
     const save = (id) => {
         saveFilter(currentEdit.current)
@@ -232,6 +232,7 @@ const FilterList = () => {
         if (currentItemId) {
             deleteFilterById(currentItemId)
                 .then(() => {
+                    setOriginalFilter({ id: null });
                     updateFilterListAndSelect();
                 })
                 .catch((error) => {
@@ -247,7 +248,7 @@ const FilterList = () => {
         if (currentItemId) {
             replaceFilterWithScript(currentItemId)
                 .then((response) => {
-                    updateFilterListAndSelect(response);
+                    updateFilterListAndSelect(response.id);
                 })
                 .catch((error) => {
                     showSnackBarNotification(error.message);
@@ -263,7 +264,7 @@ const FilterList = () => {
     const newScript = (id, newName) => {
         newScriptFromFilter(id, newName)
             .then((response) => {
-                updateFilterListAndSelect(response);
+                updateFilterListAndSelect(response.id);
             })
             .catch((error) => {
                 showSnackBarNotification(error.message);
@@ -456,6 +457,7 @@ const FilterList = () => {
         if (originalFilter.id !== currentItemId) {
             return <CircularProgress />;
         }
+
         if (originalFilter.type === ScriptTypes.SCRIPT)
             return (
                 <AceEditor

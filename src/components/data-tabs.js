@@ -23,11 +23,11 @@ const DataTabs = () => {
     const tabs = [
         {
             name: 'CONTINGENCY',
-            render: () => <ContingencyLists listType={'contingencies'} />,
+            render: () => <ContingencyLists />,
         },
         {
             name: 'FILTERS',
-            render: () => <FilterList listType={'line'} />,
+            render: () => <FilterList />,
         },
     ];
 
