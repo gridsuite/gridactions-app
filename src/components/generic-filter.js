@@ -227,7 +227,7 @@ const equipmentsDefinition = {
             },
         },
     },
-    HVDC_LINES: {
+    HVDC_LINE: {
         label: 'HvdcLines',
         fields: {
             countries: {
