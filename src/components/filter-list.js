@@ -145,9 +145,10 @@ const FilterList = () => {
         [enqueueSnackbar]
     );
 
-    useEffect(() => setBtnSaveListDisabled(originalFilter.transient !== true), [
-        originalFilter,
-    ]);
+    useEffect(
+        () => setBtnSaveListDisabled(originalFilter.transient !== true),
+        [originalFilter]
+    );
 
     /*
      * Add new list handler
