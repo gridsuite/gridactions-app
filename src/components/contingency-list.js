@@ -202,12 +202,10 @@ const ContingencyLists = () => {
 
     const contingencyLists = useSelector((state) => state.contingencyLists);
     const [currentItem, setCurrentItem] = useState(null);
-    const [currentScriptContingency, setCurrentScriptContingency] = useState(
-        null
-    );
-    const [currentFiltersContingency, setCurrentFiltersContingency] = useState(
-        null
-    );
+    const [currentScriptContingency, setCurrentScriptContingency] =
+        useState(null);
+    const [currentFiltersContingency, setCurrentFiltersContingency] =
+        useState(null);
 
     const [selectedIndex, setSelectedIndex] = useState(null);
 
@@ -225,13 +223,10 @@ const ContingencyLists = () => {
         emptyFiltersContingency
     );
 
-    const [
-        openPopupReplaceWithScriptList,
-        setOpenPopupReplaceWithScriptList,
-    ] = useState(false);
-    const [openPopupCopyToScriptList, setOpenPopupCopyToScriptList] = useState(
-        false
-    );
+    const [openPopupReplaceWithScriptList, setOpenPopupReplaceWithScriptList] =
+        useState(false);
+    const [openPopupCopyToScriptList, setOpenPopupCopyToScriptList] =
+        useState(false);
 
     const [showContainerList, setShowContainerList] = useState(true);
 
