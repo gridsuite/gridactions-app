@@ -238,6 +238,7 @@ const equipmentsDefinition = {
             nominalVoltage: {
                 name: 'nominalVoltage',
                 type: filteredTypes.range,
+                occurs: 2,
             },
             substationName: {
                 name: 'substationName',
